@@ -35,6 +35,8 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CSharpLanguage.cs" />
+    <Compile Include="IProgrammingLanguage.cs" />
     <Compile Include="SearchScope.cs" />
     <Compile Include="SearchQuery.cs" />
     <Compile Include="SearchResult.cs" />

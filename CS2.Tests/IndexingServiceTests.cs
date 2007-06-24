@@ -1,8 +1,8 @@
 using System;
-using System.IO;
-using CS2.Services;
-using NUnit.Framework;
 using System.Diagnostics;
+using System.IO;
+using CS2.Services.Indexing;
+using NUnit.Framework;
 
 namespace CS2.Tests
 {
@@ -14,7 +14,7 @@ namespace CS2.Tests
         [Test]
         public void CanResolve()
         {
-            AbstractIndexingService indexingService = container.Resolve<AbstractIndexingService>();
+            IIndexingService indexingService = container.Resolve<IIndexingService>();
 
             Assert.IsNotNull(indexingService);
 
@@ -24,7 +24,7 @@ namespace CS2.Tests
         [Test]
         public void CanIndexDirectory()
         {
-            AbstractIndexingService indexingService = container.Resolve<AbstractIndexingService>();
+            IIndexingService indexingService = container.Resolve<IIndexingService>();
 
             Debug.WriteLine(indexingService.IndexWriter.GetDirectory().GetType());
 
@@ -42,7 +42,7 @@ namespace CS2.Tests
         //[Test]
         //public void CanIndexFile()
         //{
-        //    AbstractIndexingService indexingService = container.Resolve<AbstractIndexingService>();
+        //    IIndexingService indexingService = container.Resolve<IIndexingService>();
         //    indexingService.Index(new FileInfo(@"..\..\DummyClassForParseTesting.cs"));
         //}
     }

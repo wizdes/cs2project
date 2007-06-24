@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using CS2.Model;
+using CS2.Services.Searching;
 using Lucene.Net.Analysis;
 using Lucene.Net.Search;
 
-namespace CS2.Services
+namespace CS2.Services.Searching
 {
     public class SearchService : ISearchService
     {

@@ -1,23 +1,21 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using Castle.Windsor;
 using Castle.Windsor.Configuration.Interpreters;
-using CS2.Services;
+using CS2.Services.Indexing;
 
 namespace CS2.Console
 {
     class Program
     {
-        private const string docsDir = @"C:\Development\Rhino-tools\trunk";
+        private const string docsDir = @"C:\Development\Rhino-tools\trunk\rhino-commons";
 
         static void Main(string[] args)
         {
             IWindsorContainer container = new WindsorContainer(new XmlInterpreter());
 
-            AbstractIndexingService indexingService = container.Resolve<AbstractIndexingService>();
+            IIndexingService indexingService = container.Resolve<IIndexingService>();
 
             Debug.WriteLine(indexingService.IndexWriter.GetDirectory().GetType());
 
@@ -28,7 +26,6 @@ namespace CS2.Console
             indexingService.Index(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent);
 
             Debug.WriteLine(indexingService.IndexWriter.GetHashCode());
-
         }
     }
 }

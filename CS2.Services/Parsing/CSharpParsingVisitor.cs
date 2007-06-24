@@ -1,7 +1,8 @@
+using CS2.Services.Parsing;
 using DDW;
 using Lucene.Net.Documents;
 
-namespace CS2.Services
+namespace CS2.Services.Parsing
 {
     public class CSharpParsingVisitor : AbstractVisitor, IParsingVisitor
     {

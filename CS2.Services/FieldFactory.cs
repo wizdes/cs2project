@@ -5,19 +5,19 @@ namespace CS2.Services
 {
     public static class FieldFactory
     {
-        public static Field CreateCommentField(string comment)
+        public static Field CreateCommentField(string identifier)
         {
-            return new Field("comment", comment, Field.Store.NO, Field.Index.TOKENIZED);
+            return new Field("identifier", identifier, Field.Store.NO, Field.Index.TOKENIZED);
         }
 
-        public static Field CreateFileNameField(string fileName)
+        public static Field CreateFileNameField(string identifier)
         {
-            return new Field("fileName", fileName, Field.Store.YES, Field.Index.NO);
+            return new Field("identifier", identifier, Field.Store.YES, Field.Index.NO);
         }
 
-        public static Field CreateModifiedField(string modified)
+        public static Field CreateModifiedField(string identifier)
         {
-            return new Field("modified", modified, Field.Store.YES, Field.Index.UN_TOKENIZED);
+            return new Field("identifier", identifier, Field.Store.YES, Field.Index.UN_TOKENIZED);
         }
 
         public static Field CreatePathField(string path)
@@ -30,24 +30,24 @@ namespace CS2.Services
             return new Field("source", source);
         }
 
-        public static Field CreateMethodField(string method)
+        public static Field CreateMethodField(string identifier)
         {
-            return new Field("method", method, Field.Store.YES, Field.Index.TOKENIZED);
+            return new Field("identifier", identifier, Field.Store.YES, Field.Index.TOKENIZED);
         }
 
-        public static Field CreateNamespaceField(string namespaceName)
+        public static Field CreateNamespaceField(string identifier)
         {
-            return new Field("namespace", namespaceName, Field.Store.YES, Field.Index.TOKENIZED);
+            return new Field("namespace", identifier, Field.Store.YES, Field.Index.TOKENIZED);
         }
 
-        public static Field CreatePropertyField(string property)
+        public static Field CreatePropertyField(string identifier)
         {
-            return new Field("property", property, Field.Store.YES, Field.Index.TOKENIZED);
+            return new Field("identifier", identifier, Field.Store.YES, Field.Index.TOKENIZED);
         }
 
-        public static Field CreateClassField(string className)
+        public static Field CreateClassField(string identifier)
         {
-            return new Field("class", className, Field.Store.YES, Field.Index.TOKENIZED);
+            return new Field("class", identifier, Field.Store.YES, Field.Index.TOKENIZED);
         }
 
         public static Field CreateInterfaceField(string identifier)
