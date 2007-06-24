@@ -28,12 +28,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Lucene.Net, Version=2.0.0.4, Culture=neutral">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libraries\Lucene.Net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="SourceCodeSearchResult.cs" />
+    <Compile Include="SearchScope.cs" />
+    <Compile Include="SearchQuery.cs" />
+    <Compile Include="SearchResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

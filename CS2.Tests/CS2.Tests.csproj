@@ -36,6 +36,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libraries\Castle.Windsor.dll</HintPath>
     </Reference>
+    <Reference Include="CMicroParser, Version=1.0.2729.41008, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libraries\CMicroParser.dll</HintPath>
+    </Reference>
     <Reference Include="Lucene.Net, Version=2.0.0.4, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libraries\Lucene.Net.dll</HintPath>
@@ -51,6 +55,11 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseTest.cs" />
+    <Compile Include="FileSystemDirectoryTests.cs" />
+    <Compile Include="IndexWriterTests.cs" />
+    <Compile Include="SourceCodeIndexingServiceTests.cs" />
+    <Compile Include="SourceCodeParsingServiceTests.cs" />
     <Compile Include="SourceCodeSearchServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

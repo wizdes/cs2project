@@ -28,6 +28,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CMicroParser, Version=1.0.2729.41008, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libraries\CMicroParser.dll</HintPath>
+    </Reference>
     <Reference Include="Lucene.Net, Version=2.0.0.4, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libraries\Lucene.Net.dll</HintPath>
@@ -35,9 +39,17 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CSharpSourceCodeAnalyzer.cs" />
+    <Compile Include="DirectoryFactory.cs" />
+    <Compile Include="FieldFactory.cs" />
+    <Compile Include="ISourceCodeParsingService.cs" />
+    <Compile Include="SourceCodeParsingService.cs" />
+    <Compile Include="ISourceCodeIndexingService.cs" />
     <Compile Include="ISourceCodeSearchService.cs" />
+    <Compile Include="SourceCodeIndexingService.cs" />
     <Compile Include="SourceCodeSearchService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SourceCodeVisitor.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CS2.Model\CS2.Model.csproj">

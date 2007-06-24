@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using Castle.Windsor;
 using Castle.Windsor.Configuration.Interpreters;
 using CS2.Model;
@@ -6,30 +7,19 @@ using CS2.Services;
 using Lucene.Net.Search;
 using NUnit.Framework;
 using Rhino.Mocks;
+using System.Collections;
 
 namespace CS2.Tests
 {
     [TestFixture]
-    public class SourceCodeSearchServiceTests
+    public class SourceCodeSearchServiceTests : BaseTest
     {
-        private IWindsorContainer container;
-        private MockRepository mocks;
-
-
-        [TestFixtureSetUp]
-        public void FixtureSetup()
-        {
-            container = new WindsorContainer(new XmlInterpreter());
-            mocks = new MockRepository();
-        }
-
         [Test]
         public void CanResolve()
         {
             Searcher searcher = mocks.CreateMock<Searcher>();
 
-            Dictionary<string, object> parameters = new Dictionary<string, object>();
-
+            IDictionary parameters = new ListDictionary();
             parameters.Add("searcher", searcher);
 
             ISourceCodeSearchService service = container.Resolve<ISourceCodeSearchService>(parameters);
@@ -42,14 +32,16 @@ namespace CS2.Tests
         {
             ISourceCodeSearchService service = mocks.CreateMock<ISourceCodeSearchService>();
 
-            List<SourceCodeSearchResult> list = new List<SourceCodeSearchResult>();
-            list.Add(new SourceCodeSearchResult());
+            List<SearchResult> list = new List<SearchResult>();
+            list.Add(new SearchResult(null));
+
+            SearchQuery query = new SearchQuery("test");
             
-            Expect.Call(service.Search("test")).Return(list);
+            Expect.Call(service.Search(query)).Return(list);
 
             mocks.ReplayAll();
 
-            Assert.AreEqual(service.Search("test"), list);
+            Assert.AreEqual(service.Search(query), list);
 
             mocks.VerifyAll();
         }
