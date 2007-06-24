@@ -3,7 +3,7 @@ using CS2.Model;
 
 namespace CS2.Services
 {
-    public interface ISourceCodeSearchService
+    public interface ISearchService
     {
         IEnumerable<SearchResult> Search(SearchQuery query);
     }

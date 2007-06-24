@@ -12,7 +12,7 @@ using System.Collections;
 namespace CS2.Tests
 {
     [TestFixture]
-    public class SourceCodeSearchServiceTests : BaseTest
+    public class SearchServiceTests : BaseTest
     {
         [Test]
         public void CanResolve()
@@ -22,7 +22,7 @@ namespace CS2.Tests
             IDictionary parameters = new ListDictionary();
             parameters.Add("searcher", searcher);
 
-            ISourceCodeSearchService service = container.Resolve<ISourceCodeSearchService>(parameters);
+            ISearchService service = container.Resolve<ISearchService>(parameters);
 
             Assert.IsNotNull(service);
         }
@@ -30,7 +30,7 @@ namespace CS2.Tests
         [Test]
         public void CanSearch()
         {
-            ISourceCodeSearchService service = mocks.CreateMock<ISourceCodeSearchService>();
+            ISearchService service = mocks.CreateMock<ISearchService>();
 
             List<SearchResult> list = new List<SearchResult>();
             list.Add(new SearchResult(null));

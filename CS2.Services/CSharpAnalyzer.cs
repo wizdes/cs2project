@@ -3,7 +3,7 @@ using Lucene.Net.Analysis;
 
 namespace CS2.Services
 {
-    public class CSharpSourceCodeAnalyzer : Analyzer
+    public class CSharpAnalyzer : Analyzer
     {
         private static readonly string[] cSharpStopwords = new string[]
             {

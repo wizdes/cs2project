@@ -28,6 +28,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Castle.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libraries\Castle.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Castle.Facilities.Logging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libraries\Castle.Facilities.Logging.dll</HintPath>
+    </Reference>
     <Reference Include="Castle.MicroKernel, Version=1.0.0.2, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libraries\Castle.MicroKernel.dll</HintPath>
@@ -58,9 +66,9 @@
     <Compile Include="BaseTest.cs" />
     <Compile Include="FileSystemDirectoryTests.cs" />
     <Compile Include="IndexWriterTests.cs" />
-    <Compile Include="SourceCodeIndexingServiceTests.cs" />
-    <Compile Include="SourceCodeParsingServiceTests.cs" />
-    <Compile Include="SourceCodeSearchServiceTests.cs" />
+    <Compile Include="IndexingServiceTests.cs" />
+    <Compile Include="ParsingServiceTests.cs" />
+    <Compile Include="SearchServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

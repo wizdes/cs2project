@@ -49,5 +49,10 @@ namespace CS2.Services
         {
             return new Field("class", className, Field.Store.YES, Field.Index.TOKENIZED);
         }
+
+        public static Field CreateInterfaceField(string identifier)
+        {
+            return new Field("interface", identifier, Field.Store.YES, Field.Index.TOKENIZED);
+        }
     }
 }

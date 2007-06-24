@@ -2,19 +2,16 @@ using System;
 using System.Collections.Generic;
 using CS2.Model;
 using Lucene.Net.Analysis;
-using Lucene.Net.Analysis.Standard;
-using Lucene.Net.Index;
-using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 
 namespace CS2.Services
 {
-    public class SourceCodeSearchService : ISourceCodeSearchService
+    public class SearchService : ISearchService
     {
         private readonly Searcher searcher;
         private readonly Analyzer analyzer;
 
-        public SourceCodeSearchService(Searcher searcher, Analyzer analyzer)
+        public SearchService(Searcher searcher, Analyzer analyzer)
         {
             this.searcher = searcher;
             this.analyzer = analyzer;
