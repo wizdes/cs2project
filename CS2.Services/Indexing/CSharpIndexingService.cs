@@ -8,9 +8,9 @@ namespace CS2.Services.Indexing
 {
     public class CSharpIndexingService : IIndexingService
     {
-        protected readonly IndexWriter indexWriter;
+        private readonly IndexWriter indexWriter;
         private readonly IProgrammingLanguage language = new CSharpLanguage();
-        protected readonly IParsingService parsingService;
+        private readonly IParsingService parsingService;
 
         public CSharpIndexingService(IndexWriter indexWriter, IParsingService parsingService)
         {
@@ -59,7 +59,7 @@ namespace CS2.Services.Indexing
             document.Add(FieldFactory.CreateFileNameField(file.Name));
             document.Add(FieldFactory.CreateSourceField(new StreamReader(file.FullName, true)));
             document.Add(
-                FieldFactory.CreateModifiedField(DateTools.DateToString(file.LastWriteTime, DateTools.Resolution.HOUR)));
+                FieldFactory.CreateModifiedField(DateTools.DateToString(file.LastWriteTime, FieldFactory.ModifiedResolution)));
 
             indexWriter.AddDocument(document);
 

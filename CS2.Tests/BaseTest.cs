@@ -5,7 +5,7 @@ using Rhino.Mocks;
 
 namespace CS2.Tests
 {
-    public class BaseTest
+    public abstract class BaseTest
     {
         protected IWindsorContainer container;
         protected MockRepository mocks;
@@ -15,6 +15,12 @@ namespace CS2.Tests
         {
             container = new WindsorContainer(new XmlInterpreter());
             mocks = new MockRepository();
+        }
+
+        [TestFixtureTearDown]
+        public void FixtureTeardown()
+        {
+            container.Dispose();
         }
     }
 }
