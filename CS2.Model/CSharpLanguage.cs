@@ -24,7 +24,7 @@ namespace CS2.Model
             }
         }
 
-        public string FileExtension
+        public string SearchPattern
         {
             get { return "*.cs"; }
         }

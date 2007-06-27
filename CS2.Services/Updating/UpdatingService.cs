@@ -5,7 +5,7 @@ using Lucene.Net.Index;
 
 namespace CS2.Services.Updating
 {
-    public class UpdatingService : IUpdatingService
+    public class UpdatingService
     {
         private readonly IndexReader indexReader;
 

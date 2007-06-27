@@ -8,7 +8,7 @@ namespace CS2.Services.Analysis
     {
         public override TokenStream TokenStream(string fieldName, TextReader reader)
         {
-            if(fieldName.Equals("comment"))
+            if(fieldName.Equals(FieldFactory.CommentFieldName))
                 return
                     new PorterStemFilter(new StopFilter(new LowerCaseTokenizer(reader), StopAnalyzer.ENGLISH_STOP_WORDS));
             else return new StopFilter(new LowerCaseTokenizer(reader), Language.StopWords);

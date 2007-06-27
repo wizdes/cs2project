@@ -1,7 +1,7 @@
 using System.IO;
 using Castle.Core.Logging;
-using CS2.Services.Logging;
 using CS2.Services.Parsing;
+using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 
 namespace CS2.Services.Logging
@@ -28,11 +28,20 @@ namespace CS2.Services.Logging
 
         #region IParsingService Members
 
-        public void Parse(FileInfo file, Document document)
+        public Analyzer Analyzer
+        {
+            get { return inner.Analyzer; }
+        }
+
+        public bool TryParse(FileInfo file, out Document document)
         {
             Logger.DebugFormat("Start parsing file {0}", file.FullName);
-            inner.Parse(file, document);
-            Logger.DebugFormat("Done parsing file {0}", file.FullName);
+
+            bool couldParse = inner.TryParse(file, out document);
+
+            Logger.DebugFormat(couldParse ? "Done parsing file {0}" : "Error parsing file {0}", file.FullName);
+
+            return couldParse;
         }
 
         #endregion

@@ -19,11 +19,11 @@ namespace CS2.Console
 
             Debug.WriteLine(indexingService.IndexWriter.GetDirectory().GetType());
 
-            indexingService.Index(new DirectoryInfo(docsDir));
+            indexingService.RequestIndexing(new DirectoryInfo(docsDir));
 
             Debug.WriteLine(indexingService.IndexWriter.GetHashCode());
 
-            indexingService.Index(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent);
+            indexingService.RequestIndexing(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent);
 
             Debug.WriteLine(indexingService.IndexWriter.GetHashCode());
         }

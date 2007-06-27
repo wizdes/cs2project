@@ -5,6 +5,6 @@ namespace CS2.Services.Searching
 {
     public interface ISearchService
     {
-        IEnumerable<SearchResult> Search(SearchQuery query);
+        //IEnumerable<SearchResult> Search(SearchQuery query);
     }
 }

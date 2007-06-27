@@ -1,7 +1,7 @@
-using System;
 using System.Diagnostics;
 using System.IO;
 using CS2.Services.Indexing;
+using Lucene.Net.Index;
 using NUnit.Framework;
 
 namespace CS2.Tests
@@ -9,44 +9,46 @@ namespace CS2.Tests
     [TestFixture]
     public class IndexingServiceTests : BaseTest
     {
+        private IIndexingService service;
         private const string docsDir = @"C:\Development\Rhino-tools\trunk\rhino-commons";
+
+        [SetUp]
+        public void Setup()
+        {
+            service = container.Resolve<IIndexingService>();
+        }
 
         [Test]
         public void CanResolve()
         {
-            IIndexingService indexingService = container.Resolve<IIndexingService>();
+            Assert.IsNotNull(service);
 
-            Assert.IsNotNull(indexingService);
-
-            Debug.WriteLine(indexingService.GetType());
-            Debug.WriteLine(indexingService.ParsingService.GetType());
-
-            indexingService.IndexWriter.Close();
+            Debug.WriteLine(service.GetType());
         }
 
         [Test]
-        public void CanIndexDirectory()
+        public void IndexExists()
         {
-            IIndexingService indexingService = container.Resolve<IIndexingService>();
-
-            Debug.WriteLine(indexingService.IndexWriter.GetDirectory().GetType());
-
-            indexingService.Index(new DirectoryInfo(docsDir));
-
-            Debug.WriteLine(indexingService.IndexWriter.GetHashCode());
-
-            indexingService.Index(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent);
-
-            Debug.WriteLine(indexingService.IndexWriter.GetHashCode());
-
-            Assert.AreEqual(indexingService.IndexWriter.GetDirectory().List().Length, 3);
+            Assert.IsTrue(IndexReader.IndexExists(service.IndexDirectory));
         }
 
         [Test]
-        public void CanIndexFile()
+        public void HasFilesWaitingToBeIndexed()
         {
-            IIndexingService indexingService = container.Resolve<IIndexingService>();
-            indexingService.Index(new FileInfo(@"..\..\DummyClassForParseTesting.cs"));
+            Assert.IsFalse(service.IsWaitingForFilesToBeIndexed);
+
+            service.RequestIndexing(new FileInfo(@"..\..\DummyClassForParseTesting.cs"));
+            service.RequestIndexing(new DirectoryInfo(docsDir));
+
+            Assert.IsTrue(service.IsWaitingForFilesToBeIndexed);
+        }
+
+        [Test]
+        public void CanIndexFiles()
+        {
+            service.UpdateIndex();
+
+            Assert.IsFalse(service.IsWaitingForFilesToBeIndexed);
         }
     }
 }

@@ -7,7 +7,7 @@ using Lucene.Net.Search;
 
 namespace CS2.Services.Searching
 {
-    public class SearchService : ISearchService
+    public class SearchService
     {
         private readonly Searcher searcher;
         private readonly Analyzer analyzer;
@@ -18,20 +18,20 @@ namespace CS2.Services.Searching
             this.analyzer = analyzer;
         }
 
-        public IEnumerable<SearchResult> Search(SearchQuery query)
-        {
-            //Query q = new QueryParser().Parse(query.Query);
-
-            //Hits hits = searcher.Search(q);
-
-            //while(hits.Iterator().MoveNext())
-            //{
-            //    Hit hit = hits.Iterator().Current as Hit;
-
-            //    yield return new SearchResult(hit);
-            //}
-
-            throw new NotImplementedException();
-        }
+//        public IEnumerable<SearchResult> Search(SearchQuery query)
+//        {
+//            //Query q = new QueryParser().TryParse(query.Query);
+//
+//            //Hits hits = searcher.Search(q);
+//
+//            //while(hits.Iterator().MoveNext())
+//            //{
+//            //    Hit hit = hits.Iterator().Current as Hit;
+//
+//            //    yield return new SearchResult(hit);
+//            //}
+//
+//            throw new NotImplementedException();
+//        }
     }
 }

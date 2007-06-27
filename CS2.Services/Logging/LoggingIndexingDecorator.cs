@@ -2,12 +2,11 @@ using System.IO;
 using Castle.Core.Logging;
 using CS2.Model;
 using CS2.Services.Indexing;
-using CS2.Services.Parsing;
-using Lucene.Net.Index;
+using Directory=Lucene.Net.Store.Directory;
 
 namespace CS2.Services.Logging
 {
-    public class LoggingIndexingDecorator : IIndexingService, ILoggingService
+    public class LoggingIndexingDecorator : ILoggingService, IIndexingService
     {
         private readonly IIndexingService inner;
         private ILogger logger = NullLogger.Instance;
@@ -19,33 +18,69 @@ namespace CS2.Services.Logging
 
         #region IIndexingService Members
 
-        public void Index(FileInfo file)
+        /// <summary>
+        /// The directory where the index is located.
+        /// </summary>
+        public Directory IndexDirectory
         {
-            logger.InfoFormat("Start indexing file {0}", file.FullName);
-            inner.Index(file);
-            logger.InfoFormat("Start indexing file {0}", file.FullName);
+            get { return inner.IndexDirectory; }
         }
 
-        public void Index(DirectoryInfo directory)
+        public bool IsWaitingForFilesToBeIndexed
         {
-            logger.InfoFormat("Start indexing directory {0}", directory.FullName);
-            inner.Index(directory);
-            logger.InfoFormat("Done indexing directory {0}", directory.FullName);
+            get { return inner.IsWaitingForFilesToBeIndexed; }
         }
 
-        public IProgrammingLanguage Language
+        public void RequestIndexing(FileInfo file)
         {
-            get { return inner.Language; }
+            logger.InfoFormat("Requested indexing file {0}", file.FullName);
+            inner.RequestIndexing(file);
         }
 
-        public IndexWriter IndexWriter
+        /// <summary>
+        /// Requests the indexing of the specified directory, optionally using recursion and looking for files which match the supplied pattern.
+        /// </summary>
+        /// <param name="directory">The directory.</param>
+        /// <param name="searchOption">The search option.</param>
+        /// <param name="searchPattern">The search pattern.</param>
+        public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, string searchPattern)
         {
-            get { return inner.IndexWriter; }
+            throw new System.NotImplementedException();
         }
 
-        public IParsingService ParsingService
+        /// <summary>
+        /// Requests the indexing of the specified directory, optionally using recursion and looking for files of the specified language.
+        /// </summary>
+        /// <param name="directory">The directory.</param>
+        /// <param name="searchOption">The search option.</param>
+        /// <param name="language">The language.</param>
+        public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, IProgrammingLanguage language)
         {
-            get { return inner.ParsingService; }
+            throw new System.NotImplementedException();
+        }
+
+        /// <summary>
+        /// Requests the indexing of all the files contained in the specified directory, optionally using recursion.
+        /// </summary>
+        /// <param name="directory">The directory.</param>
+        /// <param name="searchOption">The search option.</param>
+        public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void RequestIndexing(DirectoryInfo directory)
+        {
+            logger.InfoFormat("Requested indexing directory {0}", directory.FullName);
+            inner.RequestIndexing(directory);
+        }
+
+        /// <summary>
+        /// Triggers update operations on the index, removing no longer existing documents, updating changed documents and adding new documents which have been explicitly required to be indexed.
+        /// </summary>
+        public void UpdateIndex()
+        {
+            inner.UpdateIndex();
         }
 
         #endregion

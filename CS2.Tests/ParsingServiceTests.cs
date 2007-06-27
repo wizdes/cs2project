@@ -18,12 +18,12 @@ namespace CS2.Tests
         [Test]
         public void CanParseFile()
         {
-            Document document = new Document();
+            Document document;
             IParsingService parsingService = container.Resolve<IParsingService>();
 
-            parsingService.Parse(new FileInfo("..\\..\\DummyClassForParseTesting.cs"), document);
+            Assert.IsTrue(parsingService.TryParse(new FileInfo("..\\..\\DummyClassForParseTesting.cs"), out document));
 
-            foreach(Field field in document.Fields())
+            foreach (Field field in document.Fields())
             {
                 Debug.WriteLine(string.Format("{0} {1}", field.Name(), field.StringValue()));
             }
