@@ -24,9 +24,9 @@ namespace CS2.Services
             return new Field(CommentFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
         }
 
-        public static Field CreateIDField(IDIdentifier identifier)
+        public static Field CreateIDField(string identifier)
         {
-            return new Field(IDFieldName, identifier.ToString(), Field.Store.NO, Field.Index.UN_TOKENIZED);
+            return new Field(IDFieldName, identifier, Field.Store.NO, Field.Index.UN_TOKENIZED);
         }
 
         public static Field CreateFileNameField(string identifier)
@@ -72,29 +72,6 @@ namespace CS2.Services
         public static Field CreateInterfaceField(string identifier)
         {
             return new Field(InterfaceFieldName, identifier, Field.Store.YES, Field.Index.TOKENIZED);
-        }
-    }
-
-    public class IDIdentifier
-    {
-        private readonly FileInfo file;
-
-        public IDIdentifier(FileInfo file)
-        {
-            this.file = file;
-        }
-
-        public static string ToPath(string identifier)
-        {
-            string url = identifier.Replace('\u0000', '/'); // replace nulls with slashes
-            return url.Substring(0, (url.LastIndexOf('/')) - (0)); // remove date from end
-        }
-
-        public override string ToString()
-        {
-            return
-                file.FullName.Replace(Path.DirectorySeparatorChar, '\u0000') + "\u0000" +
-                DateTools.TimeToString(file.LastWriteTime.Millisecond, DateTools.Resolution.SECOND);
         }
     }
 }

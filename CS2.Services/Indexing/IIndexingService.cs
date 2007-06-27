@@ -11,10 +11,16 @@ namespace CS2.Services.Indexing
         /// </summary>
         Directory IndexDirectory { get; }
 
-        bool IsWaitingForFilesToBeIndexed
-        {
-            get;
-        }
+        /// <summary>
+        /// Returns true if there are files waiting to be indexed in batch.
+        /// </summary>
+        bool IsWaitingForFilesToBeIndexed { get; }
+
+        int DeletedFiles { get; }
+
+        int UpdatedFiles { get; }
+
+        int AddedFiles { get; }
 
         /// <summary>
         /// Requests the indexing of the specified file.

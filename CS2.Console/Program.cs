@@ -13,19 +13,19 @@ namespace CS2.Console
 
         static void Main(string[] args)
         {
-            IWindsorContainer container = new WindsorContainer(new XmlInterpreter());
+            //IWindsorContainer container = new WindsorContainer(new XmlInterpreter());
 
-            IIndexingService indexingService = container.Resolve<IIndexingService>();
+            //IIndexingService indexingService = container.Resolve<IIndexingService>();
 
-            Debug.WriteLine(indexingService.IndexWriter.GetDirectory().GetType());
+            //Debug.WriteLine(indexingService.IndexWriter.GetDirectory().GetType());
 
-            indexingService.RequestIndexing(new DirectoryInfo(docsDir));
+            //indexingService.RequestIndexing(new DirectoryInfo(docsDir));
 
-            Debug.WriteLine(indexingService.IndexWriter.GetHashCode());
+            //Debug.WriteLine(indexingService.IndexWriter.GetHashCode());
 
-            indexingService.RequestIndexing(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent);
+            //indexingService.RequestIndexing(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent);
 
-            Debug.WriteLine(indexingService.IndexWriter.GetHashCode());
+            //Debug.WriteLine(indexingService.IndexWriter.GetHashCode());
         }
     }
 }

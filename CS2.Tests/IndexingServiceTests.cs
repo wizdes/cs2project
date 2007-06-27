@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.IO;
 using CS2.Services.Indexing;
@@ -11,6 +12,7 @@ namespace CS2.Tests
     {
         private IIndexingService service;
         private const string docsDir = @"C:\Development\Rhino-tools\trunk\rhino-commons";
+        private const string dummyFile = @"..\..\DummyClassForParseTesting.cs";
 
         [SetUp]
         public void Setup()
@@ -37,7 +39,7 @@ namespace CS2.Tests
         {
             Assert.IsFalse(service.IsWaitingForFilesToBeIndexed);
 
-            service.RequestIndexing(new FileInfo(@"..\..\DummyClassForParseTesting.cs"));
+            service.RequestIndexing(new FileInfo(dummyFile));
             service.RequestIndexing(new DirectoryInfo(docsDir));
 
             Assert.IsTrue(service.IsWaitingForFilesToBeIndexed);
@@ -48,7 +50,59 @@ namespace CS2.Tests
         {
             service.UpdateIndex();
 
+            PrintFileOperations();
+
+            Assert.Greater(service.AddedFiles, 0);
+            Assert.AreEqual(service.UpdatedFiles, 0);
+            Assert.AreEqual(service.DeletedFiles, 0);
+
             Assert.IsFalse(service.IsWaitingForFilesToBeIndexed);
+        }
+
+        [Test]
+        public void ShouldntIndexAgainTheSameFiles()
+        {
+            service.RequestIndexing(new FileInfo(dummyFile));
+            service.UpdateIndex();
+
+            PrintFileOperations();
+
+            Assert.AreEqual(service.AddedFiles, 0);
+            Assert.AreEqual(service.UpdatedFiles, 0);
+            Assert.AreEqual(service.DeletedFiles, 0);
+
+        }
+
+        [Test]
+        public void AreDifferentLastWriteTimes()
+        {
+            long ticks1 = File.GetLastWriteTime(dummyFile).Ticks;
+
+            File.SetLastWriteTime(dummyFile, DateTime.Now);
+
+            long ticks2 = File.GetLastWriteTime(dummyFile).Ticks;
+
+            Assert.AreNotEqual(ticks1, ticks2);
+        }
+
+        [Test]
+        public void ShouldReindexIfFileHasBeenModified()
+        {
+            File.SetLastWriteTime(dummyFile, DateTime.Now);
+            service.UpdateIndex();
+
+            PrintFileOperations();
+
+            Assert.AreEqual(service.AddedFiles, 0);
+            Assert.AreEqual(service.UpdatedFiles, 1);
+            Assert.AreEqual(service.DeletedFiles, 0);
+        }
+
+        private void PrintFileOperations()
+        {
+            Debug.WriteLine("Added files: " + service.AddedFiles);
+            Debug.WriteLine("Updated files: " + service.UpdatedFiles);
+            Debug.WriteLine("Deleted files: " + service.DeletedFiles);
         }
     }
 }

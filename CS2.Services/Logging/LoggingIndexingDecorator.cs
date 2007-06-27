@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Castle.Core.Logging;
 using CS2.Model;
@@ -18,6 +19,21 @@ namespace CS2.Services.Logging
 
         #region IIndexingService Members
 
+        public int DeletedFiles
+        {
+            get { return inner.DeletedFiles; }
+        }
+
+        public int UpdatedFiles
+        {
+            get { return inner.UpdatedFiles; }
+        }
+
+        public int AddedFiles
+        {
+            get { return inner.AddedFiles; }
+        }
+
         /// <summary>
         /// The directory where the index is located.
         /// </summary>
@@ -26,11 +42,19 @@ namespace CS2.Services.Logging
             get { return inner.IndexDirectory; }
         }
 
+        /// <summary>
+        /// Returns true if there are files waiting to be indexed in batch.
+        /// </summary>
+        /// <value></value>
         public bool IsWaitingForFilesToBeIndexed
         {
             get { return inner.IsWaitingForFilesToBeIndexed; }
         }
 
+        /// <summary>
+        /// Requests the indexing of the specified file.
+        /// </summary>
+        /// <param name="file">The file.</param>
         public void RequestIndexing(FileInfo file)
         {
             logger.InfoFormat("Requested indexing file {0}", file.FullName);
@@ -45,7 +69,7 @@ namespace CS2.Services.Logging
         /// <param name="searchPattern">The search pattern.</param>
         public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, string searchPattern)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -56,7 +80,7 @@ namespace CS2.Services.Logging
         /// <param name="language">The language.</param>
         public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, IProgrammingLanguage language)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -66,7 +90,7 @@ namespace CS2.Services.Logging
         /// <param name="searchOption">The search option.</param>
         public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void RequestIndexing(DirectoryInfo directory)

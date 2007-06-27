@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using CS2.Model;
+using CS2.Repositories;
 using CS2.Services.Parsing;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
@@ -13,25 +14,31 @@ namespace CS2.Services.Indexing
 {
     public class IndexingService : IIndexingService
     {
-        private readonly IDictionary<string, FileInfo> allIndexedFiles = new SortedList<string, FileInfo>();
+        private readonly string[] exclusions;
         private readonly IDictionary<string, FileInfo> filesWaitingToBeIndexed = new SortedList<string, FileInfo>();
 
         private readonly Directory indexDirectory;
         private readonly IParsingService[] parsingServices;
+        private readonly IFilesRepository repository;
         private readonly object updatingLock = new object();
+        private int addedFiles;
+        private int deletedFiles;
         private IndexReader indexReader;
         private IndexWriter indexWriter;
         private bool isUpdating = false;
-        private readonly string[] exclusions;
+        private int updatedFiles;
 
-        public IndexingService(Directory indexDirectory, IParsingService[] parsingServices, string[] exclusions)
+        public IndexingService(Directory indexDirectory, IParsingService[] parsingServices, IFilesRepository repository,
+                               string[] exclusions
+            )
         {
             this.indexDirectory = indexDirectory;
             this.parsingServices = parsingServices;
             this.exclusions = exclusions;
+            this.repository = repository;
 
             // If the index directory doesn't contain an index then create it
-            if (!IndexReader.IndexExists(indexDirectory))
+            if(!IndexReader.IndexExists(indexDirectory))
             {
                 indexWriter = new IndexWriter(indexDirectory, new StandardAnalyzer(), true);
                 indexWriter.Close();
@@ -39,12 +46,27 @@ namespace CS2.Services.Indexing
             }
         }
 
+        #region IIndexingService Members
+
+        public int DeletedFiles
+        {
+            get { return deletedFiles; }
+        }
+
+        public int UpdatedFiles
+        {
+            get { return updatedFiles; }
+        }
+
+        public int AddedFiles
+        {
+            get { return addedFiles; }
+        }
+
         public bool IsWaitingForFilesToBeIndexed
         {
             get { return filesWaitingToBeIndexed.Count != 0; }
         }
-
-        #region IIndexingService Members
 
         public Directory IndexDirectory
         {
@@ -57,7 +79,7 @@ namespace CS2.Services.Indexing
         /// <param name="file">The file.</param>
         public void RequestIndexing(FileInfo file)
         {
-            if (!IsValidFileSystemEntryToBeIndexed(file))
+            if(!IsValidFileSystemEntryToBeIndexed(file))
                 return;
 
             if(!filesWaitingToBeIndexed.ContainsKey(file.FullName))
@@ -69,11 +91,17 @@ namespace CS2.Services.Indexing
         /// </summary>
         public void UpdateIndex()
         {
-            if(isUpdating)
-                return;
-
             lock(updatingLock)
+            {
+                if(isUpdating)
+                    return;
+
                 isUpdating = true;
+            }
+
+            addedFiles = 0;
+            updatedFiles = 0;
+            deletedFiles = 0;
 
             // Create new IndexReader to update the index
             indexReader = IndexReader.Open(indexDirectory);
@@ -100,9 +128,7 @@ namespace CS2.Services.Indexing
             OnIndexingCompleted();
 
             lock(updatingLock)
-            {
                 isUpdating = false;
-            }
         }
 
         public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, string searchPattern)
@@ -112,22 +138,6 @@ namespace CS2.Services.Indexing
 
             foreach(FileInfo file in directory.GetFiles(searchPattern, searchOption))
                 RequestIndexing(file);
-        }
-
-        private bool IsValidFileSystemEntryToBeIndexed(FileSystemInfo entry)
-        {
-            if (entry.Attributes == FileAttributes.Hidden)
-                return false;
-
-            foreach (string exclusion in exclusions)
-            {
-                Regex r = new Regex(Regex.Escape(exclusion));
-
-                if (r.IsMatch(entry.FullName))
-                    return false;
-            }
-
-            return true;
         }
 
         public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, IProgrammingLanguage language)
@@ -146,6 +156,28 @@ namespace CS2.Services.Indexing
         }
 
         #endregion
+
+        private bool IsValidFileSystemEntryToBeIndexed(FileSystemInfo entry)
+        {
+            // The file or directory is hidden
+            if(entry.Attributes == FileAttributes.Hidden)
+                return false;
+
+            // The entry matches one of the exclusions
+            foreach(string exclusion in exclusions)
+            {
+                Regex r = new Regex(Regex.Escape(exclusion));
+
+                if(r.IsMatch(entry.FullName))
+                    return false;
+            }
+
+            // The entry is already indexed (if it's out of date will be automatically updated)
+            if(entry is FileInfo && repository.Contains(entry as FileInfo))
+                return false;
+
+            return true;
+        }
 
         private event EventHandler IndexingCompleted;
 
@@ -179,14 +211,19 @@ namespace CS2.Services.Indexing
                 string id = idEnumerator.Term().Text();
 
                 // If file doesn't exist or if file exists but is out of date
-                if(!File.Exists(IDIdentifier.ToPath(id)) || FileExistsButNeedsUpdating(id))
+                if(!File.Exists(IDIdentifierUtils.GetPathFromIdentifier(id)) || FileExistsButNeedsUpdating(id))
                 {
                     // The delete document from the index
                     indexReader.DeleteDocuments(idEnumerator.Term());
 
                     // If file was deleted since out of date then re-index it
                     if(FileExistsButNeedsUpdating(id))
-                        RequestIndexing(new FileInfo(IDIdentifier.ToPath(id)));
+                    {
+                        FileInfo file = new FileInfo(IDIdentifierUtils.GetPathFromIdentifier(id));
+
+                        if(!filesWaitingToBeIndexed.ContainsKey(file.FullName))
+                            filesWaitingToBeIndexed.Add(file.FullName, file);
+                    }
                 }
 
                 idEnumerator.Next();
@@ -201,15 +238,19 @@ namespace CS2.Services.Indexing
         private void RemoveDeletedFilesFromRepository()
         {
             // TODO: is it right to remove items while iterating through it?
-            foreach(KeyValuePair<string, FileInfo> keyValuePair in allIndexedFiles)
-                if(!keyValuePair.Value.Exists)
-                    allIndexedFiles.Remove(keyValuePair);
+            foreach(string file in repository.GetAll())
+                if(!File.Exists(file))
+                {
+                    repository.Remove(new FileInfo(file));
+                    deletedFiles++;
+                }
         }
 
         private static bool FileExistsButNeedsUpdating(string id)
         {
-            return File.Exists(IDIdentifier.ToPath(id)) &&
-                   new IDIdentifier(new FileInfo(IDIdentifier.ToPath(id))).ToString() != id;
+            return File.Exists(IDIdentifierUtils.GetPathFromIdentifier(id)) &&
+                   IDIdentifierUtils.GetIdentifierFromFile(new FileInfo(IDIdentifierUtils.GetPathFromIdentifier(id))) !=
+                   id;
         }
 
         /// <summary>
@@ -221,11 +262,11 @@ namespace CS2.Services.Indexing
             Document document;
 
             // Find a parser that suites the file
-            foreach (IParsingService parsingService in parsingServices)
+            foreach(IParsingService parsingService in parsingServices)
             {
                 if(parsingService.TryParse(file, out document))
                 {
-                    document.Add(FieldFactory.CreateIDField(new IDIdentifier(file)));
+                    document.Add(FieldFactory.CreateIDField(IDIdentifierUtils.GetIdentifierFromFile(file)));
                     document.Add(FieldFactory.CreatePathField(file.FullName));
                     document.Add(FieldFactory.CreateFileNameField(file.Name));
                     document.Add(FieldFactory.CreateSourceField(new StreamReader(file.FullName, true)));
@@ -235,7 +276,15 @@ namespace CS2.Services.Indexing
 
                     // Add the document to the index with the appropriate analyzer
                     indexWriter.AddDocument(document, parsingService.Analyzer);
-                    allIndexedFiles.Add(file.FullName, file);
+
+                    // Add the file to the repository of indexed files
+                    // It may already contain it if it's been updated
+                    if(!repository.Contains(file))
+                    {
+                        repository.Add(file);
+                        addedFiles++;
+                    }
+                    else updatedFiles++;
 
                     // If a parser has been able to parse the file stop iterating through parsers
                     break;
