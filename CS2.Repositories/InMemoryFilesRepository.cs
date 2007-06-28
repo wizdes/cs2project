@@ -24,7 +24,7 @@ namespace CS2.Repositories
             return files.ContainsKey(file.FullName);
         }
 
-        public IList<string> GetAll()
+        public IEnumerable<string> GetAll()
         {
             return files.Keys;
         }

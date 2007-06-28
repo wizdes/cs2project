@@ -77,6 +77,10 @@
       <Project>{6F466847-ADC4-4218-8AFC-FBC70B2D3A09}</Project>
       <Name>CS2.Model</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CS2.Repositories\CS2.Repositories.csproj">
+      <Project>{1BD554B4-C8BC-4D32-98EE-81A0862510DF}</Project>
+      <Name>CS2.Repositories</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CS2.Services\CS2.Services.csproj">
       <Project>{14E25989-745F-4FCF-BB25-145FDA0CC4DF}</Project>
       <Name>CS2.Services</Name>

@@ -8,6 +8,6 @@ namespace CS2.Repositories
         void Add(FileInfo file);
         void Remove(FileInfo file);
         bool Contains(FileInfo file);
-        IList<string> GetAll();
+        IEnumerable<string> GetAll();
     }
 }
