@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -24,9 +25,9 @@ namespace CS2.Repositories
             return files.ContainsKey(file.FullName);
         }
 
-        public IEnumerable<string> GetAll()
+        public string[] GetAll()
         {
-            return files.Keys;
+            return new List<string>(files.Keys).ToArray();
         }
 
         #endregion

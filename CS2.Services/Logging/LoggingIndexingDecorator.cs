@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using Castle.Core.Logging;
 using CS2.Model;
@@ -62,14 +61,13 @@ namespace CS2.Services.Logging
         }
 
         /// <summary>
-        /// Requests the indexing of the specified directory, optionally using recursion and looking for files which match the supplied pattern.
+        /// Requests the indexing of all the files contained in the specified directory, optionally using recursion.
         /// </summary>
         /// <param name="directory">The directory.</param>
         /// <param name="searchOption">The search option.</param>
-        /// <param name="searchPattern">The search pattern.</param>
-        public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, string searchPattern)
+        public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption)
         {
-            throw new NotImplementedException();
+            inner.RequestIndexing(directory, searchOption);
         }
 
         /// <summary>
@@ -80,17 +78,18 @@ namespace CS2.Services.Logging
         /// <param name="language">The language.</param>
         public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, IProgrammingLanguage language)
         {
-            throw new NotImplementedException();
+            inner.RequestIndexing(directory, searchOption, language);
         }
 
         /// <summary>
-        /// Requests the indexing of all the files contained in the specified directory, optionally using recursion.
+        /// Requests the indexing of the specified directory, optionally using recursion and looking for files which match the supplied pattern.
         /// </summary>
         /// <param name="directory">The directory.</param>
         /// <param name="searchOption">The search option.</param>
-        public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption)
+        /// <param name="searchPattern">The search pattern.</param>
+        public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, string searchPattern)
         {
-            throw new NotImplementedException();
+            inner.RequestIndexing(directory, searchOption, searchPattern);
         }
 
         public void RequestIndexing(DirectoryInfo directory)
@@ -104,6 +103,7 @@ namespace CS2.Services.Logging
         /// </summary>
         public void UpdateIndex()
         {
+            logger.Info("Call to UpdateIndex");
             inner.UpdateIndex();
         }
 

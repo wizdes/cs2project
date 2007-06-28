@@ -248,9 +248,9 @@ namespace CS2.Services.Indexing
 
         private static bool FileExistsButNeedsUpdating(string id)
         {
-            return File.Exists(IDIdentifierUtils.GetPathFromIdentifier(id)) &&
-                   IDIdentifierUtils.GetIdentifierFromFile(new FileInfo(IDIdentifierUtils.GetPathFromIdentifier(id))) !=
-                   id;
+            string path = IDIdentifierUtils.GetPathFromIdentifier(id);
+
+            return File.Exists(path) && IDIdentifierUtils.GetIdentifierFromFile(new FileInfo(path)) != id;
         }
 
         /// <summary>
