@@ -17,17 +17,17 @@ namespace CS2.Console
             new Program().Run();
         }
 
-        private void indexingService_IndexingCompleted(object sender, EventArgs e)
+        private void indexingService_IndexingCompleted(object sender, IndexingCompletedEventArgs e)
         {
             Debug.WriteLine("Indexing completed");
-            PrintFileOperations();
+            PrintFileOperations(e);
         }
 
-        private void PrintFileOperations()
+        private static void PrintFileOperations(IndexingCompletedEventArgs e)
         {
-            Debug.WriteLine("Added files: " + indexingService.LastAddedFiles);
-            Debug.WriteLine("Updated files: " + indexingService.LastUpdatedFiles);
-            Debug.WriteLine("Deleted files: " + indexingService.LastDeletedFiles);
+            Debug.WriteLine("Added files: {0}" + e.Addedfiles);
+            Debug.WriteLine("Updated files: {0}" + e.UpdatedFiles);
+            Debug.WriteLine("Deleted files: {0}" + e.DeletedFiles);
         }
 
         private void Run()

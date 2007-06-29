@@ -93,22 +93,22 @@ namespace CS2.Services.Indexing
             get { return inner.IsWaitingForFilesToBeIndexed; }
         }
 
-        public int LastDeletedFiles
+        public int DeletedFilesSinceLastUpdate
         {
-            get { return inner.LastDeletedFiles; }
+            get { return inner.DeletedFilesSinceLastUpdate; }
         }
 
-        public int LastUpdatedFiles
+        public int UpdatedFilesSinceLastUpdate
         {
-            get { return inner.LastUpdatedFiles; }
+            get { return inner.UpdatedFilesSinceLastUpdate; }
         }
 
-        public int LastAddedFiles
+        public int AddedFilesSinceLastUpdate
         {
-            get { return inner.LastAddedFiles; }
+            get { return inner.AddedFilesSinceLastUpdate; }
         }
 
-        public event EventHandler IndexingCompleted
+        public event EventHandler<IndexingCompletedEventArgs> IndexingCompleted
         {
             add { inner.IndexingCompleted += value; }
             remove { inner.IndexingCompleted -= value; }

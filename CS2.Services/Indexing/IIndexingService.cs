@@ -17,11 +17,11 @@ namespace CS2.Services.Indexing
         /// </summary>
         bool IsWaitingForFilesToBeIndexed { get; }
 
-        int LastDeletedFiles { get; }
+        int DeletedFilesSinceLastUpdate { get; }
 
-        int LastUpdatedFiles { get; }
+        int UpdatedFilesSinceLastUpdate { get; }
 
-        int LastAddedFiles { get; }
+        int AddedFilesSinceLastUpdate { get; }
 
         /// <summary>
         /// Requests the indexing of the specified file.
@@ -63,6 +63,6 @@ namespace CS2.Services.Indexing
         /// </summary>
         void UpdateIndex();
 
-        event EventHandler IndexingCompleted;
+        event EventHandler<IndexingCompletedEventArgs> IndexingCompleted;
     }
 }

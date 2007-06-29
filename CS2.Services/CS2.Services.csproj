@@ -60,7 +60,7 @@
     <Compile Include="FieldFactory.cs" />
     <Compile Include="IDIdentifierUtils.cs" />
     <Compile Include="Indexing\TimedIndexingService.cs" />
-    <Compile Include="Logging\LoggingIndexingDecorator.cs" />
+    <Compile Include="Indexing\LoggedIndexingService.cs" />
     <Compile Include="Parsing\CSharpParsingService.cs" />
     <Compile Include="Indexing\IIndexingService.cs" />
     <Compile Include="Analysis\GenericAnalyzer.cs" />
@@ -70,7 +70,7 @@
     </Compile>
     <Compile Include="Parsing\IParsingVisitor.cs" />
     <Compile Include="Indexing\IndexingService.cs" />
-    <Compile Include="Logging\LoggingParsingDecorator.cs" />
+    <Compile Include="Parsing\LoggedParsingService.cs" />
     <Compile Include="Searching\ISearchService.cs" />
     <Compile Include="Searching\SearchService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

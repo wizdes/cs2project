@@ -3,35 +3,37 @@ using System.IO;
 using Castle.Core.Logging;
 using CS2.Model;
 using CS2.Services.Indexing;
+using CS2.Services.Logging;
 using Directory=Lucene.Net.Store.Directory;
 
-namespace CS2.Services.Logging
+namespace CS2.Services.Indexing
 {
-    public class LoggingIndexingDecorator : ILoggingService, IIndexingService
+    public class LoggedIndexingService : ILoggingService, IIndexingService
     {
         private readonly IIndexingService inner;
         private ILogger logger = NullLogger.Instance;
 
-        public LoggingIndexingDecorator(IIndexingService inner)
+        public LoggedIndexingService(IIndexingService inner)
         {
+            logger.Info("IndexingService instantiated");
             this.inner = inner;
         }
 
         #region IIndexingService Members
 
-        public int LastDeletedFiles
+        public int DeletedFilesSinceLastUpdate
         {
-            get { return inner.LastDeletedFiles; }
+            get { return inner.DeletedFilesSinceLastUpdate; }
         }
 
-        public int LastUpdatedFiles
+        public int UpdatedFilesSinceLastUpdate
         {
-            get { return inner.LastUpdatedFiles; }
+            get { return inner.UpdatedFilesSinceLastUpdate; }
         }
 
-        public int LastAddedFiles
+        public int AddedFilesSinceLastUpdate
         {
-            get { return inner.LastAddedFiles; }
+            get { return inner.AddedFilesSinceLastUpdate; }
         }
 
         /// <summary>
@@ -106,13 +108,13 @@ namespace CS2.Services.Logging
         {
             logger.Info("Call to UpdateIndex");
             inner.UpdateIndex();
+            logger.InfoFormat("Addedfiles Added: {0}", AddedFilesSinceLastUpdate);
+            logger.InfoFormat("Addedfiles Updated: {0}", UpdatedFilesSinceLastUpdate);
+            logger.InfoFormat("Addedfiles Deleted: {0}", DeletedFilesSinceLastUpdate);
             logger.Info("Finished updating index.");
-//            logger.InfoFormat("Files Added: {0}", LastAddedFiles);
-//            logger.InfoFormat("Files Updated: {0}", LastUpdatedFiles);
-//            logger.InfoFormat("Files Deleted: {0}", LastDeletedFiles);
         }
 
-        public event EventHandler IndexingCompleted
+        public event EventHandler<IndexingCompletedEventArgs> IndexingCompleted
         {
             add { inner.IndexingCompleted += value; }
             remove { inner.IndexingCompleted -= value; }

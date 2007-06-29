@@ -21,12 +21,12 @@ namespace CS2.Services.Indexing
         private readonly IParsingService[] parsingServices;
         private readonly IFilesRepository repository;
         private readonly object updatingLock = new object();
+        private int addedFilesSinceLastUpdate;
+        private int deletedFilesSinceLastUpdate;
         private IndexReader indexReader;
         private IndexWriter indexWriter;
         private bool isUpdating = false;
-        private int lastAddedFiles;
-        private int lastDeletedFiles;
-        private int lastUpdatedFiles;
+        private int updatedFilesSinceLastUpdate;
 
         public IndexingService(Directory indexDirectory, IParsingService[] parsingServices, IFilesRepository repository,
                                string[] exclusions)
@@ -48,19 +48,19 @@ namespace CS2.Services.Indexing
 
         #region IIndexingService Members
 
-        public int LastDeletedFiles
+        public int DeletedFilesSinceLastUpdate
         {
-            get { return lastDeletedFiles; }
+            get { return deletedFilesSinceLastUpdate; }
         }
 
-        public int LastUpdatedFiles
+        public int UpdatedFilesSinceLastUpdate
         {
-            get { return lastUpdatedFiles; }
+            get { return updatedFilesSinceLastUpdate; }
         }
 
-        public int LastAddedFiles
+        public int AddedFilesSinceLastUpdate
         {
-            get { return lastAddedFiles; }
+            get { return addedFilesSinceLastUpdate; }
         }
 
         public bool IsWaitingForFilesToBeIndexed
@@ -134,14 +134,14 @@ namespace CS2.Services.Indexing
                 filesWaitingToBeIndexed.Clear();
             }
 
-            lastAddedFiles = 0;
-            lastUpdatedFiles = 0;
-            lastDeletedFiles = 0;
+            int addedFiles = 0;
+            int updatedFiles = 0;
+            int deletedFiles = 0;
 
             // Create new IndexReader to update the index
             indexReader = IndexReader.Open(indexDirectory);
 
-            RemoveDeletedFilesFromRepository();
+            RemoveDeletedFilesFromRepository(ref deletedFiles);
 
             RemoveDeletedAndModifiedDocumentsFromIndex(indexingQueue);
 
@@ -152,7 +152,7 @@ namespace CS2.Services.Indexing
             // Create a new IndexWriter to add new documents to the index
             indexWriter = new IndexWriter(indexDirectory, new StandardAnalyzer(), false);
 
-            AddNewAndUpdatedFilesToTheIndex(indexingQueue);
+            AddNewAndUpdatedFilesToTheIndex(indexingQueue, ref addedFiles, ref updatedFiles);
 
             // Close the IndexWriter
             indexWriter.Optimize();
@@ -161,6 +161,10 @@ namespace CS2.Services.Indexing
 
             indexingQueue.Clear();
 
+            addedFilesSinceLastUpdate = addedFiles;
+            updatedFilesSinceLastUpdate = updatedFiles;
+            deletedFilesSinceLastUpdate = deletedFiles;
+
             // Fire IndexingCompletedEvent
             OnIndexingCompleted();
 
@@ -168,7 +172,7 @@ namespace CS2.Services.Indexing
                 isUpdating = false;
         }
 
-        public event EventHandler IndexingCompleted;
+        public event EventHandler<IndexingCompletedEventArgs> IndexingCompleted;
 
         #endregion
 
@@ -198,16 +202,19 @@ namespace CS2.Services.Indexing
         private void OnIndexingCompleted()
         {
             if(IndexingCompleted != null)
-                IndexingCompleted(this, EventArgs.Empty);
+                IndexingCompleted(this,
+                                  new IndexingCompletedEventArgs(addedFilesSinceLastUpdate, updatedFilesSinceLastUpdate,
+                                                                 deletedFilesSinceLastUpdate));
         }
 
-        private void AddNewAndUpdatedFilesToTheIndex(IDictionary<string, FileInfo> indexingQueue)
+        private void AddNewAndUpdatedFilesToTheIndex(IDictionary<string, FileInfo> indexingQueue, ref int addedFiles,
+                                                     ref int updatedFiles)
         {
             FileInfo[] filesToBeIndexed = new FileInfo[indexingQueue.Count];
             indexingQueue.Values.CopyTo(filesToBeIndexed, 0);
 
             foreach(FileInfo info in filesToBeIndexed)
-                Index(info);
+                Index(info, ref addedFiles, ref updatedFiles);
         }
 
         /// <summary>
@@ -243,20 +250,20 @@ namespace CS2.Services.Indexing
                 idEnumerator.Next();
             }
 
-            idEnumerator.Close(); // close uid iterator
+            idEnumerator.Close();
         }
 
         /// <summary>
         /// Removes the deleted files from repository.
         /// </summary>
-        private void RemoveDeletedFilesFromRepository()
+        private void RemoveDeletedFilesFromRepository(ref int deletedFiles)
         {
-            // TODO: is it right to remove items while iterating through it?
+            // Iterate through the list of files to be indexed and remove them from the repository if they no longer exist
             foreach(string file in repository.GetAll())
                 if(!File.Exists(file))
                 {
                     repository.Remove(new FileInfo(file));
-                    lastDeletedFiles++;
+                    deletedFiles++;
                 }
         }
 
@@ -271,7 +278,9 @@ namespace CS2.Services.Indexing
         /// Indexes the specified file.
         /// </summary>
         /// <param name="file">The file.</param>
-        private void Index(FileInfo file)
+        /// <param name="addedFiles">The added files.</param>
+        /// <param name="updatedFiles">The updated files.</param>
+        private void Index(FileInfo file, ref int addedFiles, ref int updatedFiles)
         {
             Document document;
 
@@ -295,14 +304,43 @@ namespace CS2.Services.Indexing
                     if(!repository.Contains(file))
                     {
                         repository.Add(file);
-                        lastAddedFiles++;
+                        addedFiles++;
                     }
                     else
-                        lastUpdatedFiles++;
+                        updatedFiles++;
 
                     // If a parser has been able to parse the file stop iterating through parsers
                     break;
                 }
+        }
+    }
+
+    public class IndexingCompletedEventArgs : EventArgs
+    {
+        private readonly int addedFiles;
+        private readonly int deletedFiles;
+        private readonly int updatedFiles;
+
+        public IndexingCompletedEventArgs(int addedFiles, int updatedFiles, int deletedFiles)
+        {
+            this.addedFiles = addedFiles;
+            this.updatedFiles = updatedFiles;
+            this.deletedFiles = deletedFiles;
+        }
+
+        public int Addedfiles
+        {
+            get { return addedFiles; }
+        }
+
+        public int UpdatedFiles
+        {
+            get { return updatedFiles; }
+        }
+
+        public int DeletedFiles
+        {
+            get { return deletedFiles; }
         }
     }
 }

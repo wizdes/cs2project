@@ -1,17 +1,18 @@
 using System.IO;
 using Castle.Core.Logging;
+using CS2.Services.Logging;
 using CS2.Services.Parsing;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 
-namespace CS2.Services.Logging
+namespace CS2.Services.Parsing
 {
-    public class LoggingParsingDecorator : IParsingService, ILoggingService
+    public class LoggedParsingService : IParsingService, ILoggingService
     {
         private readonly IParsingService inner;
         private ILogger logger = NullLogger.Instance;
 
-        public LoggingParsingDecorator(IParsingService inner)
+        public LoggedParsingService(IParsingService inner)
         {
             this.inner = inner;
         }
