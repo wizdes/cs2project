@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace CS2.Tests
 {
     [TestFixture]
-    public class IdsssssIdentifierTests
+    public class IdIdentifierTests
     {
         private static readonly string filePath = @"..\..\DummyClassForParseTesting.cs";
 
