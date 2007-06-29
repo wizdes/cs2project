@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using Castle.Windsor;
 using Castle.Windsor.Configuration.Interpreters;
@@ -25,7 +24,7 @@ namespace CS2.Console
 
             indexingService.RequestIndexing(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent);
 
-            while (true)
+            while(true)
             {
                 System.Console.Write("Type file or directory path to index or press enter to exit: ");
                 string indexingRequestPath = System.Console.ReadLine();
@@ -36,9 +35,9 @@ namespace CS2.Console
                     break;
                 }
 
-                if (File.Exists(indexingRequestPath))
+                if(File.Exists(indexingRequestPath))
                     indexingService.RequestIndexing(new FileInfo(indexingRequestPath));
-                else if (Directory.Exists(indexingRequestPath))
+                else if(Directory.Exists(indexingRequestPath))
                     indexingService.RequestIndexing(new DirectoryInfo(indexingRequestPath));
             }
         }

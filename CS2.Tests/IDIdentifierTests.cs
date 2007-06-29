@@ -13,8 +13,8 @@ namespace CS2.Tests
         [Test]
         public void ShouldBeEqualIDs()
         {
-            string id1 = IDIdentifierUtils.GetIdentifierFromFile(new FileInfo(filePath));
-            string id2 = IDIdentifierUtils.GetIdentifierFromFile(new FileInfo(filePath));
+            string id1 = IdIdentifierUtilities.GetIdentifierFromFile(new FileInfo(filePath));
+            string id2 = IdIdentifierUtilities.GetIdentifierFromFile(new FileInfo(filePath));
 
             Assert.AreEqual(id1, id2);
         }
@@ -22,11 +22,11 @@ namespace CS2.Tests
         [Test]
         public void ShouldBeDifferentIDs()
         {
-            string id1 = IDIdentifierUtils.GetIdentifierFromFile(new FileInfo(filePath));
+            string id1 = IdIdentifierUtilities.GetIdentifierFromFile(new FileInfo(filePath));
 
             File.SetLastWriteTime(filePath, DateTime.Now);
 
-            string id2 = IDIdentifierUtils.GetIdentifierFromFile(new FileInfo(filePath));
+            string id2 = IdIdentifierUtilities.GetIdentifierFromFile(new FileInfo(filePath));
 
             Assert.AreNotEqual(id1, id2);
         }

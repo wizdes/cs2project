@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Data.Common;
+using System.Globalization;
 using System.IO;
 
 namespace CS2.Repositories
@@ -10,7 +11,7 @@ namespace CS2.Repositories
         private readonly string connectionString;
         private readonly DbProviderFactory fact;
 
-        public DatabaseFilesRepository(string connectionString, string databaseProvider)
+        protected DatabaseFilesRepository(string connectionString, string databaseProvider)
         {
             this.connectionString = connectionString;
             fact = DbProviderFactories.GetFactory(databaseProvider);
@@ -61,6 +62,8 @@ namespace CS2.Repositories
         public string[] GetAll()
         {
             DataTable dt = new DataTable();
+            dt.Locale = CultureInfo.InvariantCulture;
+
             using(DbDataAdapter da = fact.CreateDataAdapter())
             {
                 DbConnection conn = fact.CreateConnection();

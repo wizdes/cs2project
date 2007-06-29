@@ -140,7 +140,8 @@ namespace CS2.Services.Indexing
         /// <param name="language">The language.</param>
         public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, IProgrammingLanguage language)
         {
-            RequestIndexing(directory, searchOption, language.SearchPattern);
+            if(language != null)
+                RequestIndexing(directory, searchOption, language.SearchPattern);
         }
 
         /// <summary>
@@ -239,6 +240,10 @@ namespace CS2.Services.Indexing
         /// </returns>
         private bool IsValidFileSystemEntryToBeIndexed(FileSystemInfo entry)
         {
+            // The file or directory doesn't exist
+            if(!entry.Exists)
+                return false;
+
             // The file or directory is hidden
             if(entry.Attributes == FileAttributes.Hidden)
                 return false;
@@ -252,9 +257,11 @@ namespace CS2.Services.Indexing
                     return false;
             }
 
+            FileInfo fileEntry = entry as FileInfo;
+
             // The entry is a file which is already indexed (if it's out of date it will be automatically updated 
             // during the update process, no need to request it to be indexed again)
-            if(entry is FileInfo && repository.Contains(entry as FileInfo))
+            if(fileEntry != null && repository.Contains(fileEntry))
                 return false;
 
             return true;
@@ -294,15 +301,15 @@ namespace CS2.Services.Indexing
         {
             // Create a term enumerator to iterate through all the terms of the ID field
             // This is done to avoid searching, which is presumably less performant
-            TermEnum idEnumerator = indexReader.Terms(new Term(FieldFactory.IDFieldName, ""));
+            TermEnum idEnumerator = indexReader.Terms(new Term(FieldFactory.IdFieldName, ""));
 
             // Remove files no longer existing or out of date from the index
-            while(idEnumerator.Term() != null && idEnumerator.Term().Field() == FieldFactory.IDFieldName)
+            while(idEnumerator.Term() != null && idEnumerator.Term().Field() == FieldFactory.IdFieldName)
             {
                 string id = idEnumerator.Term().Text();
 
                 // If file doesn't exist or if file exists but is out of date
-                if(!File.Exists(IDIdentifierUtils.GetPathFromIdentifier(id)) || FileExistsButNeedsUpdating(id))
+                if(!File.Exists(IdIdentifierUtilities.GetPathFromIdentifier(id)) || FileExistsButNeedsUpdating(id))
                 {
                     // The delete document from the index
                     indexReader.DeleteDocuments(idEnumerator.Term());
@@ -310,7 +317,7 @@ namespace CS2.Services.Indexing
                     // If file was deleted since out of date then re-index it
                     if(FileExistsButNeedsUpdating(id))
                     {
-                        FileInfo file = new FileInfo(IDIdentifierUtils.GetPathFromIdentifier(id));
+                        FileInfo file = new FileInfo(IdIdentifierUtilities.GetPathFromIdentifier(id));
 
                         if(!indexingQueue.ContainsKey(file.FullName))
                             indexingQueue.Add(file.FullName, file);
@@ -344,9 +351,9 @@ namespace CS2.Services.Indexing
         /// <returns></returns>
         private static bool FileExistsButNeedsUpdating(string id)
         {
-            string path = IDIdentifierUtils.GetPathFromIdentifier(id);
+            string path = IdIdentifierUtilities.GetPathFromIdentifier(id);
 
-            return File.Exists(path) && IDIdentifierUtils.GetIdentifierFromFile(new FileInfo(path)) != id;
+            return File.Exists(path) && IdIdentifierUtilities.GetIdentifierFromFile(new FileInfo(path)) != id;
         }
 
         /// <summary>
@@ -363,7 +370,7 @@ namespace CS2.Services.Indexing
             foreach(IParsingService parsingService in parsingServices)
                 if(parsingService.TryParse(file, out document))
                 {
-                    document.Add(FieldFactory.CreateIDField(IDIdentifierUtils.GetIdentifierFromFile(file)));
+                    document.Add(FieldFactory.CreateIdField(IdIdentifierUtilities.GetIdentifierFromFile(file)));
                     document.Add(FieldFactory.CreatePathField(file.FullName));
                     document.Add(FieldFactory.CreateFileNameField(file.Name));
                     document.Add(FieldFactory.CreateSourceField(new StreamReader(file.FullName, true)));

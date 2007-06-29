@@ -1,14 +1,17 @@
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+
 namespace CS2.Model
 {
     public class CSharpLanguage : IProgrammingLanguage
     {
         #region IProgrammingLanguage Members
 
-        public string[] StopWords
+        public ICollection<string> StopWords
         {
             get
             {
-                return new string[]
+                return new Collection<string>(new string[]
                     {
                         "byte", "bool", "char", "double", "decimal", "float", "int", "long", "object", "sbyte", "string"
                         , "short", "ushort", "ulong", "uint", "abstract", "const", "extern", "alias", "explicit",
@@ -20,7 +23,7 @@ namespace CS2.Model
                         "namespace", "operator", "params", "unsafe", "unchecked", "using", "where", "partial", "yield",
                         "true", "false", "null"
                         //, "assembly", "property", "method", "field", "param", "type"                 
-                    };
+                    });
             }
         }
 

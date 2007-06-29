@@ -1,8 +1,10 @@
+using System.Collections.Generic;
+
 namespace CS2.Model
 {
     public interface IProgrammingLanguage
     {
-        string[] StopWords { get; }
+        ICollection<string> StopWords { get; }
         string SearchPattern { get; }
     }
 }

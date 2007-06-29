@@ -2,7 +2,7 @@ using System.IO;
 
 namespace CS2.Services
 {
-    public static class IDIdentifierUtils
+    public static class IdIdentifierUtilities
     {
         public static string GetPathFromIdentifier(string identifier)
         {

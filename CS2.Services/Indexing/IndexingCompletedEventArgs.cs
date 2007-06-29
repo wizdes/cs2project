@@ -15,7 +15,7 @@ namespace CS2.Services.Indexing
             this.deletedFiles = deletedFiles;
         }
 
-        public int Addedfiles
+        public int AddedFiles
         {
             get { return addedFiles; }
         }

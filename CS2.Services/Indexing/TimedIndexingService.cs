@@ -6,7 +6,7 @@ using Directory=Lucene.Net.Store.Directory;
 
 namespace CS2.Services.Indexing
 {
-    public class TimedIndexingService : IIndexingService
+    public class TimedIndexingService : IIndexingService, IDisposable
     {
         private readonly IIndexingService inner;
         private readonly Timer timer;
@@ -16,6 +16,19 @@ namespace CS2.Services.Indexing
             this.inner = inner;
             timer = new Timer(UpdateIndex, null, new TimeSpan(0, 0, 30), updateInterval);
         }
+
+        #region IDisposable Members
+
+        ///<summary>
+        ///Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        ///</summary>
+        ///<filterpriority>2</filterpriority>
+        public void Dispose()
+        {
+            Dispose(false);
+        }
+
+        #endregion
 
         #region IIndexingService Members
 
@@ -114,16 +127,12 @@ namespace CS2.Services.Indexing
             remove { inner.IndexingCompleted -= value; }
         }
 
-        ///<summary>
-        ///Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        ///</summary>
-        ///<filterpriority>2</filterpriority>
-        public void Dispose()
-        {
-           timer.Dispose();
-        }
-
         #endregion
+
+        protected virtual void Dispose(bool isDisposing)
+        {
+            timer.Dispose();
+        }
 
         private void UpdateIndex(object data)
         {

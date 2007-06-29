@@ -8,25 +8,25 @@ namespace CS2.Services
         public const string ClassFieldName = "class";
         public const string CommentFieldName = "comment";
         public const string FileNameFieldName = "fileName";
-        public const string IDFieldName = "id";
+        public const string IdFieldName = "id";
         public const string InterfaceFieldName = "interface";
         public const string MethodFieldName = "method";
         public const string ModifiedFieldName = "modified";
-        public const string NameSpaceFieldName = "namespace";
+        public const string NamespaceFieldName = "namespace";
         public const string PathFieldName = "path";
         public const string PropertyFieldName = "property";
         public const string SourceFieldName = "source";
 
-        public static readonly DateTools.Resolution ModifiedResolution = DateTools.Resolution.SECOND;
+        public static DateTools.Resolution ModifiedResolution = DateTools.Resolution.SECOND;
 
         public static Field CreateCommentField(string identifier)
         {
             return new Field(CommentFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
         }
 
-        public static Field CreateIDField(string identifier)
+        public static Field CreateIdField(string identifier)
         {
-            return new Field(IDFieldName, identifier, Field.Store.NO, Field.Index.UN_TOKENIZED);
+            return new Field(IdFieldName, identifier, Field.Store.NO, Field.Index.UN_TOKENIZED);
         }
 
         public static Field CreateFileNameField(string identifier)
@@ -44,7 +44,7 @@ namespace CS2.Services
             return new Field(PathFieldName, path, Field.Store.YES, Field.Index.NO);
         }
 
-        public static Field CreateSourceField(StreamReader source)
+        public static Field CreateSourceField(TextReader source)
         {
             return new Field(SourceFieldName, source);
         }
@@ -56,7 +56,7 @@ namespace CS2.Services
 
         public static Field CreateNamespaceField(string identifier)
         {
-            return new Field(NameSpaceFieldName, identifier, Field.Store.YES, Field.Index.TOKENIZED);
+            return new Field(NamespaceFieldName, identifier, Field.Store.YES, Field.Index.TOKENIZED);
         }
 
         public static Field CreatePropertyField(string identifier)

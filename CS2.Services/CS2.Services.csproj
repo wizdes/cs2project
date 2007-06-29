@@ -58,7 +58,7 @@
     <Compile Include="Analysis\CSharpAnalyzer.cs" />
     <Compile Include="DirectoryFactory.cs" />
     <Compile Include="FieldFactory.cs" />
-    <Compile Include="IDIdentifierUtils.cs" />
+    <Compile Include="IdIdentifierUtilities.cs" />
     <Compile Include="Indexing\IndexingCompletedEventArgs.cs" />
     <Compile Include="Indexing\TimedIndexingService.cs" />
     <Compile Include="Indexing\LoggedIndexingService.cs" />
