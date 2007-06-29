@@ -65,7 +65,7 @@
   <ItemGroup>
     <Compile Include="BaseTest.cs" />
     <Compile Include="FileSystemDirectoryTests.cs" />
-    <Compile Include="IDIdentifierTests.cs" />
+    <Compile Include="IdIdentifierTests.cs" />
     <Compile Include="IndexingServiceTests.cs" />
     <Compile Include="ParsingServiceTests.cs" />
     <Compile Include="RamDirectoryTests.cs" />
