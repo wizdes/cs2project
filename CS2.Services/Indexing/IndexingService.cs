@@ -15,23 +15,23 @@ namespace CS2.Services.Indexing
     public class IndexingService : IIndexingService
     {
         private readonly string[] exclusions;
-        private readonly IDictionary<string, FileInfo> filesWaitingToBeIndexed = new SortedList<string, FileInfo>();
+        private readonly IDictionary<string, FileInfo> filesWaitingToBeIndexed;
 
         private readonly Directory indexDirectory;
         private readonly IParsingService[] parsingServices;
         private readonly IFilesRepository repository;
         private readonly object updatingLock = new object();
-        private int addedFiles;
-        private int deletedFiles;
         private IndexReader indexReader;
         private IndexWriter indexWriter;
         private bool isUpdating = false;
-        private int updatedFiles;
+        private int lastAddedFiles;
+        private int lastDeletedFiles;
+        private int lastUpdatedFiles;
 
         public IndexingService(Directory indexDirectory, IParsingService[] parsingServices, IFilesRepository repository,
-                               string[] exclusions
-            )
+                               string[] exclusions)
         {
+            filesWaitingToBeIndexed = new SortedDictionary<string, FileInfo>();
             this.indexDirectory = indexDirectory;
             this.parsingServices = parsingServices;
             this.exclusions = exclusions;
@@ -48,19 +48,19 @@ namespace CS2.Services.Indexing
 
         #region IIndexingService Members
 
-        public int DeletedFiles
+        public int LastDeletedFiles
         {
-            get { return deletedFiles; }
+            get { return lastDeletedFiles; }
         }
 
-        public int UpdatedFiles
+        public int LastUpdatedFiles
         {
-            get { return updatedFiles; }
+            get { return lastUpdatedFiles; }
         }
 
-        public int AddedFiles
+        public int LastAddedFiles
         {
-            get { return addedFiles; }
+            get { return lastAddedFiles; }
         }
 
         public bool IsWaitingForFilesToBeIndexed
@@ -82,53 +82,9 @@ namespace CS2.Services.Indexing
             if(!IsValidFileSystemEntryToBeIndexed(file))
                 return;
 
+            // Add the file to be indexed to the queue, if it doesn't contain the file yet
             if(!filesWaitingToBeIndexed.ContainsKey(file.FullName))
                 filesWaitingToBeIndexed.Add(file.FullName, file);
-        }
-
-        /// <summary>
-        /// Triggers update operations on the index and on the files repository, removing no longer existing files references both from repository and index, updating changed documents and adding new documents which have been explicitly required to be indexed.
-        /// </summary>
-        public void UpdateIndex()
-        {
-            lock(updatingLock)
-            {
-                if(isUpdating)
-                    return;
-
-                isUpdating = true;
-            }
-
-            addedFiles = 0;
-            updatedFiles = 0;
-            deletedFiles = 0;
-
-            // Create new IndexReader to update the index
-            indexReader = IndexReader.Open(indexDirectory);
-
-            RemoveDeletedFilesFromRepository();
-
-            RemoveDeletedAndModifiedDocumentsFromIndex();
-
-            // Close the IndexReader
-            indexReader.Close();
-            indexReader = null;
-
-            // Create a new IndexWriter to add new documents to the index
-            indexWriter = new IndexWriter(indexDirectory, new StandardAnalyzer(), false);
-
-            AddNewAndUpdatedFilesToTheIndex();
-
-            // Close the IndexWriter
-            indexWriter.Optimize();
-            indexWriter.Close();
-            indexWriter = null;
-
-            // Fire IndexingCompletedEvent
-            OnIndexingCompleted();
-
-            lock(updatingLock)
-                isUpdating = false;
         }
 
         public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, string searchPattern)
@@ -155,6 +111,65 @@ namespace CS2.Services.Indexing
             RequestIndexing(directory, SearchOption.AllDirectories);
         }
 
+        /// <summary>
+        /// Triggers update operations on the index and on the files repository, 
+        /// removing no longer existing files references both from repository and index, 
+        /// updating changed documents and adding new documents which have been explicitly required to be indexed.
+        /// </summary>
+        public void UpdateIndex()
+        {
+            lock(updatingLock)
+            {
+                if(isUpdating)
+                    return;
+
+                isUpdating = true;
+            }
+
+            SortedDictionary<string, FileInfo> indexingQueue;
+
+            lock(filesWaitingToBeIndexed)
+            {
+                indexingQueue = new SortedDictionary<string, FileInfo>(filesWaitingToBeIndexed);
+                filesWaitingToBeIndexed.Clear();
+            }
+
+            lastAddedFiles = 0;
+            lastUpdatedFiles = 0;
+            lastDeletedFiles = 0;
+
+            // Create new IndexReader to update the index
+            indexReader = IndexReader.Open(indexDirectory);
+
+            RemoveDeletedFilesFromRepository();
+
+            RemoveDeletedAndModifiedDocumentsFromIndex(indexingQueue);
+
+            // Close the IndexReader
+            indexReader.Close();
+            indexReader = null;
+
+            // Create a new IndexWriter to add new documents to the index
+            indexWriter = new IndexWriter(indexDirectory, new StandardAnalyzer(), false);
+
+            AddNewAndUpdatedFilesToTheIndex(indexingQueue);
+
+            // Close the IndexWriter
+            indexWriter.Optimize();
+            indexWriter.Close();
+            indexWriter = null;
+
+            indexingQueue.Clear();
+
+            // Fire IndexingCompletedEvent
+            OnIndexingCompleted();
+
+            lock(updatingLock)
+                isUpdating = false;
+        }
+
+        public event EventHandler IndexingCompleted;
+
         #endregion
 
         private bool IsValidFileSystemEntryToBeIndexed(FileSystemInfo entry)
@@ -172,14 +187,13 @@ namespace CS2.Services.Indexing
                     return false;
             }
 
-            // The entry is already indexed (if it's out of date will be automatically updated)
+            // The entry is a file which is already indexed (if it's out of date it will be automatically updated 
+            // during the update process, no need to request it to be indexed again)
             if(entry is FileInfo && repository.Contains(entry as FileInfo))
                 return false;
 
             return true;
         }
-
-        private event EventHandler IndexingCompleted;
 
         private void OnIndexingCompleted()
         {
@@ -187,10 +201,10 @@ namespace CS2.Services.Indexing
                 IndexingCompleted(this, EventArgs.Empty);
         }
 
-        private void AddNewAndUpdatedFilesToTheIndex()
+        private void AddNewAndUpdatedFilesToTheIndex(IDictionary<string, FileInfo> indexingQueue)
         {
-            FileInfo[] filesToBeIndexed = new FileInfo[filesWaitingToBeIndexed.Count];
-            filesWaitingToBeIndexed.Values.CopyTo(filesToBeIndexed, 0);
+            FileInfo[] filesToBeIndexed = new FileInfo[indexingQueue.Count];
+            indexingQueue.Values.CopyTo(filesToBeIndexed, 0);
 
             foreach(FileInfo info in filesToBeIndexed)
                 Index(info);
@@ -199,7 +213,7 @@ namespace CS2.Services.Indexing
         /// <summary>
         /// Removes the deleted and modified documents from the index. Marks the modified files as to be reindexed.
         /// </summary>
-        private void RemoveDeletedAndModifiedDocumentsFromIndex()
+        private void RemoveDeletedAndModifiedDocumentsFromIndex(IDictionary<string, FileInfo> indexingQueue)
         {
             // Create a term enumerator to iterate through all the terms of the ID field
             // This is done to avoid searching, which is presumably less performant
@@ -221,8 +235,8 @@ namespace CS2.Services.Indexing
                     {
                         FileInfo file = new FileInfo(IDIdentifierUtils.GetPathFromIdentifier(id));
 
-                        if(!filesWaitingToBeIndexed.ContainsKey(file.FullName))
-                            filesWaitingToBeIndexed.Add(file.FullName, file);
+                        if(!indexingQueue.ContainsKey(file.FullName))
+                            indexingQueue.Add(file.FullName, file);
                     }
                 }
 
@@ -242,7 +256,7 @@ namespace CS2.Services.Indexing
                 if(!File.Exists(file))
                 {
                     repository.Remove(new FileInfo(file));
-                    deletedFiles++;
+                    lastDeletedFiles++;
                 }
         }
 
@@ -263,7 +277,6 @@ namespace CS2.Services.Indexing
 
             // Find a parser that suites the file
             foreach(IParsingService parsingService in parsingServices)
-            {
                 if(parsingService.TryParse(file, out document))
                 {
                     document.Add(FieldFactory.CreateIDField(IDIdentifierUtils.GetIdentifierFromFile(file)));
@@ -282,16 +295,14 @@ namespace CS2.Services.Indexing
                     if(!repository.Contains(file))
                     {
                         repository.Add(file);
-                        addedFiles++;
+                        lastAddedFiles++;
                     }
-                    else updatedFiles++;
+                    else
+                        lastUpdatedFiles++;
 
                     // If a parser has been able to parse the file stop iterating through parsers
                     break;
                 }
-            }
-
-            filesWaitingToBeIndexed.Remove(file.FullName);
         }
     }
 }

@@ -55,16 +55,17 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\CS2.Services\CS2.Services.csproj">
       <Project>{14E25989-745F-4FCF-BB25-145FDA0CC4DF}</Project>
       <Name>CS2.Services</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Configuration\Components.Csharp.config">
+    <None Include="App.config" />
+    <None Include="Configuration\Components.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Configuration\Directories.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Configuration\Facilities.config">

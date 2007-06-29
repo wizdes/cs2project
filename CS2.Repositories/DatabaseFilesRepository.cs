@@ -26,7 +26,7 @@ namespace CS2.Repositories
                 conn.Open();
                 IDbCommand cmd = conn.CreateCommand();
                 cmd.CommandType = CommandType.Text;
-                cmd.CommandText = "INSERT INTO Files '" + file.FullName + "'";
+                cmd.CommandText = "INSERT INTO Files (FileName) VALUES ('" + file.FullName + "')";
                 cmd.ExecuteNonQuery();
             }
         }
@@ -54,7 +54,7 @@ namespace CS2.Repositories
                 cmd.CommandType = CommandType.Text;
                 cmd.CommandText = "SELECT COUNT(*) FROM Files WHERE FileName='" + file.FullName + "'";
 
-                return (int) cmd.ExecuteScalar() == 1;
+                return Convert.ToInt32(cmd.ExecuteScalar()) == 1;
             }
         }
 

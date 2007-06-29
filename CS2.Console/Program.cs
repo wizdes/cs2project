@@ -7,25 +7,42 @@ using CS2.Services.Indexing;
 
 namespace CS2.Console
 {
-    class Program
+    internal class Program
     {
         private const string docsDir = @"C:\Development\Rhino-tools\trunk\rhino-commons";
+        private IIndexingService indexingService;
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            //IWindsorContainer container = new WindsorContainer(new XmlInterpreter());
+            new Program().Run();
+        }
 
-            //IIndexingService indexingService = container.Resolve<IIndexingService>();
+        private void indexingService_IndexingCompleted(object sender, EventArgs e)
+        {
+            Debug.WriteLine("Indexing completed");
+            PrintFileOperations();
+        }
 
-            //Debug.WriteLine(indexingService.IndexWriter.GetDirectory().GetType());
+        private void PrintFileOperations()
+        {
+            Debug.WriteLine("Added files: " + indexingService.LastAddedFiles);
+            Debug.WriteLine("Updated files: " + indexingService.LastUpdatedFiles);
+            Debug.WriteLine("Deleted files: " + indexingService.LastDeletedFiles);
+        }
 
-            //indexingService.RequestIndexing(new DirectoryInfo(docsDir));
+        private void Run()
+        {
+            IWindsorContainer container = new WindsorContainer(new XmlInterpreter());
 
-            //Debug.WriteLine(indexingService.IndexWriter.GetHashCode());
+            indexingService = container.Resolve<IIndexingService>();
 
-            //indexingService.RequestIndexing(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent);
+            indexingService.IndexingCompleted += indexingService_IndexingCompleted;
 
-            //Debug.WriteLine(indexingService.IndexWriter.GetHashCode());
+            indexingService.RequestIndexing(new DirectoryInfo(docsDir));
+
+            indexingService.RequestIndexing(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent);
+
+            System.Console.ReadLine();
         }
     }
 }

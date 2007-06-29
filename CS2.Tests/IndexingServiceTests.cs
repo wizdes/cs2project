@@ -52,9 +52,9 @@ namespace CS2.Tests
 
             PrintFileOperations();
 
-            Assert.Greater(service.AddedFiles, 0);
-            Assert.AreEqual(service.UpdatedFiles, 0);
-            Assert.AreEqual(service.DeletedFiles, 0);
+            Assert.Greater(service.LastAddedFiles, 0);
+            Assert.AreEqual(service.LastUpdatedFiles, 0);
+            Assert.AreEqual(service.LastDeletedFiles, 0);
 
             Assert.IsFalse(service.IsWaitingForFilesToBeIndexed);
         }
@@ -67,10 +67,9 @@ namespace CS2.Tests
 
             PrintFileOperations();
 
-            Assert.AreEqual(service.AddedFiles, 0);
-            Assert.AreEqual(service.UpdatedFiles, 0);
-            Assert.AreEqual(service.DeletedFiles, 0);
-
+            Assert.AreEqual(service.LastAddedFiles, 0);
+            Assert.AreEqual(service.LastUpdatedFiles, 0);
+            Assert.AreEqual(service.LastDeletedFiles, 0);
         }
 
         [Test]
@@ -93,16 +92,16 @@ namespace CS2.Tests
 
             PrintFileOperations();
 
-            Assert.AreEqual(service.AddedFiles, 0);
-            Assert.AreEqual(service.UpdatedFiles, 1);
-            Assert.AreEqual(service.DeletedFiles, 0);
+            Assert.AreEqual(service.LastAddedFiles, 0);
+            Assert.AreEqual(service.LastUpdatedFiles, 1);
+            Assert.AreEqual(service.LastDeletedFiles, 0);
         }
 
         private void PrintFileOperations()
         {
-            Debug.WriteLine("Added files: " + service.AddedFiles);
-            Debug.WriteLine("Updated files: " + service.UpdatedFiles);
-            Debug.WriteLine("Deleted files: " + service.DeletedFiles);
+            Debug.WriteLine("Added files: " + service.LastAddedFiles);
+            Debug.WriteLine("Updated files: " + service.LastUpdatedFiles);
+            Debug.WriteLine("Deleted files: " + service.LastDeletedFiles);
         }
     }
 }

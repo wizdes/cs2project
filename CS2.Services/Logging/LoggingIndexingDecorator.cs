@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Castle.Core.Logging;
 using CS2.Model;
@@ -18,19 +19,19 @@ namespace CS2.Services.Logging
 
         #region IIndexingService Members
 
-        public int DeletedFiles
+        public int LastDeletedFiles
         {
-            get { return inner.DeletedFiles; }
+            get { return inner.LastDeletedFiles; }
         }
 
-        public int UpdatedFiles
+        public int LastUpdatedFiles
         {
-            get { return inner.UpdatedFiles; }
+            get { return inner.LastUpdatedFiles; }
         }
 
-        public int AddedFiles
+        public int LastAddedFiles
         {
-            get { return inner.AddedFiles; }
+            get { return inner.LastAddedFiles; }
         }
 
         /// <summary>
@@ -105,6 +106,16 @@ namespace CS2.Services.Logging
         {
             logger.Info("Call to UpdateIndex");
             inner.UpdateIndex();
+            logger.Info("Finished updating index.");
+//            logger.InfoFormat("Files Added: {0}", LastAddedFiles);
+//            logger.InfoFormat("Files Updated: {0}", LastUpdatedFiles);
+//            logger.InfoFormat("Files Deleted: {0}", LastDeletedFiles);
+        }
+
+        public event EventHandler IndexingCompleted
+        {
+            add { inner.IndexingCompleted += value; }
+            remove { inner.IndexingCompleted -= value; }
         }
 
         #endregion

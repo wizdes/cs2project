@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using CS2.Model;
 using Directory=Lucene.Net.Store.Directory;
@@ -16,11 +17,11 @@ namespace CS2.Services.Indexing
         /// </summary>
         bool IsWaitingForFilesToBeIndexed { get; }
 
-        int DeletedFiles { get; }
+        int LastDeletedFiles { get; }
 
-        int UpdatedFiles { get; }
+        int LastUpdatedFiles { get; }
 
-        int AddedFiles { get; }
+        int LastAddedFiles { get; }
 
         /// <summary>
         /// Requests the indexing of the specified file.
@@ -61,5 +62,7 @@ namespace CS2.Services.Indexing
         /// Triggers update operations on the index, removing no longer existing documents, updating changed documents and adding new documents which have been explicitly required to be indexed.
         /// </summary>
         void UpdateIndex();
+
+        event EventHandler IndexingCompleted;
     }
 }
