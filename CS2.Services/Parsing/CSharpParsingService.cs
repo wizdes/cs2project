@@ -8,8 +8,8 @@ namespace CS2.Services.Parsing
 {
     public class CSharpParsingService : IParsingService
     {
-        private readonly IParsingVisitor parsingVisitor;
         private readonly Analyzer analyzer;
+        private readonly IParsingVisitor parsingVisitor;
 
         public CSharpParsingService(IParsingVisitor parsingVisitor, Analyzer analyzer)
         {
@@ -28,12 +28,12 @@ namespace CS2.Services.Parsing
         public bool TryParse(FileInfo file, out Document document)
         {
             document = new Document();
+            Lexer lexer;
+            TokenCollection tokens = null;
 
             try
             {
                 FileStream fileStream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read);
-                Lexer lexer;
-                TokenCollection tokens;
 
                 using(StreamReader reader = new StreamReader(fileStream, true))
                 {
@@ -54,6 +54,11 @@ namespace CS2.Services.Parsing
             {
                 document = null;
                 return false;
+            }
+            finally
+            {
+                if(tokens != null)
+                    tokens.Clear();
             }
         }
 
