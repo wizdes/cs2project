@@ -108,9 +108,9 @@ namespace CS2.Services.Indexing
         {
             logger.Info("Call to UpdateIndex");
             inner.UpdateIndex();
-            logger.InfoFormat("Addedfiles Added: {0}", AddedFilesSinceLastUpdate);
-            logger.InfoFormat("Addedfiles Updated: {0}", UpdatedFilesSinceLastUpdate);
-            logger.InfoFormat("Addedfiles Deleted: {0}", DeletedFilesSinceLastUpdate);
+            logger.InfoFormat("Files added: {0}", AddedFilesSinceLastUpdate);
+            logger.InfoFormat("Files updated: {0}", UpdatedFilesSinceLastUpdate);
+            logger.InfoFormat("Files deleted: {0}", DeletedFilesSinceLastUpdate);
             logger.Info("Finished updating index.");
         }
 

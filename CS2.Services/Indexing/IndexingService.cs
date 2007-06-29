@@ -28,6 +28,13 @@ namespace CS2.Services.Indexing
         private bool isUpdating = false;
         private int updatedFilesSinceLastUpdate;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IndexingService"/> class.
+        /// </summary>
+        /// <param name="indexDirectory">The index directory.</param>
+        /// <param name="parsingServices">The parsing services.</param>
+        /// <param name="repository">The repository.</param>
+        /// <param name="exclusions">The exclusions.</param>
         public IndexingService(Directory indexDirectory, IParsingService[] parsingServices, IFilesRepository repository,
                                string[] exclusions)
         {
@@ -48,26 +55,46 @@ namespace CS2.Services.Indexing
 
         #region IIndexingService Members
 
+        /// <summary>
+        /// Returns the number of files deleted from the index since last update.
+        /// </summary>
+        /// <value></value>
         public int DeletedFilesSinceLastUpdate
         {
             get { return deletedFilesSinceLastUpdate; }
         }
 
+        /// <summary>
+        /// Returns the number of files updated in the index since last update.
+        /// </summary>
+        /// <value></value>
         public int UpdatedFilesSinceLastUpdate
         {
             get { return updatedFilesSinceLastUpdate; }
         }
 
+        /// <summary>
+        /// Returns the number of files added to the index since last update.
+        /// </summary>
+        /// <value></value>
         public int AddedFilesSinceLastUpdate
         {
             get { return addedFilesSinceLastUpdate; }
         }
 
+        /// <summary>
+        /// Returns true if there are files waiting to be indexed in batch.
+        /// </summary>
+        /// <value></value>
         public bool IsWaitingForFilesToBeIndexed
         {
             get { return filesWaitingToBeIndexed.Count != 0; }
         }
 
+        /// <summary>
+        /// The directory where the index is located.
+        /// </summary>
+        /// <value></value>
         public Directory IndexDirectory
         {
             get { return indexDirectory; }
@@ -83,10 +110,19 @@ namespace CS2.Services.Indexing
                 return;
 
             // Add the file to be indexed to the queue, if it doesn't contain the file yet
-            if(!filesWaitingToBeIndexed.ContainsKey(file.FullName))
-                filesWaitingToBeIndexed.Add(file.FullName, file);
+            lock(filesWaitingToBeIndexed)
+            {
+                if(!filesWaitingToBeIndexed.ContainsKey(file.FullName))
+                    filesWaitingToBeIndexed.Add(file.FullName, file);
+            }
         }
 
+        /// <summary>
+        /// Requests the indexing of the specified directory, optionally using recursion and looking for files which match the supplied pattern.
+        /// </summary>
+        /// <param name="directory">The directory.</param>
+        /// <param name="searchOption">The search option.</param>
+        /// <param name="searchPattern">The search pattern.</param>
         public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, string searchPattern)
         {
             if(!IsValidFileSystemEntryToBeIndexed(directory))
@@ -96,16 +132,31 @@ namespace CS2.Services.Indexing
                 RequestIndexing(file);
         }
 
+        /// <summary>
+        /// Requests the indexing of the specified directory, optionally using recursion and looking for files of the specified language.
+        /// </summary>
+        /// <param name="directory">The directory.</param>
+        /// <param name="searchOption">The search option.</param>
+        /// <param name="language">The language.</param>
         public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, IProgrammingLanguage language)
         {
             RequestIndexing(directory, searchOption, language.SearchPattern);
         }
 
+        /// <summary>
+        /// Requests the indexing of all the files contained in the specified directory, optionally using recursion.
+        /// </summary>
+        /// <param name="directory">The directory.</param>
+        /// <param name="searchOption">The search option.</param>
         public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption)
         {
             RequestIndexing(directory, searchOption, "*");
         }
 
+        /// <summary>
+        /// Requests the indexing of all the files contained in the specified directory and all its subdirectories.
+        /// </summary>
+        /// <param name="directory">The directory.</param>
         public void RequestIndexing(DirectoryInfo directory)
         {
             RequestIndexing(directory, SearchOption.AllDirectories);
@@ -172,10 +223,20 @@ namespace CS2.Services.Indexing
                 isUpdating = false;
         }
 
+        /// <summary>
+        /// Occurs when indexing is completed.
+        /// </summary>
         public event EventHandler<IndexingCompletedEventArgs> IndexingCompleted;
 
         #endregion
 
+        /// <summary>
+        /// Determines whether the specified entry is a valid file system entry to be indexed.
+        /// </summary>
+        /// <param name="entry">The entry.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is valid file system entry to be indexed] [the specified entry]; otherwise, <c>false</c>.
+        /// </returns>
         private bool IsValidFileSystemEntryToBeIndexed(FileSystemInfo entry)
         {
             // The file or directory is hidden
@@ -199,6 +260,9 @@ namespace CS2.Services.Indexing
             return true;
         }
 
+        /// <summary>
+        /// Called to fire the <see cref="IndexingCompleted" /> event.
+        /// </summary>
         private void OnIndexingCompleted()
         {
             if(IndexingCompleted != null)
@@ -207,6 +271,12 @@ namespace CS2.Services.Indexing
                                                                  deletedFilesSinceLastUpdate));
         }
 
+        /// <summary>
+        /// Adds new and updated files to the index.
+        /// </summary>
+        /// <param name="indexingQueue">The indexing queue.</param>
+        /// <param name="addedFiles">The added files.</param>
+        /// <param name="updatedFiles">The updated files.</param>
         private void AddNewAndUpdatedFilesToTheIndex(IDictionary<string, FileInfo> indexingQueue, ref int addedFiles,
                                                      ref int updatedFiles)
         {
@@ -267,6 +337,11 @@ namespace CS2.Services.Indexing
                 }
         }
 
+        /// <summary>
+        /// Checks whether the file exists but needs to be re-indexed because of an update.
+        /// </summary>
+        /// <param name="id">The id.</param>
+        /// <returns></returns>
         private static bool FileExistsButNeedsUpdating(string id)
         {
             string path = IDIdentifierUtils.GetPathFromIdentifier(id);
@@ -312,35 +387,6 @@ namespace CS2.Services.Indexing
                     // If a parser has been able to parse the file stop iterating through parsers
                     break;
                 }
-        }
-    }
-
-    public class IndexingCompletedEventArgs : EventArgs
-    {
-        private readonly int addedFiles;
-        private readonly int deletedFiles;
-        private readonly int updatedFiles;
-
-        public IndexingCompletedEventArgs(int addedFiles, int updatedFiles, int deletedFiles)
-        {
-            this.addedFiles = addedFiles;
-            this.updatedFiles = updatedFiles;
-            this.deletedFiles = deletedFiles;
-        }
-
-        public int Addedfiles
-        {
-            get { return addedFiles; }
-        }
-
-        public int UpdatedFiles
-        {
-            get { return updatedFiles; }
-        }
-
-        public int DeletedFiles
-        {
-            get { return deletedFiles; }
         }
     }
 }

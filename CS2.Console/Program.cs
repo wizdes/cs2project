@@ -9,40 +9,38 @@ namespace CS2.Console
 {
     internal class Program
     {
-        private const string docsDir = @"C:\Development\Rhino-tools\trunk\rhino-commons";
-        private IIndexingService indexingService;
-
         private static void Main(string[] args)
         {
-            new Program().Run();
+            Run();
         }
 
-        private void indexingService_IndexingCompleted(object sender, IndexingCompletedEventArgs e)
-        {
-            Debug.WriteLine("Indexing completed");
-            PrintFileOperations(e);
-        }
-
-        private static void PrintFileOperations(IndexingCompletedEventArgs e)
-        {
-            Debug.WriteLine("Added files: {0}" + e.Addedfiles);
-            Debug.WriteLine("Updated files: {0}" + e.UpdatedFiles);
-            Debug.WriteLine("Deleted files: {0}" + e.DeletedFiles);
-        }
-
-        private void Run()
+        private static void Run()
         {
             IWindsorContainer container = new WindsorContainer(new XmlInterpreter());
 
-            indexingService = container.Resolve<IIndexingService>();
+            IIndexingService indexingService = container.Resolve<IIndexingService>();
 
-            indexingService.IndexingCompleted += indexingService_IndexingCompleted;
-
-            indexingService.RequestIndexing(new DirectoryInfo(docsDir));
+            // Can subscribe to IndexedCompleted event
+            // indexingService.IndexingCompleted += indexingService_IndexingCompleted;
 
             indexingService.RequestIndexing(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent);
 
-            System.Console.ReadLine();
+            while (true)
+            {
+                System.Console.Write("Type file or directory path to index or press enter to exit: ");
+                string indexingRequestPath = System.Console.ReadLine();
+
+                if(indexingRequestPath == string.Empty)
+                {
+                    System.Console.WriteLine("Exiting...");
+                    break;
+                }
+
+                if (File.Exists(indexingRequestPath))
+                    indexingService.RequestIndexing(new FileInfo(indexingRequestPath));
+                else if (Directory.Exists(indexingRequestPath))
+                    indexingService.RequestIndexing(new DirectoryInfo(indexingRequestPath));
+            }
         }
     }
 }

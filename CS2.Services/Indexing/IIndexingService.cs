@@ -17,11 +17,25 @@ namespace CS2.Services.Indexing
         /// </summary>
         bool IsWaitingForFilesToBeIndexed { get; }
 
+        /// <summary>
+        /// Returns the number of files deleted from the index since last update.
+        /// </summary>
         int DeletedFilesSinceLastUpdate { get; }
 
+        /// <summary>
+        /// Returns the number of files updated in the index since last update.
+        /// </summary>
         int UpdatedFilesSinceLastUpdate { get; }
 
+        /// <summary>
+        /// Returns the number of files added to the index since last update.
+        /// </summary>
         int AddedFilesSinceLastUpdate { get; }
+
+        /// <summary>
+        /// Occurs when indexing is completed.
+        /// </summary>
+        event EventHandler<IndexingCompletedEventArgs> IndexingCompleted;
 
         /// <summary>
         /// Requests the indexing of the specified file.
@@ -62,7 +76,5 @@ namespace CS2.Services.Indexing
         /// Triggers update operations on the index, removing no longer existing documents, updating changed documents and adding new documents which have been explicitly required to be indexed.
         /// </summary>
         void UpdateIndex();
-
-        event EventHandler<IndexingCompletedEventArgs> IndexingCompleted;
     }
 }

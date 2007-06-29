@@ -11,10 +11,10 @@ namespace CS2.Services.Indexing
         private readonly IIndexingService inner;
         private readonly Timer timer;
 
-        public TimedIndexingService(IIndexingService inner)
+        public TimedIndexingService(IIndexingService inner, TimeSpan updateInterval)
         {
             this.inner = inner;
-            timer = new Timer(UpdateIndex, null, new TimeSpan(0, 0, 30), new TimeSpan(0, 0, 30));
+            timer = new Timer(UpdateIndex, null, new TimeSpan(0, 0, 30), updateInterval);
         }
 
         #region IIndexingService Members
