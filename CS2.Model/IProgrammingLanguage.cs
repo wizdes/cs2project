@@ -6,5 +6,6 @@ namespace CS2.Model
     {
         ICollection<string> StopWords { get; }
         string SearchPattern { get; }
+        string Name { get; }
     }
 }

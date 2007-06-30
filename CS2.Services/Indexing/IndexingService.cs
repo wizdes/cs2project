@@ -14,7 +14,6 @@ namespace CS2.Services.Indexing
 {
     public class IndexingService : IIndexingService
     {
-        private readonly string[] exclusions;
         private readonly IDictionary<string, FileInfo> filesWaitingToBeIndexed;
 
         private readonly Directory indexDirectory;
@@ -23,6 +22,7 @@ namespace CS2.Services.Indexing
         private readonly object updatingLock = new object();
         private int addedFilesSinceLastUpdate;
         private int deletedFilesSinceLastUpdate;
+        private string[] exclusions;
         private IndexReader indexReader;
         private IndexWriter indexWriter;
         private bool isUpdating = false;
@@ -34,14 +34,11 @@ namespace CS2.Services.Indexing
         /// <param name="indexDirectory">The index directory.</param>
         /// <param name="parsingServices">The parsing services.</param>
         /// <param name="repository">The repository.</param>
-        /// <param name="exclusions">The exclusions.</param>
-        public IndexingService(Directory indexDirectory, IParsingService[] parsingServices, IFilesRepository repository,
-                               string[] exclusions)
+        public IndexingService(Directory indexDirectory, IParsingService[] parsingServices, IFilesRepository repository)
         {
             filesWaitingToBeIndexed = new SortedDictionary<string, FileInfo>();
             this.indexDirectory = indexDirectory;
             this.parsingServices = parsingServices;
-            this.exclusions = exclusions;
             this.repository = repository;
 
             // If the index directory doesn't contain an index then create it
@@ -98,6 +95,12 @@ namespace CS2.Services.Indexing
         public Directory IndexDirectory
         {
             get { return indexDirectory; }
+        }
+
+        public string[] Exclusions
+        {
+            get { return exclusions; }
+            set { exclusions = value; }
         }
 
         /// <summary>
@@ -249,13 +252,17 @@ namespace CS2.Services.Indexing
                 return false;
 
             // The entry matches one of the exclusions
-            foreach(string exclusion in exclusions)
-            {
-                Regex r = new Regex(Regex.Escape(exclusion));
+            if(MatchesExclusions(entry, exclusions))
+                return false;
 
-                if(r.IsMatch(entry.FullName))
-                    return false;
-            }
+            //                if(r.IsMatch(entry.FullName)) })
+            //            foreach(string exclusion in Exclusions)
+            //            {
+            //                Regex r = new Regex(Regex.Escape(exclusion));
+            //
+            //                if(r.IsMatch(entry.FullName))
+            //                    return false;
+            //            }
 
             FileInfo fileEntry = entry as FileInfo;
 
@@ -265,6 +272,22 @@ namespace CS2.Services.Indexing
                 return false;
 
             return true;
+        }
+
+        /// <summary>
+        /// Returns true if the supplied <see cref="System.IO.FileSystemInfo"/> 
+        /// matches any of the petterns in the <paramref name="exclusions"/>, false otherwise.
+        /// </summary>
+        /// <param name="entry">The entry in the file system.</param>
+        /// <param name="exclusions">The array of exclusions.</param>
+        /// <returns></returns>
+        private static bool MatchesExclusions(FileSystemInfo entry, string[] exclusions)
+        {
+            return !Array.TrueForAll(exclusions, delegate(string exclusion)
+                {
+                    Regex r = new Regex(Regex.Escape(exclusion));
+                    return !r.IsMatch(entry.FullName);
+                });
         }
 
         /// <summary>
@@ -368,7 +391,7 @@ namespace CS2.Services.Indexing
 
             // Find a parser that suites the file
             foreach(IParsingService parsingService in parsingServices)
-                if(parsingService.TryParse(file, out document))
+                if(!MatchesExclusions(file, parsingService.Exclusions) && parsingService.TryParse(file, out document))
                 {
                     document.Add(FieldFactory.CreateIdField(IdIdentifierUtilities.GetIdentifierFromFile(file)));
                     document.Add(FieldFactory.CreatePathField(file.FullName));

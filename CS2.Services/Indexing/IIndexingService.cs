@@ -32,6 +32,8 @@ namespace CS2.Services.Indexing
         /// </summary>
         int AddedFilesSinceLastUpdate { get; }
 
+        string[] Exclusions { get; set; }
+
         /// <summary>
         /// Occurs when indexing is completed.
         /// </summary>

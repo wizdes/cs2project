@@ -10,6 +10,7 @@ namespace CS2.Services.Parsing
     {
         private readonly Analyzer analyzer;
         private readonly IParsingVisitor parsingVisitor;
+        private string[] exclusions = new string[0];
 
         public CSharpParsingService(IParsingVisitor parsingVisitor, Analyzer analyzer)
         {
@@ -60,6 +61,12 @@ namespace CS2.Services.Parsing
                 if(tokens != null)
                     tokens.Clear();
             }
+        }
+
+        public string[] Exclusions
+        {
+            get { return exclusions; }
+            set { exclusions = value; }
         }
 
         /// <summary>

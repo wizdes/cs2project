@@ -1,7 +1,6 @@
 using System.IO;
 using Castle.Core.Logging;
 using CS2.Services.Logging;
-using CS2.Services.Parsing;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 
@@ -28,6 +27,12 @@ namespace CS2.Services.Parsing
         #endregion
 
         #region IParsingService Members
+
+        public string[] Exclusions
+        {
+            get { return inner.Exclusions; }
+            set { inner.Exclusions = value; }
+        }
 
         public Analyzer Analyzer
         {

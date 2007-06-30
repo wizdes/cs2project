@@ -19,5 +19,7 @@ namespace CS2.Services.Parsing
         /// <param name="document">The document.</param>
         /// <returns>True if the parsing is successful, false otherwise.</returns>
         bool TryParse(FileInfo file, out Document document);
+
+        string[] Exclusions { get; set; }
     }
 }

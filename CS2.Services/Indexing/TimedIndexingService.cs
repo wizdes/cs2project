@@ -11,6 +11,12 @@ namespace CS2.Services.Indexing
         private readonly IIndexingService inner;
         private readonly Timer timer;
 
+        public string[] Exclusions
+        {
+            get { return inner.Exclusions; }
+            set { inner.Exclusions = value; }
+        }
+
         public TimedIndexingService(IIndexingService inner, TimeSpan updateInterval)
         {
             this.inner = inner;

@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Castle.Core.Logging;
 using CS2.Model;
-using CS2.Services.Indexing;
 using CS2.Services.Logging;
 using Directory=Lucene.Net.Store.Directory;
 
@@ -118,6 +117,12 @@ namespace CS2.Services.Indexing
         {
             add { inner.IndexingCompleted += value; }
             remove { inner.IndexingCompleted -= value; }
+        }
+
+        public string[] Exclusions
+        {
+            get { return inner.Exclusions; }
+            set { inner.Exclusions = value; }
         }
 
         #endregion
