@@ -173,23 +173,26 @@ namespace CS2.Services.Indexing
             // Create new IndexReader to update the index
             indexReader = IndexReader.Open(indexDirectory);
 
-            RemoveDeletedAndModifiedDocumentsFromIndex(filesUndergoingIndexing, ref deletedFiles);
+            RemoveOldEntries(filesUndergoingIndexing, ref deletedFiles);
 
             // Close the IndexReader
             indexReader.Close();
             indexReader = null;
 
-            // Create a new IndexWriter to add new documents to the index
-            indexWriter = new IndexWriter(indexDirectory, new StandardAnalyzer(), false);
+            if (filesUndergoingIndexing.Count > 0)
+            {
+                // Create a new IndexWriter to add new documents to the index
+                indexWriter = new IndexWriter(indexDirectory, new StandardAnalyzer(), false);
 
-            foreach(string fileName in filesUndergoingIndexing)
-                if(Index(new FileInfo(fileName)))
-                    addedFiles++;
+                foreach(string fileName in filesUndergoingIndexing)
+                    if(Index(new FileInfo(fileName)))
+                        addedFiles++;
 
-            // Close the IndexWriter
-            indexWriter.Optimize();
-            indexWriter.Close();
-            indexWriter = null;
+                // Close the IndexWriter
+                indexWriter.Optimize();
+                indexWriter.Close();
+                indexWriter = null;
+            }
 
             addedFilesSinceLastUpdate = addedFiles;
             deletedFilesSinceLastUpdate = deletedFiles;
@@ -260,30 +263,31 @@ namespace CS2.Services.Indexing
         /// <summary>
         /// Removes the deleted and modified documents from the index. Marks the modified files as to be reindexed.
         /// </summary>
-        private void RemoveDeletedAndModifiedDocumentsFromIndex(SynchronizedSet filesUndergoingIndexing, ref int deletedFiles)
+        private void RemoveOldEntries(SynchronizedSet filesUndergoingIndexing, ref int deletedFiles)
         {
             // Create a term enumerator to iterate through all the terms of the ID field
             // This is done to avoid searching, which is presumably less performant
             TermEnum idEnumerator = indexReader.Terms(new Term(FieldFactory.IdFieldName, ""));
 
-            // Remove files no longer existing or out of date from the index
+            // Iterate all the documents into the index
             while(idEnumerator.Term() != null && idEnumerator.Term().Field() == FieldFactory.IdFieldName)
             {
-                string id = idEnumerator.Term().Text();
-                string path = IdIdentifierUtilities.GetPathFromIdentifier(id);
-                filesUndergoingIndexing.Remove(path);
+                string filePath = IdIdentifierUtilities.GetPathFromIdentifier(idEnumerator.Term().Text());
+
+                // If the file is already in the index remove it from the list of the files waiting to be indexed
+                filesUndergoingIndexing.Remove(filePath);
 
                 // If file doesn't exist or if file exists but is out of date
-                if(!File.Exists(path) ||
-                   (File.Exists(path) && IdIdentifierUtilities.GetIdentifierFromFile(new FileInfo(path)) != id))
+                if(!File.Exists(filePath) ||
+                   (File.Exists(filePath) && IdIdentifierUtilities.GetIdentifierFromFile(new FileInfo(filePath)) != idEnumerator.Term().Text()))
                 {
                     // The delete document from the index
                     indexReader.DeleteDocuments(idEnumerator.Term());
                     deletedFiles++;
 
                     // If file was deleted since out of date then re-index it
-                    if(File.Exists(path))
-                        filesUndergoingIndexing.Add(path);
+                    if(File.Exists(filePath))
+                        filesUndergoingIndexing.Add(filePath);
                 }
 
                 idEnumerator.Next();
@@ -319,7 +323,7 @@ namespace CS2.Services.Indexing
                     return true;
                 }
 
-            // No parsers able to parse found
+            // No parser able to parse the file found, file hasn't been indexed
             return false;
         }
     }

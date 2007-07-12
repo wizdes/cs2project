@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Wintellect.PowerCollections;
 
@@ -10,7 +11,7 @@ namespace CS2.Services
 
         public SynchronizedSet()
         {
-            inner = new Set<string>();
+            inner = new Set<string>(StringComparer.InvariantCultureIgnoreCase);
         }
 
         private SynchronizedSet(Set<string> inner)
@@ -21,7 +22,7 @@ namespace CS2.Services
         public bool Add(string item)
         {
             lock(syncLock)
-                return inner.Add(item.ToLowerInvariant());
+                return inner.Add(item);
         }
 
         public void Clear()
@@ -53,7 +54,7 @@ namespace CS2.Services
         public bool Remove(string item)
         {
             lock(syncLock)
-                return inner.Remove(item.ToLowerInvariant());
+                return inner.Remove(item);
         }
     }
 }
