@@ -11,7 +11,7 @@ namespace CS2.Tests
     public class IndexingServiceTests : BaseTest
     {
         private IIndexingService service;
-        private const string docsDir = @"C:\Development\Rhino-tools\trunk\rhino-commons";
+        private const string docsDir = @"C:\Development\Rhino-tools\rhino-commons";
         private const string dummyFile = @"..\..\DummyClassForParseTesting.cs";
 
         [SetUp]
@@ -90,8 +90,8 @@ namespace CS2.Tests
 
             PrintFileOperations();
 
-            Assert.AreEqual(service.AddedFilesSinceLastUpdate, 0);
-            Assert.AreEqual(service.DeletedFilesSinceLastUpdate, 0);
+            Assert.AreEqual(service.AddedFilesSinceLastUpdate, 1);
+            Assert.AreEqual(service.DeletedFilesSinceLastUpdate, 1);
         }
 
         private void PrintFileOperations()
