@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using CS2.Model;
+using Lucene.Net.Documents;
 
 namespace CS2.Services.Searching
 {
     public interface ISearchService
     {
-        //IEnumerable<SearchResult> Search(SearchQuery query);
+        IEnumerable<Document> Search(string query);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
@@ -36,3 +37,4 @@ using System.Security.Permissions;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: InternalsVisibleTo("CS2.Tests")]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum)]
+[assembly: CLSCompliant(false)]

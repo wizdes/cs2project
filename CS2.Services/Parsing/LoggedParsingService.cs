@@ -41,11 +41,9 @@ namespace CS2.Services.Parsing
 
         public bool TryParse(FileInfo file, out Document document)
         {
-            Logger.DebugFormat("Start parsing file {0}", file.FullName);
-
             bool couldParse = inner.TryParse(file, out document);
 
-            Logger.DebugFormat(couldParse ? "Done parsing file {0}" : "Error parsing file {0}", file.FullName);
+            Logger.InfoFormat(couldParse ? "Done parsing file {0}" : "Error parsing file {0}", file.FullName);
 
             return couldParse;
         }

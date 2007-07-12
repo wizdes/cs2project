@@ -17,7 +17,7 @@ namespace CS2.Services
         public const string PropertyFieldName = "property";
         public const string SourceFieldName = "source";
 
-        public static DateTools.Resolution ModifiedResolution = DateTools.Resolution.SECOND;
+//        public static DateTools.Resolution ModifiedResolution = DateTools.Resolution.SECOND;
 
         public static Field CreateCommentField(string identifier)
         {

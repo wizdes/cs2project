@@ -100,7 +100,7 @@ namespace CS2.Services.Indexing
         /// </summary>
         public void UpdateIndex()
         {
-            logger.Info("Call to UpdateIndex");
+            logger.Info("Start updating index");
             inner.UpdateIndex();
             logger.Info("Finished updating index.");
             logger.InfoFormat("Files added: {0}", AddedFilesSinceLastUpdate);

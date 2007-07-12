@@ -10,7 +10,7 @@ namespace CS2.Services.Parsing
     {
         private readonly Analyzer analyzer;
         private readonly IParsingVisitor parsingVisitor;
-        private string[] exclusions = new string[0];
+        private string[] exclusions;
 
         public CSharpParsingService(IParsingVisitor parsingVisitor, Analyzer analyzer)
         {
