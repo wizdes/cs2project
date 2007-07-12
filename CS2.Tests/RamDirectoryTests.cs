@@ -10,7 +10,7 @@ namespace CS2.Tests
         [Test]
         public void CanResolve()
         {
-            Directory dir = container.Resolve<RAMDirectory>();
+            Directory dir = container.Resolve<Directory>("RamDirectory");
 
             Debug.WriteLine(dir.GetType());
 
@@ -20,8 +20,8 @@ namespace CS2.Tests
         [Test]
         public void SameInstance()
         {
-            Directory dir1 = container.Resolve<RAMDirectory>();
-            Directory dir2 = container.Resolve<RAMDirectory>();
+            Directory dir1 = container.Resolve<Directory>("RamDirectory");
+            Directory dir2 = container.Resolve<Directory>("RamDirectory");
            
             Assert.AreSame(dir1, dir2);
         }

@@ -6,23 +6,16 @@ namespace CS2.Services.Indexing
     {
         private readonly int addedFiles;
         private readonly int deletedFiles;
-        private readonly int updatedFiles;
 
-        public IndexingCompletedEventArgs(int addedFiles, int updatedFiles, int deletedFiles)
+        public IndexingCompletedEventArgs(int addedFiles, int deletedFiles)
         {
             this.addedFiles = addedFiles;
-            this.updatedFiles = updatedFiles;
             this.deletedFiles = deletedFiles;
         }
 
         public int AddedFiles
         {
             get { return addedFiles; }
-        }
-
-        public int UpdatedFiles
-        {
-            get { return updatedFiles; }
         }
 
         public int DeletedFiles

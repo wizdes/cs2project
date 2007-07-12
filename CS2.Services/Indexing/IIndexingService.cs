@@ -23,11 +23,6 @@ namespace CS2.Services.Indexing
         int DeletedFilesSinceLastUpdate { get; }
 
         /// <summary>
-        /// Returns the number of files updated in the index since last update.
-        /// </summary>
-        int UpdatedFilesSinceLastUpdate { get; }
-
-        /// <summary>
         /// Returns the number of files added to the index since last update.
         /// </summary>
         int AddedFilesSinceLastUpdate { get; }

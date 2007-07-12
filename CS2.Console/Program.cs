@@ -8,12 +8,7 @@ namespace CS2.Console
 {
     internal class Program
     {
-        private static void Main(string[] args)
-        {
-            Run();
-        }
-
-        private static void Run()
+        private static void Main()
         {
             IWindsorContainer container = new WindsorContainer(new XmlInterpreter());
 
@@ -26,7 +21,7 @@ namespace CS2.Console
 
             while(true)
             {
-                System.Console.Write("Type file or directory path to index or press enter to exit: ");
+                System.Console.WriteLine("Type file or directory path to index or press enter to exit: ");
                 string indexingRequestPath = System.Console.ReadLine();
 
                 if(indexingRequestPath == string.Empty)

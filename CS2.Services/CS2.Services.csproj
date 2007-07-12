@@ -40,19 +40,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libraries\Lucene.Net.dll</HintPath>
     </Reference>
+    <Reference Include="PowerCollections, Version=1.0.2141.24679, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libraries\PowerCollections.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\WINDOWS\assembly\GAC_32\System.Data\2.0.0.0__b77a5c561934e089\System.Data.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Data.SQLite, Version=1.0.43.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\WINDOWS\assembly\GAC_32\System.Data.SQLite\1.0.43.0__db937bc2d44ff139\System.Data.SQLite.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\WINDOWS\assembly\GAC_MSIL\System.Xml\2.0.0.0__b77a5c561934e089\System.Xml.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analysis\CSharpAnalyzer.cs" />
@@ -60,6 +52,7 @@
     <Compile Include="FieldFactory.cs" />
     <Compile Include="IdIdentifierUtilities.cs" />
     <Compile Include="Indexing\IndexingCompletedEventArgs.cs" />
+    <Compile Include="SynchronizedSet.cs" />
     <Compile Include="Indexing\TimedIndexingService.cs" />
     <Compile Include="Indexing\LoggedIndexingService.cs" />
     <Compile Include="Parsing\CSharpParsingService.cs" />
@@ -81,10 +74,6 @@
     <ProjectReference Include="..\CS2.Model\CS2.Model.csproj">
       <Project>{6F466847-ADC4-4218-8AFC-FBC70B2D3A09}</Project>
       <Name>CS2.Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\CS2.Repositories\CS2.Repositories.csproj">
-      <Project>{1BD554B4-C8BC-4D32-98EE-81A0862510DF}</Project>
-      <Name>CS2.Repositories</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

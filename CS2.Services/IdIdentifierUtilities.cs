@@ -6,8 +6,8 @@ namespace CS2.Services
     {
         public static string GetPathFromIdentifier(string identifier)
         {
-            string url = identifier.Replace('\u0000', '/'); // replace nulls with slashes
-            return url.Substring(0, (url.LastIndexOf('/')) - (0)); // remove date from end
+            string url = identifier.Replace('\u0000', Path.DirectorySeparatorChar); // replace nulls with slashes
+            return url.Substring(0, (url.LastIndexOf(Path.DirectorySeparatorChar)) - (0)); // remove date from end
         }
 
         public static string GetIdentifierFromFile(FileInfo file)

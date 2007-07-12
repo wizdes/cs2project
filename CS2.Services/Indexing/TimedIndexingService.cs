@@ -31,7 +31,7 @@ namespace CS2.Services.Indexing
         ///<filterpriority>2</filterpriority>
         public void Dispose()
         {
-            Dispose(false);
+            Dispose(true);
         }
 
         #endregion
@@ -117,11 +117,6 @@ namespace CS2.Services.Indexing
             get { return inner.DeletedFilesSinceLastUpdate; }
         }
 
-        public int UpdatedFilesSinceLastUpdate
-        {
-            get { return inner.UpdatedFilesSinceLastUpdate; }
-        }
-
         public int AddedFilesSinceLastUpdate
         {
             get { return inner.AddedFilesSinceLastUpdate; }
@@ -137,7 +132,8 @@ namespace CS2.Services.Indexing
 
         protected virtual void Dispose(bool isDisposing)
         {
-            timer.Dispose();
+            if(timer != null)
+                timer.Dispose();
         }
 
         private void UpdateIndex(object data)

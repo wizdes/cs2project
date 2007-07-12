@@ -25,11 +25,6 @@ namespace CS2.Services.Indexing
             get { return inner.DeletedFilesSinceLastUpdate; }
         }
 
-        public int UpdatedFilesSinceLastUpdate
-        {
-            get { return inner.UpdatedFilesSinceLastUpdate; }
-        }
-
         public int AddedFilesSinceLastUpdate
         {
             get { return inner.AddedFilesSinceLastUpdate; }
@@ -107,10 +102,9 @@ namespace CS2.Services.Indexing
         {
             logger.Info("Call to UpdateIndex");
             inner.UpdateIndex();
-            logger.InfoFormat("Files added: {0}", AddedFilesSinceLastUpdate);
-            logger.InfoFormat("Files updated: {0}", UpdatedFilesSinceLastUpdate);
-            logger.InfoFormat("Files deleted: {0}", DeletedFilesSinceLastUpdate);
             logger.Info("Finished updating index.");
+            logger.InfoFormat("Files added: {0}", AddedFilesSinceLastUpdate);
+            logger.InfoFormat("Files deleted: {0}", DeletedFilesSinceLastUpdate);
         }
 
         public event EventHandler<IndexingCompletedEventArgs> IndexingCompleted
