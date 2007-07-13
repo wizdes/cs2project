@@ -51,16 +51,22 @@ namespace CS2.Services.Searching
         {
             IEnumerable<Document> docs = Search(query);
 
-            Highlighter highlighter = new Highlighter(formatter, new QueryScorer(new TermQuery(new Term(FieldFactory.SourceFieldName, query))));
+            Highlighter highlighter =
+                new Highlighter(formatter, new QueryScorer(new TermQuery(new Term(FieldFactory.SourceFieldName, query))));
             highlighter.SetTextFragmenter(new SimpleFragmenter(50));
 
             foreach(Document doc in docs)
             {
                 string path = doc.Get(FieldFactory.PathFieldName);
 
-                TokenStream tokenStream = analyzers[doc.Get(FieldFactory.LanguageFieldName)].TokenStream(FieldFactory.SourceFieldName, new StreamReader(path));
+                TokenStream tokenStream =
+                    analyzers[doc.Get(FieldFactory.LanguageFieldName)].TokenStream(FieldFactory.SourceFieldName,
+                                                                                   new StreamReader(path));
 
-                yield return highlighter.GetBestFragments(tokenStream, new StreamReader(path).ReadToEnd(), 10, Environment.NewLine);
+                string[] fragments = highlighter.GetBestFragments(tokenStream, new StreamReader(path).ReadToEnd(), 10);
+
+                foreach(string fragment in fragments)
+                    yield return fragment;
             }
         }
     }

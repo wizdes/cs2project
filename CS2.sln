@@ -2,12 +2,34 @@
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS2.Model", "CS2.Model\CS2.Model.csproj", "{6F466847-ADC4-4218-8AFC-FBC70B2D3A09}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS2.Services", "CS2.Services\CS2.Services.csproj", "{14E25989-745F-4FCF-BB25-145FDA0CC4DF}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS2.Tests", "CS2.Tests\CS2.Tests.csproj", "{C9FC8F32-673E-480B-8167-2ACD2F528C21}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS2.Console", "CS2.Console\CS2.Console.csproj", "{B9AB3543-9136-4787-A390-5EC8B164C100}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS2.Web", "CS2.Web\CS2.Web.csproj", "{F8BBC66A-CDF8-4CB7-BF65-FC0F2104251D}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +53,10 @@ Global
 		{B9AB3543-9136-4787-A390-5EC8B164C100}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B9AB3543-9136-4787-A390-5EC8B164C100}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B9AB3543-9136-4787-A390-5EC8B164C100}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8BBC66A-CDF8-4CB7-BF65-FC0F2104251D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8BBC66A-CDF8-4CB7-BF65-FC0F2104251D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8BBC66A-CDF8-4CB7-BF65-FC0F2104251D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8BBC66A-CDF8-4CB7-BF65-FC0F2104251D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
