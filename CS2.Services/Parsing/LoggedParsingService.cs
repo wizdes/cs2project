@@ -1,7 +1,7 @@
 using System.IO;
 using Castle.Core.Logging;
+using CS2.Services.Analysis;
 using CS2.Services.Logging;
-using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 
 namespace CS2.Services.Parsing
@@ -34,7 +34,7 @@ namespace CS2.Services.Parsing
             set { inner.Exclusions = value; }
         }
 
-        public Analyzer Analyzer
+        public BaseAnalyzer Analyzer
         {
             get { return inner.Analyzer; }
         }

@@ -312,9 +312,7 @@ namespace CS2.Services.Indexing
                     document.Add(FieldFactory.CreatePathField(file.FullName));
                     document.Add(FieldFactory.CreateFileNameField(file.Name));
                     document.Add(FieldFactory.CreateSourceField(new StreamReader(file.FullName, true)));
-                    //document.Add(
-                    //    FieldFactory.CreateModifiedField(
-                    //        DateTools.DateToString(file.LastWriteTime, FieldFactory.ModifiedResolution)));
+                    document.Add(FieldFactory.CreateLanguageField(parsingService.Analyzer.Language.Name));
 
                     // Add the document to the index with the appropriate analyzer
                     indexWriter.AddDocument(document, parsingService.Analyzer);

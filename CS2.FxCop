@@ -96,11 +96,6 @@
          <Item>CS2.Model</Item>
         </Issue>
        </Message>
-       <Message TypeName="MarkAssembliesWithClsCompliant" Category="Microsoft.Design" CheckId="CA1014" Created="2007-06-29 19:33:03Z">
-        <Issue Name="NoAttr">
-         <Item>CS2.Model</Item>
-        </Issue>
-       </Message>
       </Messages>
      </Module>
     </Modules>
@@ -111,11 +106,6 @@
       <Messages>
        <Message TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210" Created="2007-06-29 19:33:03Z">
         <Issue Name="NoStrongName">
-         <Item>CS2.Services</Item>
-        </Issue>
-       </Message>
-       <Message TypeName="MarkAssembliesWithClsCompliant" Category="Microsoft.Design" CheckId="CA1014" Created="2007-06-29 19:33:03Z">
-        <Issue Name="NoAttr">
          <Item>CS2.Services</Item>
         </Issue>
        </Message>
@@ -243,13 +233,13 @@
                <Item>LoggedIndexingService.UpdateIndex():Void</Item>
                <Item>1</Item>
                <Item>ILogger.Info(String):Void</Item>
-               <Item>Call to UpdateIndex</Item>
+               <Item>Finished updating index.</Item>
               </Issue>
               <Issue>
                <Item>LoggedIndexingService.UpdateIndex():Void</Item>
                <Item>1</Item>
                <Item>ILogger.Info(String):Void</Item>
-               <Item>Finished updating index.</Item>
+               <Item>Start updating index</Item>
               </Issue>
              </Message>
             </Messages>
@@ -346,41 +336,6 @@
          </Type>
         </Types>
        </Namespace>
-       <Namespace Name="CS2.Services.Searching">
-        <Types>
-         <Type Name="ISearchService">
-          <Messages>
-           <Message TypeName="AvoidEmptyInterfaces" Category="Microsoft.Design" CheckId="CA1040" Created="2007-06-29 19:33:03Z">
-            <Issue>
-             <Item>ISearchService</Item>
-            </Issue>
-           </Message>
-          </Messages>
-         </Type>
-         <Type Name="SearchService">
-          <Members>
-           <Member Name="analyzer">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Created="2007-06-29 19:33:03Z">
-              <Issue>
-               <Item>SearchService.analyzer</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="searcher">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Created="2007-06-29 19:33:03Z">
-              <Issue>
-               <Item>SearchService.searcher</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-        </Types>
-       </Namespace>
       </Namespaces>
      </Module>
     </Modules>
@@ -399,9 +354,6 @@
    <Rule TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020">
     <Resolution Name="Default">Consider merging the types defined in '{0}' with another namespace.</Resolution>
    </Rule>
-   <Rule TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823">
-    <Resolution Name="Default">It appears that field '{0}' is never used or is only ever assigned to. Use this field or remove it.</Resolution>
-   </Rule>
    <Rule TypeName="ConsiderPassingBaseTypesAsParameters" Category="Microsoft.Design" CheckId="CA1011">
     <Resolution Name="Default">Consider changing the type of parameter '{0}' in {1} from {2} to its base type {3}. This method appears to only require base class members in its implementation. Suppress this violation if there is a compelling reason to require the more derived type in the method signature.</Resolution>
    </Rule>
@@ -413,9 +365,6 @@
    </Rule>
    <Rule TypeName="DoNotPassLiteralsAsLocalizedParameters" Category="Microsoft.Globalization" CheckId="CA1303">
     <Resolution Name="Default">{0} passes a literal as parameter {1} of a call to {2}. Retrieve the following string argument from a resource table instead: '{3}'</Resolution>
-   </Rule>
-   <Rule TypeName="MarkAssembliesWithClsCompliant" Category="Microsoft.Design" CheckId="CA1014">
-    <Resolution Name="NoAttr">'{0}' should be marked with CLSCompliantAttribute and its value should be true.</Resolution>
    </Rule>
    <Rule TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819">
     <Resolution Name="Default">Change {0} to return a collection or make it a method.</Resolution>

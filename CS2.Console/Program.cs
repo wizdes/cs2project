@@ -43,8 +43,12 @@ namespace CS2.Console
                 {
                     System.Console.WriteLine("Search results:");
 
-                    foreach(Document document in searchService.Search(indexingRequestPath))
-                        System.Console.WriteLine(document.Get(FieldFactory.PathFieldName));
+                    //foreach(Document document in searchService.Search(indexingRequestPath))
+                    //    System.Console.WriteLine(document.Get(FieldFactory.PathFieldName));
+                    foreach(string result in searchService.SearchWithHighlighting(indexingRequestPath))
+                    {
+                        System.Console.WriteLine(result);
+                    }
                 }
             }
         }

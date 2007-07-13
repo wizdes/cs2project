@@ -1,18 +1,18 @@
 using System.IO;
+using CS2.Services.Analysis;
 using DDW;
 using DDW.Collections;
-using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 
 namespace CS2.Services.Parsing
 {
     public class CSharpParsingService : IParsingService
     {
-        private readonly Analyzer analyzer;
+        private readonly BaseAnalyzer analyzer;
         private readonly IParsingVisitor parsingVisitor;
         private string[] exclusions;
 
-        public CSharpParsingService(IParsingVisitor parsingVisitor, Analyzer analyzer)
+        public CSharpParsingService(IParsingVisitor parsingVisitor, BaseAnalyzer analyzer)
         {
             this.parsingVisitor = parsingVisitor;
             this.analyzer = analyzer;
@@ -73,7 +73,7 @@ namespace CS2.Services.Parsing
         /// Gets or sets the analyzer used to index the documents supported by this parser.
         /// </summary>
         /// <value>The analyzer.</value>
-        public Analyzer Analyzer
+        public BaseAnalyzer Analyzer
         {
             get { return analyzer; }
         }

@@ -16,8 +16,7 @@ namespace CS2.Services
         public const string PathFieldName = "path";
         public const string PropertyFieldName = "property";
         public const string SourceFieldName = "source";
-
-//        public static DateTools.Resolution ModifiedResolution = DateTools.Resolution.SECOND;
+        public const string LanguageFieldName = "language";
 
         public static Field CreateCommentField(string identifier)
         {
@@ -29,9 +28,14 @@ namespace CS2.Services
             return new Field(IdFieldName, identifier, Field.Store.NO, Field.Index.UN_TOKENIZED);
         }
 
+        public static Field CreateLanguageField(string identifier)
+        {
+            return new Field(LanguageFieldName, identifier, Field.Store.YES, Field.Index.UN_TOKENIZED);
+        }
+
         public static Field CreateFileNameField(string identifier)
         {
-            return new Field(FileNameFieldName, identifier, Field.Store.YES, Field.Index.NO);
+            return new Field(FileNameFieldName, identifier, Field.Store.NO, Field.Index.UN_TOKENIZED);
         }
 
         public static Field CreateModifiedField(string identifier)
@@ -51,27 +55,27 @@ namespace CS2.Services
 
         public static Field CreateMethodField(string identifier)
         {
-            return new Field(MethodFieldName, identifier, Field.Store.YES, Field.Index.TOKENIZED);
+            return new Field(MethodFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
         }
 
         public static Field CreateNamespaceField(string identifier)
         {
-            return new Field(NamespaceFieldName, identifier, Field.Store.YES, Field.Index.TOKENIZED);
+            return new Field(NamespaceFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
         }
 
         public static Field CreatePropertyField(string identifier)
         {
-            return new Field(PropertyFieldName, identifier, Field.Store.YES, Field.Index.TOKENIZED);
+            return new Field(PropertyFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
         }
 
         public static Field CreateClassField(string identifier)
         {
-            return new Field(ClassFieldName, identifier, Field.Store.YES, Field.Index.TOKENIZED);
+            return new Field(ClassFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
         }
 
         public static Field CreateInterfaceField(string identifier)
         {
-            return new Field(InterfaceFieldName, identifier, Field.Store.YES, Field.Index.TOKENIZED);
+            return new Field(InterfaceFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
         }
     }
 }

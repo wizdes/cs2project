@@ -36,6 +36,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libraries\CMicroParser.dll</HintPath>
     </Reference>
+    <Reference Include="Highlighter.Net, Version=2.0.0.1, Culture=neutral">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libraries\Highlighter.Net.dll</HintPath>
+    </Reference>
     <Reference Include="Lucene.Net, Version=2.0.0.4, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libraries\Lucene.Net.dll</HintPath>
@@ -52,12 +56,13 @@
     <Compile Include="FieldFactory.cs" />
     <Compile Include="IdIdentifierUtilities.cs" />
     <Compile Include="Indexing\IndexingCompletedEventArgs.cs" />
+    <Compile Include="Searching\ISearchService.cs" />
     <Compile Include="SynchronizedSet.cs" />
     <Compile Include="Indexing\TimedIndexingService.cs" />
     <Compile Include="Indexing\LoggedIndexingService.cs" />
     <Compile Include="Parsing\CSharpParsingService.cs" />
     <Compile Include="Indexing\IIndexingService.cs" />
-    <Compile Include="Analysis\GenericAnalyzer.cs" />
+    <Compile Include="Analysis\BaseAnalyzer.cs" />
     <Compile Include="Logging\ILoggingService.cs" />
     <Compile Include="Parsing\IParsingService.cs">
       <SubType>Code</SubType>

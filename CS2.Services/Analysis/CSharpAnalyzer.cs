@@ -5,8 +5,12 @@ using Lucene.Net.Analysis;
 
 namespace CS2.Services.Analysis
 {
-    public class CSharpAnalyzer : GenericAnalyzer<CSharpLanguage>
+    public class CSharpAnalyzer : BaseAnalyzer
     {
+        public CSharpAnalyzer() : base(new CSharpLanguage())
+        {
+        }
+
         public override TokenStream TokenStream(string fieldName, TextReader reader)
         {
             if(fieldName.Equals(FieldFactory.CommentFieldName))

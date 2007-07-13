@@ -1,5 +1,5 @@
 using System.IO;
-using Lucene.Net.Analysis;
+using CS2.Services.Analysis;
 using Lucene.Net.Documents;
 
 namespace CS2.Services.Parsing
@@ -10,7 +10,7 @@ namespace CS2.Services.Parsing
         /// Gets or sets the analyzer used to index the documents supported by this parser.
         /// </summary>
         /// <value>The analyzer.</value>
-        Analyzer Analyzer { get; }
+        BaseAnalyzer Analyzer { get; }
 
         /// <summary>
         /// Tries to parse the specified file into the supplied document.
