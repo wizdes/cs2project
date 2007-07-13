@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using CS2.Services.Analysis;
@@ -13,28 +12,40 @@ namespace CS2.Services.Searching
 {
     public class SearchService : ISearchService
     {
+        private readonly IDictionary<string, AbstractAnalyzer> analyzers;
         private readonly IIndexingService indexingService;
-        private readonly IDictionary<string, BaseAnalyzer> analyzers;
+        private Encoder encoder = new DefaultEncoder();
+        private Formatter formatter = new SimpleHTMLFormatter();
+        private Fragmenter fragmenter = new NullFragmenter();
         private IndexSearcher searcher;
-        private readonly Formatter formatter = new SimpleHTMLFormatter();
 
-        public SearchService(IIndexingService indexingService, IDictionary<string, BaseAnalyzer> analyzers)
+        public SearchService(IIndexingService indexingService, IDictionary<string, AbstractAnalyzer> analyzers)
         {
             this.indexingService = indexingService;
             this.analyzers = analyzers;
-            this.indexingService.IndexingCompleted += indexingService_IndexingCompleted;
+            this.indexingService.IndexingCompleted += delegate { InstantiateSearcher(); };
 
             InstantiateSearcher();
         }
 
-        private void indexingService_IndexingCompleted(object sender, IndexingCompletedEventArgs e)
+        #region ISearchService Members
+
+        public Formatter Formatter
         {
-            InstantiateSearcher();
+            get { return formatter; }
+            set { formatter = value; }
         }
 
-        private void InstantiateSearcher()
+        public Fragmenter Fragmenter
         {
-            searcher = new IndexSearcher(indexingService.IndexDirectory);
+            get { return fragmenter; }
+            set { fragmenter = value; }
+        }
+
+        public Encoder Encoder
+        {
+            get { return encoder; }
+            set { encoder = value; }
         }
 
         public IEnumerable<Document> Search(string query)
@@ -47,13 +58,13 @@ namespace CS2.Services.Searching
                 yield return hits.Doc(i);
         }
 
-        public IEnumerable<string> SearchWithHighlighting(string query)
+        public IEnumerable<SearchResult> SearchWithHighlighting(string query)
         {
             IEnumerable<Document> docs = Search(query);
 
             Highlighter highlighter =
-                new Highlighter(formatter, new QueryScorer(new TermQuery(new Term(FieldFactory.SourceFieldName, query))));
-            highlighter.SetTextFragmenter(new SimpleFragmenter(50));
+                new Highlighter(formatter, encoder, new QueryScorer(new TermQuery(new Term(FieldFactory.SourceFieldName, query))));
+            highlighter.SetTextFragmenter(fragmenter);
 
             foreach(Document doc in docs)
             {
@@ -66,8 +77,15 @@ namespace CS2.Services.Searching
                 string[] fragments = highlighter.GetBestFragments(tokenStream, new StreamReader(path).ReadToEnd(), 10);
 
                 foreach(string fragment in fragments)
-                    yield return fragment;
+                    yield return new SearchResult(path, fragment);
             }
+        }
+
+        #endregion
+
+        private void InstantiateSearcher()
+        {
+            searcher = new IndexSearcher(indexingService.IndexDirectory);
         }
     }
 }

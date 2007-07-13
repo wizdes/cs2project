@@ -8,11 +8,11 @@ namespace CS2.Services.Parsing
 {
     public class CSharpParsingService : IParsingService
     {
-        private readonly BaseAnalyzer analyzer;
+        private readonly AbstractAnalyzer analyzer;
         private readonly IParsingVisitor parsingVisitor;
         private string[] exclusions;
 
-        public CSharpParsingService(IParsingVisitor parsingVisitor, BaseAnalyzer analyzer)
+        public CSharpParsingService(IParsingVisitor parsingVisitor, AbstractAnalyzer analyzer)
         {
             this.parsingVisitor = parsingVisitor;
             this.analyzer = analyzer;
@@ -73,7 +73,7 @@ namespace CS2.Services.Parsing
         /// Gets or sets the analyzer used to index the documents supported by this parser.
         /// </summary>
         /// <value>The analyzer.</value>
-        public BaseAnalyzer Analyzer
+        public AbstractAnalyzer Analyzer
         {
             get { return analyzer; }
         }

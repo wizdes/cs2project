@@ -34,7 +34,7 @@ namespace CS2.Services.Parsing
             set { inner.Exclusions = value; }
         }
 
-        public BaseAnalyzer Analyzer
+        public AbstractAnalyzer Analyzer
         {
             get { return inner.Analyzer; }
         }

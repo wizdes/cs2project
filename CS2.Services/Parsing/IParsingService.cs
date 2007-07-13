@@ -10,7 +10,7 @@ namespace CS2.Services.Parsing
         /// Gets or sets the analyzer used to index the documents supported by this parser.
         /// </summary>
         /// <value>The analyzer.</value>
-        BaseAnalyzer Analyzer { get; }
+        AbstractAnalyzer Analyzer { get; }
 
         /// <summary>
         /// Tries to parse the specified file into the supplied document.

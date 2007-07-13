@@ -52,17 +52,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analysis\CSharpAnalyzer.cs" />
+    <Compile Include="Analysis\AbstractAnalyzer.cs" />
     <Compile Include="DirectoryFactory.cs" />
     <Compile Include="FieldFactory.cs" />
     <Compile Include="IdIdentifierUtilities.cs" />
+    <Compile Include="Indexing\IIndexingService.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Indexing\IndexingCompletedEventArgs.cs" />
     <Compile Include="Searching\ISearchService.cs" />
+    <Compile Include="Searching\SearchResult.cs" />
     <Compile Include="SynchronizedSet.cs" />
     <Compile Include="Indexing\TimedIndexingService.cs" />
     <Compile Include="Indexing\LoggedIndexingService.cs" />
     <Compile Include="Parsing\CSharpParsingService.cs" />
-    <Compile Include="Indexing\IIndexingService.cs" />
-    <Compile Include="Analysis\BaseAnalyzer.cs" />
     <Compile Include="Logging\ILoggingService.cs" />
     <Compile Include="Parsing\IParsingService.cs">
       <SubType>Code</SubType>
@@ -73,12 +76,6 @@
     <Compile Include="Searching\SearchService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Parsing\CSharpParsingVisitor.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CS2.Model\CS2.Model.csproj">
-      <Project>{6F466847-ADC4-4218-8AFC-FBC70B2D3A09}</Project>
-      <Name>CS2.Model</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

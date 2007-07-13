@@ -11,7 +11,7 @@ namespace CS2.Tests
     public class IndexingServiceTests : BaseTest
     {
         private IIndexingService service;
-        private const string docsDir = @"C:\Development\Rhino-tools\rhino-commons";
+        private const string docsDir = @"C:\Development\subtext";
         private const string dummyFile = @"..\..\DummyClassForParseTesting.cs";
 
         [SetUp]
@@ -62,6 +62,7 @@ namespace CS2.Tests
         public void ShouldntIndexAgainTheSameFiles()
         {
             service.RequestIndexing(new FileInfo(dummyFile));
+            service.RequestIndexing(new DirectoryInfo(docsDir));
             service.UpdateIndex();
 
             PrintFileOperations();

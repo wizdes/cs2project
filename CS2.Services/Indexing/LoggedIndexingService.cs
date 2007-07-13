@@ -1,13 +1,12 @@
 using System;
 using System.IO;
 using Castle.Core.Logging;
-using CS2.Model;
 using CS2.Services.Logging;
 using Directory=Lucene.Net.Store.Directory;
 
 namespace CS2.Services.Indexing
 {
-    public class LoggedIndexingService : ILoggingService, IIndexingService
+    public class LoggedIndexingService : IIndexingService, ILoggingService
     {
         private readonly IIndexingService inner;
         private ILogger logger = NullLogger.Instance;
@@ -55,38 +54,6 @@ namespace CS2.Services.Indexing
         {
             logger.InfoFormat("Requested indexing file {0}", file.FullName);
             inner.RequestIndexing(file);
-        }
-
-        /// <summary>
-        /// Requests the indexing of all the files contained in the specified directory, optionally using recursion.
-        /// </summary>
-        /// <param name="directory">The directory.</param>
-        /// <param name="searchOption">The search option.</param>
-        public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption)
-        {
-            inner.RequestIndexing(directory, searchOption);
-        }
-
-        /// <summary>
-        /// Requests the indexing of the specified directory, optionally using recursion and looking for files of the specified language.
-        /// </summary>
-        /// <param name="directory">The directory.</param>
-        /// <param name="searchOption">The search option.</param>
-        /// <param name="language">The language.</param>
-        public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, IProgrammingLanguage language)
-        {
-            inner.RequestIndexing(directory, searchOption, language);
-        }
-
-        /// <summary>
-        /// Requests the indexing of the specified directory, optionally using recursion and looking for files which match the supplied pattern.
-        /// </summary>
-        /// <param name="directory">The directory.</param>
-        /// <param name="searchOption">The search option.</param>
-        /// <param name="searchPattern">The search pattern.</param>
-        public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, string searchPattern)
-        {
-            inner.RequestIndexing(directory, searchOption, searchPattern);
         }
 
         public void RequestIndexing(DirectoryInfo directory)

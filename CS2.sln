@@ -1,12 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS2.Model", "CS2.Model\CS2.Model.csproj", "{6F466847-ADC4-4218-8AFC-FBC70B2D3A09}"
-	ProjectSection(WebsiteProperties) = preProject
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.Debug = "False"
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS2.Services", "CS2.Services\CS2.Services.csproj", "{14E25989-745F-4FCF-BB25-145FDA0CC4DF}"
 	ProjectSection(WebsiteProperties) = preProject
 		Debug.AspNetCompiler.Debug = "True"
@@ -37,10 +31,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6F466847-ADC4-4218-8AFC-FBC70B2D3A09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F466847-ADC4-4218-8AFC-FBC70B2D3A09}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F466847-ADC4-4218-8AFC-FBC70B2D3A09}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F466847-ADC4-4218-8AFC-FBC70B2D3A09}.Release|Any CPU.Build.0 = Release|Any CPU
 		{14E25989-745F-4FCF-BB25-145FDA0CC4DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{14E25989-745F-4FCF-BB25-145FDA0CC4DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14E25989-745F-4FCF-BB25-145FDA0CC4DF}.Release|Any CPU.ActiveCfg = Release|Any CPU

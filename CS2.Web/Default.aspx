@@ -1,4 +1,5 @@
 <%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="CS2.Web._Default" %>
+<%@ Import namespace="CS2.Services.Searching"%>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -20,7 +21,9 @@
                 <br />
                 <asp:DataList ID="DataList1" runat="server" CellPadding="4" ForeColor="#333333">
                 <ItemTemplate>
-                <%# Container.DataItem %>
+                <%#((SearchResult) Container.DataItem).Snippet%>
+                <br />
+                <%#((SearchResult) Container.DataItem).FilePath%>
                 </ItemTemplate>
                     <FooterStyle BackColor="#507CD1" Font-Bold="True" ForeColor="White" />
                     <SelectedItemStyle BackColor="#D1DDF1" Font-Bold="True" ForeColor="#333333" />

@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
-using CS2.Model;
 using CS2.Services.Parsing;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
@@ -39,11 +38,11 @@ namespace CS2.Services.Indexing
             this.parsingServices = parsingServices;
 
             // If the index directory doesn't contain an index then create it
-            if(!IndexReader.IndexExists(indexDirectory))
+            if (!IndexReader.IndexExists(indexDirectory))
             {
-                indexWriter = new IndexWriter(indexDirectory, new StandardAnalyzer(), true);
-                indexWriter.Close();
-                indexWriter = null;
+                IndexWriter writer = new IndexWriter(indexDirectory, new StandardAnalyzer(), true);
+                writer.Optimize();
+                writer.Close();
             }
         }
 
@@ -105,49 +104,16 @@ namespace CS2.Services.Indexing
         }
 
         /// <summary>
-        /// Requests the indexing of the specified directory, optionally using recursion and looking for files which match the supplied pattern.
-        /// </summary>
-        /// <param name="directory">The directory.</param>
-        /// <param name="searchOption">The search option.</param>
-        /// <param name="searchPattern">The search pattern.</param>
-        public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, string searchPattern)
-        {
-            if(!IsValidFileSystemEntryToBeIndexed(directory))
-                return;
-
-            foreach(FileInfo file in directory.GetFiles(searchPattern, searchOption))
-                RequestIndexing(file);
-        }
-
-        /// <summary>
-        /// Requests the indexing of the specified directory, optionally using recursion and looking for files of the specified language.
-        /// </summary>
-        /// <param name="directory">The directory.</param>
-        /// <param name="searchOption">The search option.</param>
-        /// <param name="language">The language.</param>
-        public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, IProgrammingLanguage language)
-        {
-            if(language != null)
-                RequestIndexing(directory, searchOption, language.SearchPattern);
-        }
-
-        /// <summary>
-        /// Requests the indexing of all the files contained in the specified directory, optionally using recursion.
-        /// </summary>
-        /// <param name="directory">The directory.</param>
-        /// <param name="searchOption">The search option.</param>
-        public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption)
-        {
-            RequestIndexing(directory, searchOption, "*");
-        }
-
-        /// <summary>
         /// Requests the indexing of all the files contained in the specified directory and all its subdirectories.
         /// </summary>
         /// <param name="directory">The directory.</param>
         public void RequestIndexing(DirectoryInfo directory)
         {
-            RequestIndexing(directory, SearchOption.AllDirectories);
+            if(!IsValidFileSystemEntryToBeIndexed(directory))
+                return;
+
+            foreach(FileInfo file in directory.GetFiles("*", SearchOption.AllDirectories))
+                RequestIndexing(file);
         }
 
         /// <summary>
@@ -179,7 +145,7 @@ namespace CS2.Services.Indexing
             indexReader.Close();
             indexReader = null;
 
-            if (filesUndergoingIndexing.Count > 0)
+            if(filesUndergoingIndexing.Count > 0)
             {
                 // Create a new IndexWriter to add new documents to the index
                 indexWriter = new IndexWriter(indexDirectory, new StandardAnalyzer(), false);
@@ -197,7 +163,7 @@ namespace CS2.Services.Indexing
             addedFilesSinceLastUpdate = addedFiles;
             deletedFilesSinceLastUpdate = deletedFiles;
 
-            // Fire IndexingCompletedEvent
+            // Fire IndexingCompleted event
             OnIndexingCompleted();
 
             lock(updatingLock)
@@ -279,7 +245,8 @@ namespace CS2.Services.Indexing
 
                 // If file doesn't exist or if file exists but is out of date
                 if(!File.Exists(filePath) ||
-                   (File.Exists(filePath) && IdIdentifierUtilities.GetIdentifierFromFile(new FileInfo(filePath)) != idEnumerator.Term().Text()))
+                   (File.Exists(filePath) &&
+                    IdIdentifierUtilities.GetIdentifierFromFile(new FileInfo(filePath)) != idEnumerator.Term().Text()))
                 {
                     // The delete document from the index
                     indexReader.DeleteDocuments(idEnumerator.Term());
@@ -304,7 +271,7 @@ namespace CS2.Services.Indexing
         {
             Document document;
 
-            // Find a parser that suites the file
+            // Find a parser that suits the file
             foreach(IParsingService parsingService in parsingServices)
                 if(!MatchesAnyExclusion(file, parsingService.Exclusions) && parsingService.TryParse(file, out document))
                 {
@@ -312,7 +279,7 @@ namespace CS2.Services.Indexing
                     document.Add(FieldFactory.CreatePathField(file.FullName));
                     document.Add(FieldFactory.CreateFileNameField(file.Name));
                     document.Add(FieldFactory.CreateSourceField(new StreamReader(file.FullName, true)));
-                    document.Add(FieldFactory.CreateLanguageField(parsingService.Analyzer.Language.Name));
+                    document.Add(FieldFactory.CreateLanguageField(parsingService.Analyzer.LanguageName));
 
                     // Add the document to the index with the appropriate analyzer
                     indexWriter.AddDocument(document, parsingService.Analyzer);

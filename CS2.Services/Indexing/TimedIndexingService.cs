@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Threading;
-using CS2.Model;
 using Directory=Lucene.Net.Store.Directory;
 
 namespace CS2.Services.Indexing
@@ -11,16 +10,10 @@ namespace CS2.Services.Indexing
         private readonly IIndexingService inner;
         private readonly Timer timer;
 
-        public string[] Exclusions
-        {
-            get { return inner.Exclusions; }
-            set { inner.Exclusions = value; }
-        }
-
         public TimedIndexingService(IIndexingService inner, TimeSpan updateInterval)
         {
             this.inner = inner;
-            timer = new Timer(UpdateIndex, null, new TimeSpan(0, 0, 30), updateInterval);
+            timer = new Timer(delegate { UpdateIndex(); }, null, new TimeSpan(0, 0, 30), updateInterval);
         }
 
         #region IDisposable Members
@@ -38,6 +31,12 @@ namespace CS2.Services.Indexing
 
         #region IIndexingService Members
 
+        public string[] Exclusions
+        {
+            get { return inner.Exclusions; }
+            set { inner.Exclusions = value; }
+        }
+
         /// <summary>
         /// Requests the indexing of the specified file.
         /// </summary>
@@ -45,38 +44,6 @@ namespace CS2.Services.Indexing
         public void RequestIndexing(FileInfo file)
         {
             inner.RequestIndexing(file);
-        }
-
-        /// <summary>
-        /// Requests the indexing of the specified directory, optionally using recursion and looking for files which match the supplied pattern.
-        /// </summary>
-        /// <param name="directory">The directory.</param>
-        /// <param name="searchOption">The search option.</param>
-        /// <param name="searchPattern">The search pattern.</param>
-        public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, string searchPattern)
-        {
-            inner.RequestIndexing(directory, searchOption, searchPattern);
-        }
-
-        /// <summary>
-        /// Requests the indexing of the specified directory, optionally using recursion and looking for files of the specified language.
-        /// </summary>
-        /// <param name="directory">The directory.</param>
-        /// <param name="searchOption">The search option.</param>
-        /// <param name="language">The language.</param>
-        public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption, IProgrammingLanguage language)
-        {
-            inner.RequestIndexing(directory, searchOption, language);
-        }
-
-        /// <summary>
-        /// Requests the indexing of all the files contained in the specified directory, optionally using recursion.
-        /// </summary>
-        /// <param name="directory">The directory.</param>
-        /// <param name="searchOption">The search option.</param>
-        public void RequestIndexing(DirectoryInfo directory, SearchOption searchOption)
-        {
-            inner.RequestIndexing(directory, searchOption);
         }
 
         /// <summary>
@@ -134,11 +101,6 @@ namespace CS2.Services.Indexing
         {
             if(timer != null)
                 timer.Dispose();
-        }
-
-        private void UpdateIndex(object data)
-        {
-            UpdateIndex();
         }
     }
 }

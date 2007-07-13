@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Castle.Windsor;
 using Castle.Windsor.Configuration.Interpreters;
+using CS2.Services;
 using CS2.Services.Indexing;
 using CS2.Services.Searching;
+using Lucene.Net.Documents;
 
 namespace CS2.Console
 {
@@ -39,14 +42,11 @@ namespace CS2.Console
                 // Search
                 else
                 {
-                    System.Console.WriteLine("Search results:");
+                    IEnumerable<Document> searchResults = searchService.Search(indexingRequestPath);
+                    System.Console.WriteLine("{0} matches found.", new List<Document>(searchResults).Count);
 
-                    //foreach(Document document in searchService.Search(indexingRequestPath))
-                    //    System.Console.WriteLine(document.Get(FieldFactory.PathFieldName));
-                    foreach(string result in searchService.SearchWithHighlighting(indexingRequestPath))
-                    {
-                        System.Console.WriteLine(result);
-                    }
+                    foreach(Document document in searchResults)
+                        System.Console.WriteLine(document.Get(FieldFactory.PathFieldName));
                 }
             }
         }

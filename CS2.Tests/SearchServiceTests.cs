@@ -1,13 +1,8 @@
-using System.Collections.Generic;
+using System.Collections;
 using System.Collections.Specialized;
-using Castle.Windsor;
-using Castle.Windsor.Configuration.Interpreters;
-using CS2.Model;
 using CS2.Services.Searching;
 using Lucene.Net.Search;
 using NUnit.Framework;
-using Rhino.Mocks;
-using System.Collections;
 
 namespace CS2.Tests
 {

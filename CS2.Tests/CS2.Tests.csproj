@@ -73,10 +73,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CS2.Model\CS2.Model.csproj">
-      <Project>{6F466847-ADC4-4218-8AFC-FBC70B2D3A09}</Project>
-      <Name>CS2.Model</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CS2.Services\CS2.Services.csproj">
       <Project>{14E25989-745F-4FCF-BB25-145FDA0CC4DF}</Project>
       <Name>CS2.Services</Name>
