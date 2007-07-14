@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Lucene.Net.Analysis;
 
-namespace CS2.Services.Analysis
+namespace CS2.Core.Analysis
 {
     public abstract class AbstractAnalyzer : Analyzer
     {

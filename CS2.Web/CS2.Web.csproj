@@ -85,9 +85,9 @@
     <Content Include="Global.asax" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CS2.Services\CS2.Services.csproj">
+    <ProjectReference Include="..\CS2.Core\CS2.Core.csproj">
       <Project>{14E25989-745F-4FCF-BB25-145FDA0CC4DF}</Project>
-      <Name>CS2.Services</Name>
+      <Name>CS2.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

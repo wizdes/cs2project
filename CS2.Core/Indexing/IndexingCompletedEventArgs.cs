@@ -1,6 +1,6 @@
 using System;
 
-namespace CS2.Services.Indexing
+namespace CS2.Core.Indexing
 {
     public class IndexingCompletedEventArgs : EventArgs
     {

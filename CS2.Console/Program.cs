@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using Castle.Windsor;
 using Castle.Windsor.Configuration.Interpreters;
-using CS2.Services;
-using CS2.Services.Indexing;
-using CS2.Services.Searching;
+using CS2.Core;
+using CS2.Core.Indexing;
+using CS2.Core.Searching;
 using Lucene.Net.Documents;
 
 namespace CS2.Console

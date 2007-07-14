@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Specialized;
-using CS2.Services.Searching;
+using CS2.Core.Searching;
 using Lucene.Net.Search;
 using NUnit.Framework;
 

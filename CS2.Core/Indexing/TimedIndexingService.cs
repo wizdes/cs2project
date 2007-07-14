@@ -1,9 +1,10 @@
 using System;
 using System.IO;
 using System.Threading;
+using CS2.Core.Indexing;
 using Directory=Lucene.Net.Store.Directory;
 
-namespace CS2.Services.Indexing
+namespace CS2.Core.Indexing
 {
     public class TimedIndexingService : IIndexingService, IDisposable
     {

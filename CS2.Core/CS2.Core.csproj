@@ -7,8 +7,8 @@
     <ProjectGuid>{14E25989-745F-4FCF-BB25-145FDA0CC4DF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CS2.Services</RootNamespace>
-    <AssemblyName>CS2.Services</AssemblyName>
+    <RootNamespace>CS2.Core</RootNamespace>
+    <AssemblyName>CS2.Core</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

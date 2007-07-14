@@ -1,5 +1,6 @@
 <%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="CS2.Web._Default" %>
-<%@ Import namespace="CS2.Services.Searching"%>
+<%@ Import namespace="CS2.Core.Searching"%>
+
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 

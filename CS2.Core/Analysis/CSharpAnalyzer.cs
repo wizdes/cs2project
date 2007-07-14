@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using CS2.Core.Analysis;
 using Lucene.Net.Analysis;
 
-namespace CS2.Services.Analysis
+namespace CS2.Core.Analysis
 {
     public class CSharpAnalyzer : AbstractAnalyzer
     {

@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using CS2.Services;
+using CS2.Core;
 using NUnit.Framework;
 
 namespace CS2.Tests

@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.IO;
-using CS2.Services.Parsing;
+using CS2.Core.Parsing;
 using Lucene.Net.Documents;
 using NUnit.Framework;
 

@@ -1,4 +1,4 @@
-namespace CS2.Services.Searching
+namespace CS2.Core.Searching
 {
     public class SearchResult
     {

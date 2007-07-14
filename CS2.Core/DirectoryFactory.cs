@@ -1,6 +1,6 @@
 using Lucene.Net.Store;
 
-namespace CS2.Services
+namespace CS2.Core
 {
     /// <summary>
     /// Factory to create directories on the file system.

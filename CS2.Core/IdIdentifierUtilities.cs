@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace CS2.Services
+namespace CS2.Core
 {
     public static class IdIdentifierUtilities
     {

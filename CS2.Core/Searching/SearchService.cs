@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.IO;
-using CS2.Services.Analysis;
-using CS2.Services.Indexing;
+using CS2.Core.Analysis;
+using CS2.Core.Indexing;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Highlight;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
 
-namespace CS2.Services.Searching
+namespace CS2.Core.Searching
 {
     public class SearchService : ISearchService
     {

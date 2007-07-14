@@ -1,10 +1,11 @@
 using System;
 using System.IO;
 using Castle.Core.Logging;
-using CS2.Services.Logging;
+using CS2.Core.Indexing;
+using CS2.Core.Logging;
 using Directory=Lucene.Net.Store.Directory;
 
-namespace CS2.Services.Indexing
+namespace CS2.Core.Indexing
 {
     public class LoggedIndexingService : IIndexingService, ILoggingService
     {

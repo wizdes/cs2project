@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Lucene.Net.Documents;
 using Lucene.Net.Highlight;
 
-namespace CS2.Services.Searching
+namespace CS2.Core.Searching
 {
     public interface ISearchService
     {

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Wintellect.PowerCollections;
 
-namespace CS2.Services
+namespace CS2.Core
 {
     public class SynchronizedSet
     {

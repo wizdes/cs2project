@@ -1,6 +1,6 @@
 using Castle.Core.Logging;
 
-namespace CS2.Services.Logging
+namespace CS2.Core.Logging
 {
     public interface ILoggingService
     {

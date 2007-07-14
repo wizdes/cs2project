@@ -1,13 +1,13 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
-using CS2.Services.Parsing;
+using CS2.Core.Parsing;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Directory=Lucene.Net.Store.Directory;
 
-namespace CS2.Services.Indexing
+namespace CS2.Core.Indexing
 {
     public class IndexingService : IIndexingService
     {

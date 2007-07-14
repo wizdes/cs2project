@@ -1,4 +1,4 @@
-namespace CS2.Services.Parsing
+namespace CS2.Core.Parsing
 {
     public interface IParsingVisitor    
     {}

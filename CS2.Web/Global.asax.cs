@@ -1,8 +1,8 @@
 using System;
 using Castle.Windsor;
 using Castle.Windsor.Configuration.Interpreters;
-using CS2.Services.Indexing;
-using CS2.Services.Searching;
+using CS2.Core.Indexing;
+using CS2.Core.Searching;
 
 namespace CS2.Web
 {
@@ -30,7 +30,10 @@ namespace CS2.Web
 
         protected void Application_End(object sender, EventArgs e)
         {
+            container.Release(indexingService);
+            container.Release(searchService);
 
+            container.Dispose();
         }
     }
 }

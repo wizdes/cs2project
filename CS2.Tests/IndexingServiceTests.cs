@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using CS2.Services.Indexing;
+using CS2.Core.Indexing;
 using Lucene.Net.Index;
 using NUnit.Framework;
 

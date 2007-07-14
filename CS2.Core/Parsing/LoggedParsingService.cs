@@ -1,10 +1,11 @@
 using System.IO;
 using Castle.Core.Logging;
-using CS2.Services.Analysis;
-using CS2.Services.Logging;
+using CS2.Core.Analysis;
+using CS2.Core.Logging;
+using CS2.Core.Parsing;
 using Lucene.Net.Documents;
 
-namespace CS2.Services.Parsing
+namespace CS2.Core.Parsing
 {
     public class LoggedParsingService : IParsingService, ILoggingService
     {

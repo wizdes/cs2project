@@ -1,7 +1,7 @@
 using System.IO;
 using Lucene.Net.Documents;
 
-namespace CS2.Services
+namespace CS2.Core
 {
     public static class FieldFactory
     {
