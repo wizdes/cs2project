@@ -6,7 +6,5 @@ namespace CS2.Core.Analysis
     public abstract class AbstractAnalyzer : Analyzer
     {
         protected abstract ICollection<string> StopWords { get; }
-        public abstract string SearchPattern { get; }
-        public abstract string LanguageName { get; }
     }
 }

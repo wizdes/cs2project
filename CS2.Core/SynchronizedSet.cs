@@ -1,10 +1,11 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Wintellect.PowerCollections;
 
 namespace CS2.Core
 {
-    public class SynchronizedSet
+    public class SynchronizedSet : ISynchronizedCollection
     {
         private readonly Set<string> inner;
         private readonly object syncLock = new object();
@@ -18,6 +19,8 @@ namespace CS2.Core
         {
             this.inner = inner;
         }
+
+        #region ISynchronizedCollection Members
 
         public bool Add(string item)
         {
@@ -36,7 +39,7 @@ namespace CS2.Core
             get { return inner.Count; }
         }
 
-        public SynchronizedSet CloneAndClear()
+        public ISynchronizedCollection CloneAndClear()
         {
             lock(syncLock)
             {
@@ -46,6 +49,12 @@ namespace CS2.Core
             }
         }
 
+        /// <summary>
+        /// Returns an enumerator that iterates through the collection.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="T:System.Collections.Generic.IEnumerator`1"></see> that can be used to iterate through the collection.
+        /// </returns>
         public IEnumerator<string> GetEnumerator()
         {
             return inner.GetEnumerator();
@@ -56,5 +65,20 @@ namespace CS2.Core
             lock(syncLock)
                 return inner.Remove(item);
         }
+
+        ///<summary>
+        ///Returns an enumerator that iterates through a collection.
+        ///</summary>
+        ///
+        ///<returns>
+        ///An <see cref="T:System.Collections.IEnumerator"></see> object that can be used to iterate through the collection.
+        ///</returns>
+        ///<filterpriority>2</filterpriority>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        #endregion
     }
 }

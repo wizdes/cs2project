@@ -1,9 +1,9 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Castle.Core.Logging;
 using CS2.Core.Analysis;
 using CS2.Core.Logging;
-using CS2.Core.Parsing;
 using Lucene.Net.Documents;
 
 namespace CS2.Core.Parsing
@@ -11,11 +11,14 @@ namespace CS2.Core.Parsing
     public class LoggedParsingService : IParsingService, ILoggingService
     {
         private readonly IParsingService inner;
+        private readonly Stopwatch watch = new Stopwatch();
         private ILogger logger = NullLogger.Instance;
 
         public LoggedParsingService(IParsingService inner)
         {
             this.inner = inner;
+            watch.Start();
+            watch.Reset();
         }
 
         #region ILoggingService Members
@@ -30,10 +33,14 @@ namespace CS2.Core.Parsing
 
         #region IParsingService Members
 
-        public string[] Exclusions
+        public ICollection<string> FileExtensions
         {
-            get { return inner.Exclusions; }
-            set { inner.Exclusions = value; }
+            get { return inner.FileExtensions; }
+        }
+
+        public string LanguageName
+        {
+            get { return inner.LanguageName; }
         }
 
         public AbstractAnalyzer Analyzer
@@ -43,9 +50,17 @@ namespace CS2.Core.Parsing
 
         public bool TryParse(FileInfo file, out Document document)
         {
-            bool couldParse = inner.TryParse(file, out document);
+            watch.Start();
 
-            Trace.TraceInformation(couldParse ? "Done parsing file {0}" : "Error parsing file {0}", file.FullName);
+            bool couldParse = inner.TryParse(file, out document);
+            long elapsed = watch.ElapsedMilliseconds;
+
+            watch.Reset();
+
+            if(couldParse)
+                Trace.TraceInformation("Done parsing file {0} in {1} milliseconds", file.FullName, elapsed);
+            else
+                Trace.TraceError("Error parsing file {0} n {1} milliseconds", file.FullName, elapsed);
 
             return couldParse;
         }

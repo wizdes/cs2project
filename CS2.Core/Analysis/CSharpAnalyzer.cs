@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using CS2.Core.Analysis;
 using Lucene.Net.Analysis;
 
 namespace CS2.Core.Analysis
@@ -27,16 +26,6 @@ namespace CS2.Core.Analysis
                                 //, "assembly", "property", "method", "field", "param", "type"                 
                             });
             }
-        }
-
-        public override string SearchPattern
-        {
-            get { return "*.cs"; }
-        }
-
-        public override string LanguageName
-        {
-            get { return "C#"; }
         }
 
         public override TokenStream TokenStream(string fieldName, TextReader reader)

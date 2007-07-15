@@ -60,6 +60,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Indexing\IndexingCompletedEventArgs.cs" />
+    <Compile Include="ISynchronizedCollection.cs" />
+    <Compile Include="LoggedSynchronizedSet.cs" />
     <Compile Include="Searching\ISearchService.cs" />
     <Compile Include="Searching\SearchResult.cs" />
     <Compile Include="SynchronizedSet.cs" />

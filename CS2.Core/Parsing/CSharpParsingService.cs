@@ -12,13 +12,16 @@ namespace CS2.Core.Parsing
     {
         #region Delegates
 
-        public delegate CompilationUnitNode ParseDelegate(TokenCollection tokens, List<string> literals);
+        public delegate CompilationUnitNode ParseDelegate(Parser parser, TokenCollection tokens, List<string> literals);
 
         #endregion
 
         private readonly AbstractAnalyzer analyzer;
+
+        private readonly ParseDelegate parseDelegate =
+            delegate(Parser parser, TokenCollection toks, List<string> literals) { return parser.Parse(toks, literals); };
+
         private readonly IParsingVisitor parsingVisitor;
-        private string[] exclusions;
 
         public CSharpParsingService(IParsingVisitor parsingVisitor, AbstractAnalyzer analyzer)
         {
@@ -36,8 +39,8 @@ namespace CS2.Core.Parsing
         /// <returns>True is the parsing is successful, false otherwise.</returns>
         public bool TryParse(FileInfo file, out Document document)
         {
-            document = new Document();
             Lexer lexer;
+            document = new Document();
             TokenCollection tokens = null;
 
             try
@@ -51,30 +54,24 @@ namespace CS2.Core.Parsing
                 }
 
                 Parser parser = new Parser(file.FullName);
+                IAsyncResult result = parseDelegate.BeginInvoke(parser, tokens, lexer.StringLiterals, null, null);
 
-                ParseDelegate del = delegate(TokenCollection toks, List<string> literals) { return parser.Parse(toks, literals); };
-
-                IAsyncResult result = del.BeginInvoke(tokens, lexer.StringLiterals, null, null);
-
-                // Call asynchronously and wait for 500 ms for the parsing to complete
-                if(result.AsyncWaitHandle.WaitOne(200, true))
+                // Call asynchronously and wait for a while for the parsing to complete
+                if(result.AsyncWaitHandle.WaitOne(1500, true))
                 {
-                    CompilationUnitNode compilationUnitNode = del.EndInvoke(result);
+                    CompilationUnitNode compilationUnitNode = parseDelegate.EndInvoke(result);
                     compilationUnitNode.AcceptVisitor((AbstractVisitor) parsingVisitor, document);
 
                     // Too few fields found, this is probably not a C# file
                     return document.GetFieldsCount() > 1 ? true : false;
                 }
-                // The parsing didn't complete in 500 ms or threw an exception
+                    // The parsing didn't complete in time or threw an exception
                 else
-                {
-                    document = null;
-                    return false;
-                }
+                    throw new InvalidOperationException("Didn't complete in time.");
 
 //                CompilationUnitNode compilationUnitNode = parser.Parse(tokens, lexer.StringLiterals);
-
-//                compilationUnitNode.AcceptVisitor((AbstractVisitor) parsingVisitor, document);
+//
+//                compilationUnitNode.AcceptVisitor((AbstractVisitor)parsingVisitor, document);
 //
 //                // Too few fields found, this is probably not a C# file
 //                return document.GetFieldsCount() > 1 ? true : false;
@@ -91,10 +88,14 @@ namespace CS2.Core.Parsing
             }
         }
 
-        public string[] Exclusions
+        public ICollection<string> FileExtensions
         {
-            get { return exclusions; }
-            set { exclusions = value; }
+            get { return new string[] { ".cs" }; }
+        }
+
+        public string LanguageName
+        {
+            get { return "C#"; }
         }
 
         /// <summary>

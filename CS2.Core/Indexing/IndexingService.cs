@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
 using CS2.Core.Parsing;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
@@ -13,16 +14,16 @@ namespace CS2.Core.Indexing
     {
         #region Fields
 
-        private readonly IParsingService[] parsingServices;
+        private readonly ISynchronizedCollection filesWaitingToBeIndexed;
         private readonly Directory indexDirectory;
-        private readonly SynchronizedSet filesWaitingToBeIndexed;
+        private readonly IParsingService[] parsingServices;
+        private readonly object updatingLock = new object();
+        private int addedFilesSinceLastUpdate;
+        private int deletedFilesSinceLastUpdate;
+        private string[] exclusions;
         private IndexReader indexReader;
         private IndexWriter indexWriter;
         private bool isUpdating = false;
-        private string[] exclusions;
-        private int addedFilesSinceLastUpdate;
-        private int deletedFilesSinceLastUpdate;
-        private readonly object updatingLock = new object();
 
         #endregion
 
@@ -31,14 +32,15 @@ namespace CS2.Core.Indexing
         /// </summary>
         /// <param name="indexDirectory">The index directory.</param>
         /// <param name="parsingServices">The parsing services.</param>
-        public IndexingService(Directory indexDirectory, IParsingService[] parsingServices)
+        /// <param name="filesWaitingToBeIndexed">The files waiting to be indexed.</param>
+        public IndexingService(Directory indexDirectory, IParsingService[] parsingServices, ISynchronizedCollection filesWaitingToBeIndexed)
         {
-            filesWaitingToBeIndexed = new SynchronizedSet();
+            this.filesWaitingToBeIndexed = filesWaitingToBeIndexed;
             this.indexDirectory = indexDirectory;
             this.parsingServices = parsingServices;
 
             // If the index directory doesn't contain an index then create it
-            if (!IndexReader.IndexExists(indexDirectory))
+            if(!IndexReader.IndexExists(indexDirectory))
             {
                 IndexWriter writer = new IndexWriter(indexDirectory, new StandardAnalyzer(), true);
                 writer.Optimize();
@@ -112,8 +114,10 @@ namespace CS2.Core.Indexing
             if(!IsValidFileSystemEntryToBeIndexed(directory))
                 return;
 
-            foreach(FileInfo file in directory.GetFiles("*", SearchOption.AllDirectories))
-                RequestIndexing(file);
+            foreach(IParsingService parsingService in parsingServices)
+                foreach(string extension in parsingService.FileExtensions)
+                    foreach(FileInfo file in directory.GetFiles(string.Format("*{0}", extension), SearchOption.AllDirectories))
+                        RequestIndexing(file);
         }
 
         /// <summary>
@@ -131,7 +135,7 @@ namespace CS2.Core.Indexing
                 isUpdating = true;
             }
 
-            SynchronizedSet filesUndergoingIndexing = filesWaitingToBeIndexed.CloneAndClear();
+            ISynchronizedCollection filesUndergoingIndexing = filesWaitingToBeIndexed.CloneAndClear();
 
             int addedFiles = 0;
             int deletedFiles = 0;
@@ -151,11 +155,13 @@ namespace CS2.Core.Indexing
                 indexWriter = new IndexWriter(indexDirectory, new StandardAnalyzer(), false);
 
                 foreach(string fileName in filesUndergoingIndexing)
-                    if (Index(new FileInfo(fileName)))
+                    if(Index(new FileInfo(fileName)))
                     {
                         addedFiles++;
 
-                        
+                        // Each 100 files indexed give some cpu to other threads
+                        if(addedFiles % 20 == 0)
+                            Thread.Sleep(0);
                     }
 
                 // Close the IndexWriter
@@ -233,7 +239,7 @@ namespace CS2.Core.Indexing
         /// <summary>
         /// Removes the deleted and modified documents from the index. Marks the modified files as to be reindexed.
         /// </summary>
-        private void RemoveOldEntries(SynchronizedSet filesUndergoingIndexing, ref int deletedFiles)
+        private void RemoveOldEntries(ISynchronizedCollection filesUndergoingIndexing, ref int deletedFiles)
         {
             // Create a term enumerator to iterate through all the terms of the ID field
             // This is done to avoid searching, which is presumably less performant
@@ -276,14 +282,18 @@ namespace CS2.Core.Indexing
             Document document;
 
             // Find a parser that suits the file
-            foreach(IParsingService parsingService in parsingServices)
-                if(!MatchesAnyExclusion(file, parsingService.Exclusions) && parsingService.TryParse(file, out document))
+            foreach(IParsingService parsingService in Array.FindAll(parsingServices,
+                                                            delegate(IParsingService service)
+                                                                {
+                                                                    return service.FileExtensions.Contains(file.Extension);
+                                                                }))
+                if(parsingService.TryParse(file, out document))
                 {
                     document.Add(FieldFactory.CreateIdField(IdIdentifierUtilities.GetIdentifierFromFile(file)));
                     document.Add(FieldFactory.CreatePathField(file.FullName));
                     document.Add(FieldFactory.CreateFileNameField(file.Name));
                     document.Add(FieldFactory.CreateSourceField(new StreamReader(file.FullName, true)));
-                    document.Add(FieldFactory.CreateLanguageField(parsingService.Analyzer.LanguageName));
+                    document.Add(FieldFactory.CreateLanguageField(parsingService.LanguageName));
 
                     // Add the document to the index with the appropriate analyzer
                     indexWriter.AddDocument(document, parsingService.Analyzer);
@@ -292,7 +302,7 @@ namespace CS2.Core.Indexing
                     return true;
                 }
 
-            // No parser able to parse the file found, file hasn't been indexed
+            // No parser able to parse the file found, file wasn't indexed
             return false;
         }
     }

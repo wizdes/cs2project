@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using CS2.Core.Analysis;
 using Lucene.Net.Documents;
@@ -12,6 +13,10 @@ namespace CS2.Core.Parsing
         /// <value>The analyzer.</value>
         AbstractAnalyzer Analyzer { get; }
 
+        string LanguageName { get; }
+
+        ICollection<string> FileExtensions { get; }
+
         /// <summary>
         /// Tries to parse the specified file into the supplied document.
         /// </summary>
@@ -19,7 +24,5 @@ namespace CS2.Core.Parsing
         /// <param name="document">The document.</param>
         /// <returns>True if the parsing is successful, false otherwise.</returns>
         bool TryParse(FileInfo file, out Document document);
-
-        string[] Exclusions { get; set; }
     }
 }
