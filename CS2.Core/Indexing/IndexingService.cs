@@ -151,8 +151,12 @@ namespace CS2.Core.Indexing
                 indexWriter = new IndexWriter(indexDirectory, new StandardAnalyzer(), false);
 
                 foreach(string fileName in filesUndergoingIndexing)
-                    if(Index(new FileInfo(fileName)))
+                    if (Index(new FileInfo(fileName)))
+                    {
                         addedFiles++;
+
+                        
+                    }
 
                 // Close the IndexWriter
                 indexWriter.Optimize();

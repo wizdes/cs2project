@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using Castle.Core.Logging;
 using CS2.Core.Analysis;
@@ -44,7 +45,7 @@ namespace CS2.Core.Parsing
         {
             bool couldParse = inner.TryParse(file, out document);
 
-            Logger.InfoFormat(couldParse ? "Done parsing file {0}" : "Error parsing file {0}", file.FullName);
+            Trace.TraceInformation(couldParse ? "Done parsing file {0}" : "Error parsing file {0}", file.FullName);
 
             return couldParse;
         }

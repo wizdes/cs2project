@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using CS2.Core.Analysis;
 using DDW;
@@ -8,6 +10,12 @@ namespace CS2.Core.Parsing
 {
     public class CSharpParsingService : IParsingService
     {
+        #region Delegates
+
+        public delegate CompilationUnitNode ParseDelegate(TokenCollection tokens, List<string> literals);
+
+        #endregion
+
         private readonly AbstractAnalyzer analyzer;
         private readonly IParsingVisitor parsingVisitor;
         private string[] exclusions;
@@ -44,12 +52,32 @@ namespace CS2.Core.Parsing
 
                 Parser parser = new Parser(file.FullName);
 
-                CompilationUnitNode compilationUnitNode = parser.Parse(tokens, lexer.StringLiterals);
+                ParseDelegate del = delegate(TokenCollection toks, List<string> literals) { return parser.Parse(toks, literals); };
 
-                compilationUnitNode.AcceptVisitor((AbstractVisitor) parsingVisitor, document);
+                IAsyncResult result = del.BeginInvoke(tokens, lexer.StringLiterals, null, null);
 
-                // Too few fields found, this is probably not a C# file
-                return document.GetFieldsCount() > 1 ? true : false;
+                // Call asynchronously and wait for 500 ms for the parsing to complete
+                if(result.AsyncWaitHandle.WaitOne(200, true))
+                {
+                    CompilationUnitNode compilationUnitNode = del.EndInvoke(result);
+                    compilationUnitNode.AcceptVisitor((AbstractVisitor) parsingVisitor, document);
+
+                    // Too few fields found, this is probably not a C# file
+                    return document.GetFieldsCount() > 1 ? true : false;
+                }
+                // The parsing didn't complete in 500 ms or threw an exception
+                else
+                {
+                    document = null;
+                    return false;
+                }
+
+//                CompilationUnitNode compilationUnitNode = parser.Parse(tokens, lexer.StringLiterals);
+
+//                compilationUnitNode.AcceptVisitor((AbstractVisitor) parsingVisitor, document);
+//
+//                // Too few fields found, this is probably not a C# file
+//                return document.GetFieldsCount() > 1 ? true : false;
             }
             catch
             {
