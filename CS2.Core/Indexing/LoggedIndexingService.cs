@@ -75,7 +75,7 @@ namespace CS2.Core.Indexing
         /// </summary>
         public void UpdateIndex()
         {
-//            Trace.TraceInformation("Call to UpdateIndex()");
+            Trace.TraceInformation("Call to UpdateIndex()");
             inner.UpdateIndex();
         }
 

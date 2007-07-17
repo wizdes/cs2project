@@ -60,7 +60,7 @@ namespace CS2.Core.Parsing
             if(couldParse)
                 Trace.TraceInformation("Done parsing file {0} in {1} milliseconds", file.FullName, elapsed);
             else
-                Trace.TraceError("Error parsing file {0} n {1} milliseconds", file.FullName, elapsed);
+                Trace.TraceError("Error parsing file {0} in {1} milliseconds", file.FullName, elapsed);
 
             return couldParse;
         }

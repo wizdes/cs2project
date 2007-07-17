@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using CS2.Core.Analysis;
 using DDW;
 using DDW.Collections;
@@ -18,8 +19,10 @@ namespace CS2.Core.Parsing
 
         private readonly AbstractAnalyzer analyzer;
 
+/*
         private readonly ParseDelegate parseDelegate =
             delegate(Parser parser, TokenCollection toks, List<string> literals) { return parser.Parse(toks, literals); };
+*/
 
         private readonly IParsingVisitor parsingVisitor;
 
@@ -45,36 +48,55 @@ namespace CS2.Core.Parsing
 
             try
             {
-                FileStream fileStream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read);
+                Thread dummyParser = new Thread(DummyParsing);
+                dummyParser.Start(file);
 
-                using(StreamReader reader = new StreamReader(fileStream, true))
+                if(dummyParser.Join(2000))
                 {
-                    lexer = new Lexer(reader);
-                    tokens = lexer.Lex();
-                }
+                    FileStream fileStream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read);
 
-                Parser parser = new Parser(file.FullName);
-                IAsyncResult result = parseDelegate.BeginInvoke(parser, tokens, lexer.StringLiterals, null, null);
+                    using(StreamReader reader = new StreamReader(fileStream, true))
+                    {
+                        lexer = new Lexer(reader);
+                        tokens = lexer.Lex();
+                    }
 
-                // Call asynchronously and wait for a while for the parsing to complete
-                if(result.AsyncWaitHandle.WaitOne(1500, true))
-                {
-                    CompilationUnitNode compilationUnitNode = parseDelegate.EndInvoke(result);
+                    Parser parser = new Parser(file.FullName);
+
+//                    IAsyncResult result = parseDelegate.BeginInvoke(parser, tokens, lexer.StringLiterals, null, null);
+//
+//                    // Call asynchronously and wait for a while for the parsing to complete
+//                    if(result.AsyncWaitHandle.WaitOne(1500, true))
+//                    {
+//                        CompilationUnitNode compilationUnitNode = parseDelegate.EndInvoke(result);
+//                        compilationUnitNode.AcceptVisitor((AbstractVisitor) parsingVisitor, document);
+//
+//                        // Too few fields found, this is probably not a C# file
+//                        return document.GetFieldsCount() > 1 ? true : false;
+//                    }
+//                        // The parsing didn't complete in time or threw an exception
+//                    else
+//                        throw new InvalidOperationException("Didn't complete in time.");
+
+                    CompilationUnitNode compilationUnitNode = parser.Parse(tokens, lexer.StringLiterals);
+
                     compilationUnitNode.AcceptVisitor((AbstractVisitor) parsingVisitor, document);
 
                     // Too few fields found, this is probably not a C# file
                     return document.GetFieldsCount() > 1 ? true : false;
                 }
-                    // The parsing didn't complete in time or threw an exception
                 else
-                    throw new InvalidOperationException("Didn't complete in time.");
-
-//                CompilationUnitNode compilationUnitNode = parser.Parse(tokens, lexer.StringLiterals);
-//
-//                compilationUnitNode.AcceptVisitor((AbstractVisitor)parsingVisitor, document);
-//
-//                // Too few fields found, this is probably not a C# file
-//                return document.GetFieldsCount() > 1 ? true : false;
+                {
+                    try
+                    {
+                        dummyParser.Abort();
+                        return false;
+                    }
+                    catch(ThreadAbortException)
+                    {
+                        return false;
+                    }
+                }
             }
             catch
             {
@@ -108,5 +130,32 @@ namespace CS2.Core.Parsing
         }
 
         #endregion
+
+        private static void DummyParsing(object data)
+        {
+            Lexer lexer;
+
+            FileInfo file = (FileInfo) data;
+
+            FileStream fileStream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read);
+
+            try
+            {
+                TokenCollection tokens;
+                using(StreamReader reader = new StreamReader(fileStream, true))
+                {
+                    lexer = new Lexer(reader);
+                    tokens = lexer.Lex();
+                }
+
+                Parser parser = new Parser(file.FullName);
+
+                parser.Parse(tokens, lexer.StringLiterals);
+            }
+            catch(Exception)
+            {
+                Thread.Sleep(2000);
+            }
+        }
     }
 }

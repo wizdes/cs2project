@@ -11,7 +11,7 @@ namespace CS2.Tests
     public class IndexingServiceTests : BaseTest
     {
         private IIndexingService service;
-        private const string docsDir = @"C:\Development\castleproject\monorail";
+        private const string docsDir = @"C:\Development\castleproject\monorail\Castle.MonoRail.Views.Brail";
         private const string dummyFile = @"..\..\DummyClassForParseTesting.cs";
 
         [SetUp]

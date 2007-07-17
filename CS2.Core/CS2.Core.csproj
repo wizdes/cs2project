@@ -60,11 +60,11 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Indexing\IndexingCompletedEventArgs.cs" />
-    <Compile Include="ISynchronizedCollection.cs" />
-    <Compile Include="LoggedSynchronizedSet.cs" />
+    <Compile Include="ISynchronizedStringSet.cs" />
+    <Compile Include="LoggedSynchronizedStringSet.cs" />
     <Compile Include="Searching\ISearchService.cs" />
     <Compile Include="Searching\SearchResult.cs" />
-    <Compile Include="SynchronizedSet.cs" />
+    <Compile Include="SynchronizedStringSet.cs" />
     <Compile Include="Indexing\TimedIndexingService.cs" />
     <Compile Include="Indexing\LoggedIndexingService.cs" />
     <Compile Include="Parsing\CSharpParsingService.cs" />

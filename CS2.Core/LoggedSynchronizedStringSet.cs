@@ -5,16 +5,16 @@ using System.Threading;
 
 namespace CS2.Core
 {
-    public class LoggedSynchronizedSet : ISynchronizedCollection
+    public class LoggedSynchronizedStringSet : ISynchronizedStringSet
     {
-        private readonly ISynchronizedCollection inner;
+        private readonly ISynchronizedStringSet inner;
 
-        public LoggedSynchronizedSet(ISynchronizedCollection inner)
+        public LoggedSynchronizedStringSet(ISynchronizedStringSet inner)
         {
             this.inner = inner;
         }
 
-        #region ISynchronizedCollection Members
+        #region ISynchronizedStringSet Members
 
         ///<summary>
         ///Returns an enumerator that iterates through a collection.
@@ -44,9 +44,16 @@ namespace CS2.Core
 
         public bool Add(string item)
         {
-            Thread.Sleep(100);
-            Trace.TraceInformation("Adding {0} to collection. Total items: {1}", item, Count + 1);
-            return inner.Add(item);
+            Thread.Sleep(0);
+
+            try
+            {
+                return inner.Add(item);
+            }
+            finally
+            {
+                Trace.TraceInformation("Adding {0} to collection. Total items: {1}", item, Count);
+            }
         }
 
         public void Clear()
@@ -55,16 +62,22 @@ namespace CS2.Core
             inner.Clear();
         }
 
-        public ISynchronizedCollection CloneAndClear()
+        public ISynchronizedStringSet CloneAndClear()
         {
-            Trace.TraceInformation("Cloning and clearing the collection");
+            Trace.TraceInformation("Cloning and clearing the collection. Total items: {0}", Count);
             return inner.CloneAndClear();
         }
 
         public bool Remove(string item)
         {
-            Trace.TraceInformation("Removing {0} from the collection. Total items: {1}", item, Count - 1);
-            return inner.Remove(item);
+            try
+            {
+                return inner.Remove(item);
+            }
+            finally
+            {
+                Trace.TraceInformation("Removing {0} from the collection. Total items: {1}", item, Count);                                
+            }
         }
 
         public int Count

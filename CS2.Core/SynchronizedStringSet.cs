@@ -5,46 +5,46 @@ using Wintellect.PowerCollections;
 
 namespace CS2.Core
 {
-    public class SynchronizedSet : ISynchronizedCollection
+    public class SynchronizedStringSet : ISynchronizedStringSet
     {
-        private readonly Set<string> inner;
+        private readonly Set<string> set;
         private readonly object syncLock = new object();
 
-        public SynchronizedSet()
+        public SynchronizedStringSet()
         {
-            inner = new Set<string>(StringComparer.InvariantCultureIgnoreCase);
+            set = new Set<string>(StringComparer.InvariantCultureIgnoreCase);
         }
 
-        private SynchronizedSet(Set<string> inner)
+        private SynchronizedStringSet(Set<string> inner)
         {
-            this.inner = inner;
+            set = inner;
         }
 
-        #region ISynchronizedCollection Members
+        #region ISynchronizedStringSet Members
 
         public bool Add(string item)
         {
             lock(syncLock)
-                return inner.Add(item);
+                return set.Add(item);
         }
 
         public void Clear()
         {
             lock(syncLock)
-                inner.Clear();
+                set.Clear();
         }
 
         public int Count
         {
-            get { return inner.Count; }
+            get { return set.Count; }
         }
 
-        public ISynchronizedCollection CloneAndClear()
+        public ISynchronizedStringSet CloneAndClear()
         {
             lock(syncLock)
             {
-                SynchronizedSet clone = new SynchronizedSet(inner.Clone());
-                inner.Clear();
+                ISynchronizedStringSet clone = new SynchronizedStringSet(set.Clone());
+                set.Clear();
                 return clone;
             }
         }
@@ -57,13 +57,13 @@ namespace CS2.Core
         /// </returns>
         public IEnumerator<string> GetEnumerator()
         {
-            return inner.GetEnumerator();
+            return set.GetEnumerator();
         }
 
         public bool Remove(string item)
         {
             lock(syncLock)
-                return inner.Remove(item);
+                return set.Remove(item);
         }
 
         ///<summary>

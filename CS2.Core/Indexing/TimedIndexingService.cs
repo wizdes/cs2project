@@ -14,7 +14,7 @@ namespace CS2.Core.Indexing
         public TimedIndexingService(IIndexingService inner, TimeSpan updateInterval)
         {
             this.inner = inner;
-            timer = new Timer(delegate { UpdateIndex(); }, null, new TimeSpan(0, 0, 30), updateInterval);
+            timer = new Timer(delegate { UpdateIndex(); }, null, new TimeSpan(0, 0, 10), updateInterval);
         }
 
         #region IDisposable Members

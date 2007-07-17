@@ -14,7 +14,7 @@ namespace CS2.Core.Indexing
     {
         #region Fields
 
-        private readonly ISynchronizedCollection filesWaitingToBeIndexed;
+        private readonly ISynchronizedStringSet filesWaitingToBeIndexed;
         private readonly Directory indexDirectory;
         private readonly IParsingService[] parsingServices;
         private readonly object updatingLock = new object();
@@ -32,10 +32,10 @@ namespace CS2.Core.Indexing
         /// </summary>
         /// <param name="indexDirectory">The index directory.</param>
         /// <param name="parsingServices">The parsing services.</param>
-        /// <param name="filesWaitingToBeIndexed">The files waiting to be indexed.</param>
-        public IndexingService(Directory indexDirectory, IParsingService[] parsingServices, ISynchronizedCollection filesWaitingToBeIndexed)
+        /// <param name="fileQueue">The files waiting to be indexed.</param>
+        public IndexingService(Directory indexDirectory, IParsingService[] parsingServices, ISynchronizedStringSet fileQueue)
         {
-            this.filesWaitingToBeIndexed = filesWaitingToBeIndexed;
+            filesWaitingToBeIndexed = fileQueue;
             this.indexDirectory = indexDirectory;
             this.parsingServices = parsingServices;
 
@@ -114,10 +114,15 @@ namespace CS2.Core.Indexing
             if(!IsValidFileSystemEntryToBeIndexed(directory))
                 return;
 
-            foreach(IParsingService parsingService in parsingServices)
-                foreach(string extension in parsingService.FileExtensions)
-                    foreach(FileInfo file in directory.GetFiles(string.Format("*{0}", extension), SearchOption.AllDirectories))
-                        RequestIndexing(file);
+            ThreadPool.QueueUserWorkItem(delegate
+                {
+                    foreach(IParsingService parsingService in parsingServices)
+                        foreach(string extension in parsingService.FileExtensions)
+                            foreach(
+                                FileInfo file in directory.GetFiles(string.Format("*{0}", extension), SearchOption.AllDirectories)
+                                )
+                                RequestIndexing(file);
+                });
         }
 
         /// <summary>
@@ -135,7 +140,7 @@ namespace CS2.Core.Indexing
                 isUpdating = true;
             }
 
-            ISynchronizedCollection filesUndergoingIndexing = filesWaitingToBeIndexed.CloneAndClear();
+            ISynchronizedStringSet filesUndergoingIndexing = filesWaitingToBeIndexed.CloneAndClear();
 
             int addedFiles = 0;
             int deletedFiles = 0;
@@ -156,13 +161,7 @@ namespace CS2.Core.Indexing
 
                 foreach(string fileName in filesUndergoingIndexing)
                     if(Index(new FileInfo(fileName)))
-                    {
                         addedFiles++;
-
-                        // Each 100 files indexed give some cpu to other threads
-                        if(addedFiles % 20 == 0)
-                            Thread.Sleep(0);
-                    }
 
                 // Close the IndexWriter
                 indexWriter.Optimize();
@@ -239,7 +238,7 @@ namespace CS2.Core.Indexing
         /// <summary>
         /// Removes the deleted and modified documents from the index. Marks the modified files as to be reindexed.
         /// </summary>
-        private void RemoveOldEntries(ISynchronizedCollection filesUndergoingIndexing, ref int deletedFiles)
+        private void RemoveOldEntries(ISynchronizedStringSet filesUndergoingIndexing, ref int deletedFiles)
         {
             // Create a term enumerator to iterate through all the terms of the ID field
             // This is done to avoid searching, which is presumably less performant
@@ -253,17 +252,18 @@ namespace CS2.Core.Indexing
                 // If the file is already in the index remove it from the list of the files waiting to be indexed
                 filesUndergoingIndexing.Remove(filePath);
 
-                // If file doesn't exist or if file exists but is out of date
-                if(!File.Exists(filePath) ||
-                   (File.Exists(filePath) &&
-                    IdIdentifierUtilities.GetIdentifierFromFile(new FileInfo(filePath)) != idEnumerator.Term().Text()))
+                bool fileExists = File.Exists(filePath);
+
+                // If file doesn't exist or it is out of date
+                if(!fileExists ||
+                   IdIdentifierUtilities.GetIdentifierFromFile(new FileInfo(filePath)) != idEnumerator.Term().Text())
                 {
                     // The delete document from the index
                     indexReader.DeleteDocuments(idEnumerator.Term());
                     deletedFiles++;
 
                     // If file was deleted since out of date then re-index it
-                    if(File.Exists(filePath))
+                    if(fileExists)
                         filesUndergoingIndexing.Add(filePath);
                 }
 
@@ -282,11 +282,9 @@ namespace CS2.Core.Indexing
             Document document;
 
             // Find a parser that suits the file
-            foreach(IParsingService parsingService in Array.FindAll(parsingServices,
-                                                            delegate(IParsingService service)
-                                                                {
-                                                                    return service.FileExtensions.Contains(file.Extension);
-                                                                }))
+            foreach(IParsingService parsingService in
+                Array.FindAll(parsingServices,
+                              delegate(IParsingService service) { return service.FileExtensions.Contains(file.Extension); }))
                 if(parsingService.TryParse(file, out document))
                 {
                     document.Add(FieldFactory.CreateIdField(IdIdentifierUtilities.GetIdentifierFromFile(file)));

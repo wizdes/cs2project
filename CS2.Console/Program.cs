@@ -21,34 +21,37 @@ namespace CS2.Console
 
             indexingService.RequestIndexing(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent);
 
-            while(true)
+            string input;
+            
+            do
             {
-                System.Console.WriteLine();
-                System.Console.WriteLine("Type file/directory to index or search query or press enter to exit: ");
-                string indexingRequestPath = System.Console.ReadLine();
+                System.Console.WriteLine("Type file/directory to index or search query or press enter to exit:\n");
 
-                if(indexingRequestPath == string.Empty)
+                if ((input = System.Console.ReadLine()) != string.Empty)
                 {
-                    System.Console.WriteLine("Exiting...");
-                    break;
+                    // Index file
+                    if(File.Exists(input))
+                        indexingService.RequestIndexing(new FileInfo(input));
+                        // Index directory
+                    else if(Directory.Exists(input))
+                        indexingService.RequestIndexing(new DirectoryInfo(input));
+                        // Search
+                    else
+                    {
+                        IEnumerable<Document> searchResults = searchService.Search(input);
+
+                        System.Console.WriteLine("{0} matches found.", new List<Document>(searchResults).Count);
+
+                        foreach(Document document in searchResults)
+                            System.Console.WriteLine(document.Get(FieldFactory.PathFieldName));
+                    }
+
+                    System.Console.WriteLine();
                 }
 
-                // Index file
-                if(File.Exists(indexingRequestPath))
-                    indexingService.RequestIndexing(new FileInfo(indexingRequestPath));
-                // Index directory
-                else if(Directory.Exists(indexingRequestPath))
-                    indexingService.RequestIndexing(new DirectoryInfo(indexingRequestPath));
-                // Search
-                else
-                {
-                    IEnumerable<Document> searchResults = searchService.Search(indexingRequestPath);
-                    System.Console.WriteLine("{0} matches found.", new List<Document>(searchResults).Count);
+            } while(input != string.Empty);
 
-                    foreach(Document document in searchResults)
-                        System.Console.WriteLine(document.Get(FieldFactory.PathFieldName));
-                }
-            }
+            System.Console.WriteLine("Exiting...");
         }
     }
 }
