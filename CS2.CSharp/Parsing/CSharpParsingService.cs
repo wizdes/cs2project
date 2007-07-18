@@ -2,22 +2,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using CS2.Core.Analysis;
+using CS2.Core.Parsing;
+using CS2.CSharp.Analysis;
 using DDW;
 using DDW.Collections;
 using Lucene.Net.Documents;
 
-namespace CS2.Core.Parsing
+namespace CS2.CSharp.Parsing
 {
     public class CSharpParsingService : IParsingService
     {
         private readonly AbstractAnalyzer analyzer;
 
-        private readonly IParsingVisitor parsingVisitor;
+        private readonly CSharpParsingVisitor parsingVisitor;
 
-        public CSharpParsingService(IParsingVisitor parsingVisitor, AbstractAnalyzer analyzer)
+        public CSharpParsingService()
         {
-            this.parsingVisitor = parsingVisitor;
-            this.analyzer = analyzer;
+            parsingVisitor = new CSharpParsingVisitor();
+            analyzer = new CSharpAnalyzer();
         }
 
         #region IParsingService Members
@@ -105,7 +107,7 @@ namespace CS2.Core.Parsing
 
                 CompilationUnitNode compilationUnitNode = parser.Parse(tokens, lexer.StringLiterals);
 
-                compilationUnitNode.AcceptVisitor((AbstractVisitor) parsingVisitor, document);
+                compilationUnitNode.AcceptVisitor(parsingVisitor, document);
             }
             catch
             {

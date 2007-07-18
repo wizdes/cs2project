@@ -16,6 +16,7 @@ namespace CS2.Core.Indexing
 
         private readonly ISynchronizedStringSet filesWaitingToBeIndexed;
         private readonly Directory indexDirectory;
+
         private readonly IParsingService[] parsingServices;
         private readonly object updatingLock = new object();
         private int addedFilesSinceLastUpdate;
@@ -49,6 +50,11 @@ namespace CS2.Core.Indexing
         }
 
         #region IIndexingService Members
+
+        public IParsingService[] ParsingServices
+        {
+            get { return parsingServices; }
+        }
 
         /// <summary>
         /// Returns the number of files deleted from the index since last update.
@@ -219,9 +225,11 @@ namespace CS2.Core.Indexing
         /// <returns></returns>
         private static bool MatchesAnyExclusion(FileSystemInfo entry, string[] exclusions)
         {
+            Regex r;
+
             return !Array.TrueForAll(exclusions, delegate(string exclusion)
                 {
-                    Regex r = new Regex(Regex.Escape(exclusion));
+                    r = new Regex(Regex.Escape(exclusion));
                     return !r.IsMatch(entry.FullName);
                 });
         }
@@ -281,7 +289,7 @@ namespace CS2.Core.Indexing
         {
             Document document;
 
-            // Find a parser that suits the file
+            // Find a parser that suits the filez
             foreach(IParsingService parsingService in
                 Array.FindAll(parsingServices,
                               delegate(IParsingService service) { return service.FileExtensions.Contains(file.Extension); }))

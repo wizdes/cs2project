@@ -25,6 +25,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS2.Core", "CS2.Core\CS2.Co
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS2.CSharp", "CS2.CSharp\CS2.CSharp.csproj", "{7C952222-5E69-4F20-AE08-C185F8051D74}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +53,10 @@ Global
 		{14E25989-745F-4FCF-BB25-145FDA0CC4DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14E25989-745F-4FCF-BB25-145FDA0CC4DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14E25989-745F-4FCF-BB25-145FDA0CC4DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C952222-5E69-4F20-AE08-C185F8051D74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C952222-5E69-4F20-AE08-C185F8051D74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C952222-5E69-4F20-AE08-C185F8051D74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C952222-5E69-4F20-AE08-C185F8051D74}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

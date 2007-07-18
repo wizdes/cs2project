@@ -2,9 +2,9 @@ using CS2.Core;
 using DDW;
 using Lucene.Net.Documents;
 
-namespace CS2.Core.Parsing
+namespace CS2.CSharp.Parsing
 {
-    public class CSharpParsingVisitor : AbstractVisitor, IParsingVisitor
+    public class CSharpParsingVisitor : AbstractVisitor
     {
         private static Document GetDocument(object data)
         {

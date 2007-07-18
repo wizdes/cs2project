@@ -2,8 +2,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using Castle.Core.Logging;
-using CS2.Core.Indexing;
 using CS2.Core.Logging;
+using CS2.Core.Parsing;
 using Directory=Lucene.Net.Store.Directory;
 
 namespace CS2.Core.Indexing
@@ -20,12 +20,12 @@ namespace CS2.Core.Indexing
             inner.IndexingCompleted += inner_IndexingCompleted;
         }
 
-        void inner_IndexingCompleted(object sender, IndexingCompletedEventArgs e)
-        {
-            Trace.TraceInformation("Update completed. Files added: {0}, files deleted: {1}", AddedFilesSinceLastUpdate, DeletedFilesSinceLastUpdate);
-        }
-
         #region IIndexingService Members
+
+        public IParsingService[] ParsingServices
+        {
+            get { return inner.ParsingServices; }
+        }
 
         public int DeletedFilesSinceLastUpdate
         {
@@ -102,5 +102,11 @@ namespace CS2.Core.Indexing
         }
 
         #endregion
+
+        private void inner_IndexingCompleted(object sender, IndexingCompletedEventArgs e)
+        {
+            Trace.TraceInformation("Update completed. Files added: {0}, files deleted: {1}", AddedFilesSinceLastUpdate,
+                                   DeletedFilesSinceLastUpdate);
+        }
     }
 }

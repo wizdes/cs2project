@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using CS2.Core.Analysis;
 using CS2.Core.Indexing;
+using CS2.Core.Parsing;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Highlight;
@@ -12,18 +13,24 @@ namespace CS2.Core.Searching
 {
     public class SearchService : ISearchService
     {
-        private readonly IDictionary<string, AbstractAnalyzer> analyzers;
+        #region Private fields
+
+        private readonly IDictionary<string, AbstractAnalyzer> analyzers = new Dictionary<string, AbstractAnalyzer>();
         private readonly IIndexingService indexingService;
         private Encoder encoder = new DefaultEncoder();
         private Formatter formatter = new SimpleHTMLFormatter();
         private Fragmenter fragmenter = new NullFragmenter();
         private IndexSearcher searcher;
 
-        public SearchService(IIndexingService indexingService, IDictionary<string, AbstractAnalyzer> analyzers)
+        #endregion
+
+        public SearchService(IIndexingService indexingService)
         {
             this.indexingService = indexingService;
-            this.analyzers = analyzers;
             this.indexingService.IndexingCompleted += delegate { InstantiateSearcher(); };
+
+            foreach(IParsingService service in indexingService.ParsingServices)
+                analyzers.Add(service.LanguageName, service.Analyzer);
 
             InstantiateSearcher();
         }

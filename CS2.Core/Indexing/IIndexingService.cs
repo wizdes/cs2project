@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using CS2.Core.Parsing;
 using Directory=Lucene.Net.Store.Directory;
 
 namespace CS2.Core.Indexing
@@ -27,6 +28,8 @@ namespace CS2.Core.Indexing
         int AddedFilesSinceLastUpdate { get; }
 
         string[] Exclusions { get; set; }
+
+        IParsingService[] ParsingServices { get; }
 
         /// <summary>
         /// Occurs when indexing is completed.
