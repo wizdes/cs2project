@@ -33,6 +33,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libraries\Castle.Core.dll</HintPath>
     </Reference>
+    <Reference Include="Castle.Facilities.Logging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Libraries\Castle.Facilities.Logging.dll</HintPath>
+    </Reference>
     <Reference Include="Castle.MicroKernel, Version=1.0.0.2, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Libraries\Castle.MicroKernel.dll</HintPath>
@@ -76,9 +80,9 @@
     <Content Include="Configuration\Directories.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Configuration\Facilities.config">
+    <None Include="Configuration\Facilities.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
     <Content Include="Configuration\Properties.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -88,6 +92,10 @@
     <ProjectReference Include="..\CS2.Core\CS2.Core.csproj">
       <Project>{14E25989-745F-4FCF-BB25-145FDA0CC4DF}</Project>
       <Name>CS2.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CS2.CSharp\CS2.CSharp.csproj">
+      <Project>{7C952222-5E69-4F20-AE08-C185F8051D74}</Project>
+      <Name>CS2.CSharp</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

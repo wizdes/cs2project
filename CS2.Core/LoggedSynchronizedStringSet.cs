@@ -1,18 +1,30 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
+using Castle.Core.Logging;
+using CS2.Core.Logging;
 
 namespace CS2.Core
 {
-    public class LoggedSynchronizedStringSet : ISynchronizedStringSet
+    public class LoggedSynchronizedStringSet : ISynchronizedStringSet, ILoggingService
     {
         private readonly ISynchronizedStringSet inner;
+        private ILogger logger = NullLogger.Instance;
 
         public LoggedSynchronizedStringSet(ISynchronizedStringSet inner)
         {
             this.inner = inner;
         }
+
+        #region ILoggingService Members
+
+        public ILogger Logger
+        {
+            get { return logger; }
+            set { logger = value; }
+        }
+
+        #endregion
 
         #region ISynchronizedStringSet Members
 
@@ -52,19 +64,19 @@ namespace CS2.Core
             }
             finally
             {
-                Trace.TraceInformation("Adding {0} to collection. Total items: {1}", item, Count);
+                Logger.InfoFormat("Adding {0} to collection. Total items: {1}", item, Count);
             }
         }
 
         public void Clear()
         {
-            Trace.TraceInformation("Clearing collection");
+            Logger.InfoFormat("Clearing collection");
             inner.Clear();
         }
 
         public ISynchronizedStringSet CloneAndClear()
         {
-            Trace.TraceInformation("Cloning and clearing the collection. Total items: {0}", Count);
+            Logger.InfoFormat("Cloning and clearing the collection. Total items: {0}", Count);
             return inner.CloneAndClear();
         }
 
@@ -76,7 +88,7 @@ namespace CS2.Core
             }
             finally
             {
-                Trace.TraceInformation("Removing {0} from the collection. Total items: {1}", item, Count);                                
+                Logger.InfoFormat("Removing {0} from the collection. Total items: {1}", item, Count);
             }
         }
 

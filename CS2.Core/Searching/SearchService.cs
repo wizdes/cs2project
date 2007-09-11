@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using CS2.Core.Analysis;
@@ -7,6 +8,7 @@ using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Highlight;
 using Lucene.Net.Index;
+using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 
 namespace CS2.Core.Searching
@@ -27,11 +29,15 @@ namespace CS2.Core.Searching
         public SearchService(IIndexingService indexingService)
         {
             this.indexingService = indexingService;
+
+            // Refresh searcher each time the indexer has finished indexing
             this.indexingService.IndexingCompleted += delegate { InstantiateSearcher(); };
 
+            // Create a list of all the analyzers, one for each language
             foreach(IParsingService service in indexingService.ParsingServices)
                 analyzers.Add(service.LanguageName, service.Analyzer);
 
+            // Instantiate the searcher for the fist time
             InstantiateSearcher();
         }
 
@@ -88,7 +94,57 @@ namespace CS2.Core.Searching
             }
         }
 
+        public IEnumerable<Document> SearchWithQueryParser(string query)
+        {
+            // Create a list of query parsers, one for each language, based on the language analyzer
+            List<QueryParser> parsers = new List<QueryParser>(analyzers.Count);
+
+            // See if the query contains specification for a particular language
+            string language = GetLanguageFromQuery(query);
+
+            PerFieldAnalyzerWrapper analyzerWrapper;
+
+            // If no language was specified or if there is no analyzer suitable for that language
+            // then use all the analyzers to search the query
+            if(string.IsNullOrEmpty(language) || !analyzers.ContainsKey(language))
+                foreach(KeyValuePair<string, AbstractAnalyzer> analyzer in analyzers)
+                {
+                    analyzerWrapper = new PerFieldAnalyzerWrapper(analyzer.Value);
+                    analyzerWrapper.AddAnalyzer(FieldFactory.LanguageFieldName, new KeywordAnalyzer());
+
+                    parsers.Add(new QueryParser(FieldFactory.SourceFieldName, analyzerWrapper));
+                }
+            // otherwise use just the analyzer corresponding to the specified language
+            else
+            {
+                analyzerWrapper = new PerFieldAnalyzerWrapper(analyzers[language]);
+                analyzerWrapper.AddAnalyzer(FieldFactory.LanguageFieldName, new KeywordAnalyzer());
+
+                parsers.Add(new QueryParser(FieldFactory.SourceFieldName, analyzerWrapper));
+            }
+
+            foreach(QueryParser parser in parsers)
+            {
+                Hits hits = searcher.Search(parser.Parse(query));
+
+                for(int i = 0; i < hits.Length(); i++)
+                    yield return hits.Doc(i);
+            }
+        }
+
         #endregion
+
+        private static string GetLanguageFromQuery(string query)
+        {
+            if(!query.Contains(FieldFactory.LanguageFieldName))
+                return null;
+
+            List<string> terms = new List<string>(query.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
+
+            return
+                terms.Find(delegate(string s) { return s.Contains(FieldFactory.LanguageFieldName); }).Split(':')[1].
+                    ToLowerInvariant();
+        }
 
         private void InstantiateSearcher()
         {

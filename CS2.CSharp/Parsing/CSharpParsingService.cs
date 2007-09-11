@@ -39,7 +39,7 @@ namespace CS2.CSharp.Parsing
                 Thread parser = new Thread(Parse);
                 parser.Start(new object[] { file, document });
 
-                if (parser.Join(2000))
+                if(parser.Join(2000))
                     // Too few fields found, this is probably not a C# file
                     return document.GetFieldsCount() > 1 ? true : false;
                 else
@@ -62,7 +62,7 @@ namespace CS2.CSharp.Parsing
 
         public string LanguageName
         {
-            get { return "C#"; }
+            get { return "c#"; }
         }
 
         /// <summary>
@@ -93,10 +93,9 @@ namespace CS2.CSharp.Parsing
 
             TokenCollection tokens = null;
 
-            FileStream fileStream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read);
-
             try
             {
+                using(FileStream fileStream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read))
                 using(StreamReader reader = new StreamReader(fileStream, true))
                 {
                     lexer = new Lexer(reader);

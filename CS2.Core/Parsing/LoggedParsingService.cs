@@ -58,9 +58,9 @@ namespace CS2.Core.Parsing
             watch.Reset();
 
             if(couldParse)
-                Trace.TraceInformation("Done parsing file {0} in {1} milliseconds", file.FullName, elapsed);
+                Logger.InfoFormat("Done parsing file {0} in {1} milliseconds", file.FullName, elapsed);
             else
-                Trace.TraceError("Error parsing file {0} in {1} milliseconds", file.FullName, elapsed);
+                Logger.ErrorFormat("Error parsing file {0} in {1} milliseconds", file.FullName, elapsed);
 
             return couldParse;
         }

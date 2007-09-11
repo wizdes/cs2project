@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using Castle.Core.Logging;
 using CS2.Core.Logging;
@@ -15,7 +14,7 @@ namespace CS2.Core.Indexing
 
         public LoggedIndexingService(IIndexingService inner)
         {
-            Trace.TraceInformation("IndexingService instantiated");
+            Logger.InfoFormat("IndexingService instantiated");
             this.inner = inner;
             inner.IndexingCompleted += inner_IndexingCompleted;
         }
@@ -60,13 +59,13 @@ namespace CS2.Core.Indexing
         /// <param name="file">The file.</param>
         public void RequestIndexing(FileInfo file)
         {
-            Trace.TraceInformation("Requested indexing file {0}", file.FullName);
+            Logger.InfoFormat("Requested indexing file {0}", file.FullName);
             inner.RequestIndexing(file);
         }
 
         public void RequestIndexing(DirectoryInfo directory)
         {
-            Trace.TraceInformation("Requested indexing directory {0}", directory.FullName);
+            Logger.InfoFormat("Requested indexing directory {0}", directory.FullName);
             inner.RequestIndexing(directory);
         }
 
@@ -75,7 +74,7 @@ namespace CS2.Core.Indexing
         /// </summary>
         public void UpdateIndex()
         {
-            Trace.TraceInformation("Call to UpdateIndex()");
+            Logger.InfoFormat("Call to UpdateIndex()");
             inner.UpdateIndex();
         }
 
@@ -105,7 +104,7 @@ namespace CS2.Core.Indexing
 
         private void inner_IndexingCompleted(object sender, IndexingCompletedEventArgs e)
         {
-            Trace.TraceInformation("Update completed. Files added: {0}, files deleted: {1}", AddedFilesSinceLastUpdate,
+            Logger.InfoFormat("Update completed. Files added: {0}, files deleted: {1}", AddedFilesSinceLastUpdate,
                                    DeletedFilesSinceLastUpdate);
         }
     }

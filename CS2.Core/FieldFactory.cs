@@ -10,13 +10,13 @@ namespace CS2.Core
         public const string FileNameFieldName = "fileName";
         public const string IdFieldName = "id";
         public const string InterfaceFieldName = "interface";
+        public const string LanguageFieldName = "language";
         public const string MethodFieldName = "method";
         public const string ModifiedFieldName = "modified";
         public const string NamespaceFieldName = "namespace";
         public const string PathFieldName = "path";
         public const string PropertyFieldName = "property";
         public const string SourceFieldName = "source";
-        public const string LanguageFieldName = "language";
 
         public static Field CreateCommentField(string identifier)
         {

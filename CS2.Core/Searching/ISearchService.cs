@@ -14,5 +14,6 @@ namespace CS2.Core.Searching
 
         IEnumerable<Document> Search(string query);
         IEnumerable<SearchResult> SearchWithHighlighting(string query);
+        IEnumerable<Document> SearchWithQueryParser(string query);
     }
 }

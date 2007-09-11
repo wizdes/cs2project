@@ -22,23 +22,23 @@ namespace CS2.Console
             indexingService.RequestIndexing(new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent);
 
             string input;
-            
+
             do
             {
                 System.Console.WriteLine("Type file/directory to index or search query or press enter to exit:\n");
 
-                if ((input = System.Console.ReadLine()) != string.Empty)
+                if((input = System.Console.ReadLine()) != string.Empty)
                 {
                     // Index file
                     if(File.Exists(input))
                         indexingService.RequestIndexing(new FileInfo(input));
-                        // Index directory
+                    // Index directory
                     else if(Directory.Exists(input))
                         indexingService.RequestIndexing(new DirectoryInfo(input));
-                        // Search
+                    // Search
                     else
                     {
-                        IEnumerable<Document> searchResults = searchService.Search(input);
+                        IEnumerable<Document> searchResults = searchService.SearchWithQueryParser(input);
 
                         System.Console.WriteLine("{0} matches found.", new List<Document>(searchResults).Count);
 
@@ -48,7 +48,6 @@ namespace CS2.Console
 
                     System.Console.WriteLine();
                 }
-
             } while(input != string.Empty);
 
             System.Console.WriteLine("Exiting...");
