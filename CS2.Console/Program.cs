@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using Castle.Windsor;
 using Castle.Windsor.Configuration.Interpreters;
-using CS2.Core;
 using CS2.Core.Indexing;
 using CS2.Core.Searching;
-using Lucene.Net.Documents;
 
 namespace CS2.Console
 {
@@ -32,18 +30,21 @@ namespace CS2.Console
                     // Index file
                     if(File.Exists(input))
                         indexingService.RequestIndexing(new FileInfo(input));
-                    // Index directory
+                        // Index directory
                     else if(Directory.Exists(input))
                         indexingService.RequestIndexing(new DirectoryInfo(input));
-                    // Search
+                        // Search
                     else
                     {
-                        IEnumerable<Document> searchResults = searchService.SearchWithQueryParser(input);
+                        IEnumerable<SearchResult> searchResults = searchService.SearchWithQueryParser(input);
 
-                        System.Console.WriteLine("{0} matches found.", new List<Document>(searchResults).Count);
+                        System.Console.WriteLine("{0} matches found.", new List<SearchResult>(searchResults).Count);
 
-                        foreach(Document document in searchResults)
-                            System.Console.WriteLine(document.Get(FieldFactory.PathFieldName));
+                        foreach (SearchResult searchResult in searchResults)
+                        {
+                            System.Console.WriteLine(searchResult.FilePath);
+                            System.Console.WriteLine(searchResult.Snippet);
+                        }
                     }
 
                     System.Console.WriteLine();

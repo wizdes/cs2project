@@ -138,51 +138,66 @@ namespace CS2.Core.Indexing
         /// </summary>
         public void UpdateIndex()
         {
-            lock(updatingLock)
+            try
             {
-                if(isUpdating)
-                    return;
+                lock (updatingLock)
+                {
+                    if (isUpdating)
+                        return;
 
-                isUpdating = true;
+                    isUpdating = true;
+                }
+
+                ISynchronizedStringSet filesUndergoingIndexing = filesWaitingToBeIndexed.CloneAndClear();
+
+                int addedFiles = 0;
+                int deletedFiles = 0;
+
+                try
+                {
+                    // Create new IndexReader to update the index
+                    indexReader = IndexReader.Open(indexDirectory);
+
+                    RemoveOldEntries(filesUndergoingIndexing, ref deletedFiles);
+                }
+                finally
+                {
+                    // Close the IndexReader
+                    indexReader.Close();
+                    indexReader = null;
+                }
+
+                if (filesUndergoingIndexing.Count > 0)
+                {
+                    // Create a new IndexWriter to add new documents to the index
+                    try
+                    {
+                        indexWriter = new IndexWriter(indexDirectory, new StandardAnalyzer(), false);
+
+                        foreach (string fileName in filesUndergoingIndexing)
+                            if (Index(new FileInfo(fileName)))
+                                addedFiles++;
+                    }
+                    finally
+                    {
+                        // Close the IndexWriter
+                        indexWriter.Optimize();
+                        indexWriter.Close();
+                        indexWriter = null;
+                    }
+                }
+
+                addedFilesSinceLastUpdate = addedFiles;
+                deletedFilesSinceLastUpdate = deletedFiles;
+
+                // Fire IndexingCompleted event
+                OnIndexingCompleted();
             }
-
-            ISynchronizedStringSet filesUndergoingIndexing = filesWaitingToBeIndexed.CloneAndClear();
-
-            int addedFiles = 0;
-            int deletedFiles = 0;
-
-            // Create new IndexReader to update the index
-            indexReader = IndexReader.Open(indexDirectory);
-
-            RemoveOldEntries(filesUndergoingIndexing, ref deletedFiles);
-
-            // Close the IndexReader
-            indexReader.Close();
-            indexReader = null;
-
-            if(filesUndergoingIndexing.Count > 0)
+            finally
             {
-                // Create a new IndexWriter to add new documents to the index
-                indexWriter = new IndexWriter(indexDirectory, new StandardAnalyzer(), false);
-
-                foreach(string fileName in filesUndergoingIndexing)
-                    if(Index(new FileInfo(fileName)))
-                        addedFiles++;
-
-                // Close the IndexWriter
-                indexWriter.Optimize();
-                indexWriter.Close();
-                indexWriter = null;
+                lock(updatingLock)
+                    isUpdating = false;
             }
-
-            addedFilesSinceLastUpdate = addedFiles;
-            deletedFilesSinceLastUpdate = deletedFiles;
-
-            // Fire IndexingCompleted event
-            OnIndexingCompleted();
-
-            lock(updatingLock)
-                isUpdating = false;
         }
 
         /// <summary>

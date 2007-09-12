@@ -1,0 +1,69 @@
+body
+{
+	background-color: white;
+	color: black;
+	font-family: Verdana;
+	font-size: 12px;
+	margin: 3px 8px 8px;
+}
+
+.watermark
+{
+	color:GrayText;
+}
+
+input
+{
+	font-family: Verdana;
+}
+
+.j
+{
+	background-color: #F5F5F5;
+	border: 1px solid silver;
+	color: #222222;
+	margin-bottom: 4px;
+	margin-top: 4px;
+	padding: 0.5em;
+	white-space: -moz-pre-wrap;
+	width: 85%;
+}
+#title
+{
+	background-color: #E5ECF9;
+	border-top: 1px solid #3366CC;
+	margin: 5px 0pt 0pt;
+	padding: 1px 0pt 1px 3px;
+	font-size: 1.2em;
+}
+
+.f
+{
+	font-size: small;
+	margin-bottom: 1.5em;
+}
+
+.h
+{
+	margin-bottom: 0px;
+	margin-top: 1em;
+}
+
+a:active
+{
+	color: #FF0000;
+}
+a:link
+{
+	color: #0000CC;
+}
+a:visited
+{
+	color: #551A8B;
+}
+
+img
+{
+	border: 0pt none;
+}
+
