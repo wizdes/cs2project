@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<FxCopProject Version="1.35" Name="My FxCop Project">
+<FxCopProject Version="1.35" Name="CS2">
  <ProjectOptions>
   <SharedProject>True</SharedProject>
   <Stylesheet Apply="False">c:\programmi\microsoft fxcop 1.35\Xml\FxCopReport.Xsl</Stylesheet>
@@ -22,10 +22,12 @@
  </ProjectOptions>
  <Targets>
   <AssemblyReferenceDirectories>
+   <Directory>$(ProjectDir)/CS2.Model/bin/Debug/</Directory>
    <Directory>$(ProjectDir)/CS2.Repositories/bin/Debug/</Directory>
+   <Directory>$(ProjectDir)/CS2.Services/bin/Debug/</Directory>
   </AssemblyReferenceDirectories>
-  <Target Name="$(ProjectDir)/CS2.Model/bin/Debug/CS2.Model.dll" Analyze="True" AnalyzeAllChildren="True" />
-  <Target Name="$(ProjectDir)/CS2.Services/bin/Debug/CS2.Services.dll" Analyze="True" AnalyzeAllChildren="True" />
+  <Target Name="$(ProjectDir)/CS2.Core/bin/Debug/CS2.Core.dll" Analyze="True" AnalyzeAllChildren="True" />
+  <Target Name="$(ProjectDir)/CS2.CSharp/bin/Debug/CS2.CSharp.dll" Analyze="True" AnalyzeAllChildren="True" />
  </Targets>
  <Rules>
   <RuleFiles>
@@ -44,80 +46,62 @@
  </Rules>
  <FxCopReport Version="1.35">
   <Namespaces>
-   <Namespace Name="CS2.Services">
+   <Namespace Name="CS2.Core.Analysis">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2007-06-29 19:33:03Z">
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2007-09-13 00:55:41Z">
       <Issue>
-       <Item>CS2.Services</Item>
+       <Item>CS2.Core.Analysis</Item>
       </Issue>
      </Message>
     </Messages>
    </Namespace>
-   <Namespace Name="CS2.Services.Analysis">
+   <Namespace Name="CS2.Core.Logging">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2007-06-29 19:33:03Z">
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2007-09-13 00:55:41Z">
       <Issue>
-       <Item>CS2.Services.Analysis</Item>
+       <Item>CS2.Core.Logging</Item>
       </Issue>
      </Message>
     </Messages>
    </Namespace>
-   <Namespace Name="CS2.Services.Logging">
+   <Namespace Name="CS2.Core.Parsing">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2007-06-29 19:33:03Z">
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2007-09-13 00:55:41Z">
       <Issue>
-       <Item>CS2.Services.Logging</Item>
+       <Item>CS2.Core.Parsing</Item>
       </Issue>
      </Message>
     </Messages>
    </Namespace>
-   <Namespace Name="CS2.Services.Searching">
+   <Namespace Name="CS2.Core.Searching">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2007-06-29 19:33:03Z">
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2007-09-13 00:55:41Z">
       <Issue>
-       <Item>CS2.Services.Searching</Item>
+       <Item>CS2.Core.Searching</Item>
       </Issue>
      </Message>
     </Messages>
    </Namespace>
   </Namespaces>
   <Targets>
-   <Target Name="$(ProjectDir)/CS2.Model/bin/Debug/CS2.Model.dll">
+   <Target Name="$(ProjectDir)/CS2.Core/bin/Debug/CS2.Core.dll">
     <Modules>
-     <Module Name="cs2.model.dll">
+     <Module Name="cs2.core.dll">
       <Messages>
-       <Message TypeName="AssembliesShouldDeclareMinimumSecurity" Category="Microsoft.Usage" CheckId="CA2209" Created="2007-06-29 19:33:03Z">
-        <Issue>
-         <Item>CS2.Model</Item>
-        </Issue>
-       </Message>
-       <Message TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210" Created="2007-06-29 19:33:03Z">
+       <Message TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210" Created="2007-09-13 00:55:41Z">
         <Issue Name="NoStrongName">
-         <Item>CS2.Model</Item>
-        </Issue>
-       </Message>
-      </Messages>
-     </Module>
-    </Modules>
-   </Target>
-   <Target Name="$(ProjectDir)/CS2.Services/bin/Debug/CS2.Services.dll">
-    <Modules>
-     <Module Name="cs2.services.dll">
-      <Messages>
-       <Message TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210" Created="2007-06-29 19:33:03Z">
-        <Issue Name="NoStrongName">
-         <Item>CS2.Services</Item>
+         <Item>CS2.Core</Item>
         </Issue>
        </Message>
       </Messages>
       <Namespaces>
-       <Namespace Name="CS2.Services">
+       <Namespace Name="CS2.Core">
         <Types>
          <Type Name="IdIdentifierUtilities">
           <Members>
            <Member Name="GetIdentifierFromFile(System.IO.FileInfo):System.String">
             <Messages>
-             <Message TypeName="ConsiderPassingBaseTypesAsParameters" Category="Microsoft.Design" CheckId="CA1011" Created="2007-06-29 20:24:27Z">
+             <Message TypeName="ConsiderPassingBaseTypesAsParameters" Category="Microsoft.Design" CheckId="CA1011" Created="2007-09-13 00:55:41Z">
               <Issue>
                <Item>file</Item>
                <Item>IdIdentifierUtilities.GetIdentifierFromFile(FileInfo):String</Item>
@@ -125,7 +109,7 @@
                <Item>System.IO.FileSystemInfo</Item>
               </Issue>
              </Message>
-             <Message Id="System.IO.FileNotFoundException.#ctor(System.String,System.String)" TypeName="DoNotPassLiteralsAsLocalizedParameters" Category="Microsoft.Globalization" CheckId="CA1303" Created="2007-06-29 20:24:27Z">
+             <Message Id="System.IO.FileNotFoundException.#ctor(System.String,System.String)" TypeName="DoNotPassLiteralsAsLocalizedParameters" Category="Microsoft.Globalization" CheckId="CA1303" Created="2007-09-13 00:55:41Z">
               <Issue>
                <Item>IdIdentifierUtilities.GetIdentifierFromFile(FileInfo):String</Item>
                <Item>1</Item>
@@ -133,7 +117,7 @@
                <Item>File not found</Item>
               </Issue>
              </Message>
-             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-06-29 20:24:27Z">
+             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-09-13 00:55:41Z">
               <Issue>
                <Item>'file'</Item>
                <Item>IdIdentifierUtilities.GetIdentifierFromFile(FileInfo):String</Item>
@@ -143,7 +127,7 @@
            </Member>
            <Member Name="GetPathFromIdentifier(System.String):System.String">
             <Messages>
-             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-06-29 20:24:27Z">
+             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-09-13 00:55:41Z">
               <Issue>
                <Item>'identifier'</Item>
                <Item>IdIdentifierUtilities.GetPathFromIdentifier(String):String</Item>
@@ -153,17 +137,56 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="ISynchronizedStringSet">
+          <Messages>
+           <Message TypeName="IdentifiersShouldHaveCorrectSuffix" Category="Microsoft.Naming" CheckId="CA1710" Created="2007-09-13 00:55:41Z">
+            <Issue>
+             <Item>CS2.Core.ISynchronizedStringSet</Item>
+             <Item>Collection</Item>
+            </Issue>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="LoggedSynchronizedStringSet">
+          <Messages>
+           <Message TypeName="IdentifiersShouldHaveCorrectSuffix" Category="Microsoft.Naming" CheckId="CA1710" Created="2007-09-13 00:55:41Z">
+            <Issue>
+             <Item>CS2.Core.LoggedSynchronizedStringSet</Item>
+             <Item>Collection</Item>
+            </Issue>
+           </Message>
+          </Messages>
+         </Type>
+         <Type Name="SynchronizedStringSet">
+          <Messages>
+           <Message TypeName="IdentifiersShouldHaveCorrectSuffix" Category="Microsoft.Naming" CheckId="CA1710" Created="2007-09-13 00:55:41Z">
+            <Issue>
+             <Item>CS2.Core.SynchronizedStringSet</Item>
+             <Item>Collection</Item>
+            </Issue>
+           </Message>
+          </Messages>
+         </Type>
         </Types>
        </Namespace>
-       <Namespace Name="CS2.Services.Indexing">
+       <Namespace Name="CS2.Core.Indexing">
         <Types>
          <Type Name="IIndexingService">
           <Members>
            <Member Name="Exclusions">
             <Messages>
-             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2007-07-12 07:46:16Z">
+             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2007-09-13 00:55:41Z">
               <Issue>
                <Item>IIndexingService.Exclusions:String[]</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="ParsingServices">
+            <Messages>
+             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2007-09-13 00:55:41Z">
+              <Issue>
+               <Item>IIndexingService.ParsingServices:IParsingService[]</Item>
               </Issue>
              </Message>
             </Messages>
@@ -172,17 +195,11 @@
          </Type>
          <Type Name="IndexingService">
           <Members>
-           <Member Name=".ctor(Lucene.Net.Store.Directory,CS2.Services.Parsing.IParsingService[])">
+           <Member Name=".ctor(Lucene.Net.Store.Directory,CS2.Core.Parsing.IParsingService[],CS2.Core.ISynchronizedStringSet)">
             <Messages>
-             <Message TypeName="DoNotInitializeUnnecessarily" Category="Microsoft.Performance" CheckId="CA1805" Created="2007-07-12 07:46:16Z">
+             <Message TypeName="DoNotInitializeUnnecessarily" Category="Microsoft.Performance" CheckId="CA1805" Created="2007-09-13 00:55:41Z">
               <Issue>
-               <Item>IndexingService.IndexingService(Directory, IParsingService[])</Item>
-               <Item>indexWriter</Item>
-               <Item>Lucene.Net.Index.IndexWriter</Item>
-               <Item>null</Item>
-              </Issue>
-              <Issue>
-               <Item>IndexingService.IndexingService(Directory, IParsingService[])</Item>
+               <Item>IndexingService.IndexingService(Directory, IParsingService[], ISynchronizedStringSet)</Item>
                <Item>isUpdating</Item>
                <Item>System.Boolean</Item>
                <Item>false</Item>
@@ -194,21 +211,9 @@
          </Type>
          <Type Name="LoggedIndexingService">
           <Members>
-           <Member Name=".ctor(CS2.Services.Indexing.IIndexingService)">
-            <Messages>
-             <Message Id="Castle.Core.Logging.ILogger.Info(System.String)" TypeName="DoNotPassLiteralsAsLocalizedParameters" Category="Microsoft.Globalization" CheckId="CA1303" Created="2007-06-29 19:33:03Z">
-              <Issue>
-               <Item>LoggedIndexingService.LoggedIndexingService(IIndexingService)</Item>
-               <Item>1</Item>
-               <Item>ILogger.Info(String):Void</Item>
-               <Item>IndexingService instantiated</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="RequestIndexing(System.IO.DirectoryInfo):System.Void">
             <Messages>
-             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-06-29 19:33:03Z">
+             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-09-13 00:55:41Z">
               <Issue>
                <Item>'directory'</Item>
                <Item>LoggedIndexingService.RequestIndexing(DirectoryInfo):Void</Item>
@@ -218,28 +223,10 @@
            </Member>
            <Member Name="RequestIndexing(System.IO.FileInfo):System.Void">
             <Messages>
-             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-06-29 19:33:03Z">
+             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-09-13 00:55:41Z">
               <Issue>
                <Item>'file'</Item>
                <Item>LoggedIndexingService.RequestIndexing(FileInfo):Void</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="UpdateIndex():System.Void">
-            <Messages>
-             <Message Id="Castle.Core.Logging.ILogger.Info(System.String)" TypeName="DoNotPassLiteralsAsLocalizedParameters" Category="Microsoft.Globalization" CheckId="CA1303" Created="2007-06-29 19:33:03Z">
-              <Issue>
-               <Item>LoggedIndexingService.UpdateIndex():Void</Item>
-               <Item>1</Item>
-               <Item>ILogger.Info(String):Void</Item>
-               <Item>Finished updating index.</Item>
-              </Issue>
-              <Issue>
-               <Item>LoggedIndexingService.UpdateIndex():Void</Item>
-               <Item>1</Item>
-               <Item>ILogger.Info(String):Void</Item>
-               <Item>Start updating index</Item>
               </Issue>
              </Message>
             </Messages>
@@ -248,13 +235,102 @@
          </Type>
         </Types>
        </Namespace>
-       <Namespace Name="CS2.Services.Parsing">
+       <Namespace Name="CS2.Core.Parsing">
         <Types>
-         <Type Name="CSharpParsingService">
+         <Type Name="LoggedParsingService">
           <Members>
            <Member Name="TryParse(System.IO.FileInfo,Lucene.Net.Documents.Document&amp;):System.Boolean">
             <Messages>
-             <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Created="2007-06-29 19:33:03Z">
+             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-09-13 00:55:41Z">
+              <Issue>
+               <Item>'file'</Item>
+               <Item>LoggedParsingService.TryParse(FileInfo, Document&amp;):Boolean</Item>
+              </Issue>
+              <Issue>
+               <Item>'file'</Item>
+               <Item>LoggedParsingService.TryParse(FileInfo, Document&amp;):Boolean</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+       <Namespace Name="CS2.Core.Searching">
+        <Types>
+         <Type Name="ISearchService">
+          <Members>
+           <Member Name="Fragmenter">
+            <Messages>
+             <Message Id="Fragmenter" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Created="2007-09-13 00:55:41Z">
+              <Issue Name="Member">
+               <Item>Fragmenter</Item>
+               <Item>ISearchService.Fragmenter:Fragmenter</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="SearchResult">
+          <Members>
+           <Member Name=".ctor(Lucene.Net.Documents.Document,System.String)">
+            <Messages>
+             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-09-13 00:55:41Z">
+              <Issue>
+               <Item>'doc'</Item>
+               <Item>SearchResult.SearchResult(Document, String)</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+      </Namespaces>
+     </Module>
+    </Modules>
+   </Target>
+   <Target Name="$(ProjectDir)/CS2.CSharp/bin/Debug/CS2.CSharp.dll">
+    <Modules>
+     <Module Name="cs2.csharp.dll">
+      <Messages>
+       <Message TypeName="AssembliesShouldDeclareMinimumSecurity" Category="Microsoft.Usage" CheckId="CA2209" Created="2007-09-13 00:55:41Z">
+        <Issue>
+         <Item>CS2.CSharp</Item>
+        </Issue>
+       </Message>
+       <Message TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210" Created="2007-09-13 00:55:41Z">
+        <Issue Name="NoStrongName">
+         <Item>CS2.CSharp</Item>
+        </Issue>
+       </Message>
+       <Message TypeName="MarkAssembliesWithClsCompliant" Category="Microsoft.Design" CheckId="CA1014" Created="2007-09-13 00:55:41Z">
+        <Issue Name="NoAttr">
+         <Item>CS2.CSharp</Item>
+        </Issue>
+       </Message>
+      </Messages>
+      <Namespaces>
+       <Namespace Name="CS2.CSharp.Parsing">
+        <Types>
+         <Type Name="CSharpParsingService">
+          <Members>
+           <Member Name="Parse(System.Object):System.Void">
+            <Messages>
+             <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Created="2007-09-13 00:55:41Z">
+              <Issue>
+               <Item>CSharpParsingService.Parse(Object):Void</Item>
+               <Item>System.Object</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="TryParse(System.IO.FileInfo,Lucene.Net.Documents.Document&amp;):System.Boolean">
+            <Messages>
+             <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Created="2007-09-13 00:55:41Z">
               <Issue>
                <Item>CSharpParsingService.TryParse(FileInfo, Document&amp;):Boolean</Item>
                <Item>System.Object</Item>
@@ -268,7 +344,7 @@
           <Members>
            <Member Name="VisitClassDeclaration(DDW.ClassNode,System.Object):System.Object">
             <Messages>
-             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-06-29 19:33:03Z">
+             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-09-13 00:55:41Z">
               <Issue>
                <Item>'classDeclaration'</Item>
                <Item>CSharpParsingVisitor.VisitClassDeclaration(ClassNode, Object):Object</Item>
@@ -278,7 +354,7 @@
            </Member>
            <Member Name="VisitInterfaceDeclaration(DDW.InterfaceNode,System.Object):System.Object">
             <Messages>
-             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-06-29 19:33:03Z">
+             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-09-13 00:55:41Z">
               <Issue>
                <Item>'interfaceDeclaration'</Item>
                <Item>CSharpParsingVisitor.VisitInterfaceDeclaration(InterfaceNode, Object):Object</Item>
@@ -288,46 +364,10 @@
            </Member>
            <Member Name="VisitNamespaceDeclaration(DDW.NamespaceNode,System.Object):System.Object">
             <Messages>
-             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-06-29 19:33:03Z">
+             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-09-13 00:55:41Z">
               <Issue>
                <Item>'namespaceDeclaration'</Item>
                <Item>CSharpParsingVisitor.VisitNamespaceDeclaration(NamespaceNode, Object):Object</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="IParsingService">
-          <Members>
-           <Member Name="Exclusions">
-            <Messages>
-             <Message TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819" Created="2007-07-12 07:46:16Z">
-              <Issue>
-               <Item>IParsingService.Exclusions:String[]</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="IParsingVisitor">
-          <Messages>
-           <Message TypeName="AvoidEmptyInterfaces" Category="Microsoft.Design" CheckId="CA1040" Created="2007-06-29 19:33:03Z">
-            <Issue>
-             <Item>IParsingVisitor</Item>
-            </Issue>
-           </Message>
-          </Messages>
-         </Type>
-         <Type Name="LoggedParsingService">
-          <Members>
-           <Member Name="TryParse(System.IO.FileInfo,Lucene.Net.Documents.Document&amp;):System.Boolean">
-            <Messages>
-             <Message TypeName="ValidateArgumentsOfPublicMethods" Category="Microsoft.Design" CheckId="CA1062" Created="2007-06-29 19:33:03Z">
-              <Issue>
-               <Item>'file'</Item>
-               <Item>LoggedParsingService.TryParse(FileInfo, Document&amp;):Boolean</Item>
               </Issue>
              </Message>
             </Messages>
@@ -348,9 +388,6 @@
    <Rule TypeName="AssembliesShouldHaveValidStrongNames" Category="Microsoft.Design" CheckId="CA2210">
     <Resolution Name="NoStrongName">Sign '{0}' with a strong name key.</Resolution>
    </Rule>
-   <Rule TypeName="AvoidEmptyInterfaces" Category="Microsoft.Design" CheckId="CA1040">
-    <Resolution Name="Default">Define a custom attribute to replace '{0}'.</Resolution>
-   </Rule>
    <Rule TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020">
     <Resolution Name="Default">Consider merging the types defined in '{0}' with another namespace.</Resolution>
    </Rule>
@@ -365,6 +402,15 @@
    </Rule>
    <Rule TypeName="DoNotPassLiteralsAsLocalizedParameters" Category="Microsoft.Globalization" CheckId="CA1303">
     <Resolution Name="Default">{0} passes a literal as parameter {1} of a call to {2}. Retrieve the following string argument from a resource table instead: '{3}'</Resolution>
+   </Rule>
+   <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
+    <Resolution Name="Member">Correct the spelling of the unrecognized token '{0}' in member name '{1}'.</Resolution>
+   </Rule>
+   <Rule TypeName="IdentifiersShouldHaveCorrectSuffix" Category="Microsoft.Naming" CheckId="CA1710">
+    <Resolution Name="Default">Rename '{0}' to end in '{1}'.</Resolution>
+   </Rule>
+   <Rule TypeName="MarkAssembliesWithClsCompliant" Category="Microsoft.Design" CheckId="CA1014">
+    <Resolution Name="NoAttr">'{0}' should be marked with CLSCompliantAttribute and its value should be true.</Resolution>
    </Rule>
    <Rule TypeName="PropertiesShouldNotReturnArrays" Category="Microsoft.Performance" CheckId="CA1819">
     <Resolution Name="Default">Change {0} to return a collection or make it a method.</Resolution>

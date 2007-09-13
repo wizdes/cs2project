@@ -9,8 +9,28 @@ body
 
 .watermark
 {
-	color:GrayText;
+	color: GrayText;
 }
+
+.pager
+{
+	font-size: 1.2em;
+}
+
+#searchSyntax
+{
+	font-size: 0.9em;
+	border-right: gold thin solid;
+	border-top: gold thin solid;
+	background-image: none;
+	border-left: gold thin solid;
+	border-bottom: gold thin solid;
+	background-color: #ffff99;
+	margin-top: 5px;
+	padding: 5px;
+	text-align:left;
+}
+
 
 input
 {
@@ -67,3 +87,23 @@ img
 	border: 0pt none;
 }
 
+.a, .a a
+{
+	font-size: small;
+	color: green;
+}
+a.s, .s a
+{
+	font-size: small;
+	color: #77c;
+}
+.a, .a a
+{
+	font-size: small;
+	color: green;
+}
+.i, .i:link
+{
+	color: #a90a08;
+	font-size: small;
+}

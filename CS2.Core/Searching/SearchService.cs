@@ -17,6 +17,7 @@ namespace CS2.Core.Searching
     {
         #region Private fields
 
+        private static readonly object searcherLock = new object();
         private readonly IDictionary<string, AbstractAnalyzer> analyzers = new Dictionary<string, AbstractAnalyzer>();
         private readonly IIndexingService indexingService;
         private Encoder encoder = new DefaultEncoder();
@@ -31,10 +32,14 @@ namespace CS2.Core.Searching
             this.indexingService = indexingService;
 
             // Refresh searcher each time the indexer has finished indexing
-            this.indexingService.IndexingCompleted += delegate { searcher.Close(); InstantiateSearcher(); };
+            this.indexingService.IndexingCompleted += delegate(object sender, IndexingCompletedEventArgs e)
+                {
+                    if(e.AddedFiles > 0 || e.DeletedFiles > 0)
+                        InstantiateSearcher();
+                };
 
             // Create a list of all the analyzers, one for each language
-            foreach (IParsingService service in indexingService.ParsingServices)
+            foreach(IParsingService service in indexingService.ParsingServices)
                 analyzers.Add(service.LanguageName, service.Analyzer);
 
             // Instantiate the searcher for the fist time
@@ -67,7 +72,7 @@ namespace CS2.Core.Searching
 
             Hits hits = searcher.Search(q);
 
-            for (int i = 0; i < hits.Length(); i++)
+            for(int i = 0; i < hits.Length(); i++)
                 yield return hits.Doc(i);
         }
 
@@ -79,7 +84,7 @@ namespace CS2.Core.Searching
                 new Highlighter(formatter, encoder, new QueryScorer(new TermQuery(new Term(FieldFactory.SourceFieldName, query))));
             highlighter.SetTextFragmenter(fragmenter);
 
-            foreach (Document doc in docs)
+            foreach(Document doc in docs)
             {
                 string path = doc.Get(FieldFactory.PathFieldName);
 
@@ -89,14 +94,14 @@ namespace CS2.Core.Searching
 
                 string[] fragments = highlighter.GetBestFragments(tokenStream, new StreamReader(path).ReadToEnd(), 10);
 
-                foreach (string fragment in fragments)
+                foreach(string fragment in fragments)
                     yield return new SearchResult(doc, fragment);
             }
         }
 
         public IEnumerable<SearchResult> SearchWithQueryParser(string query)
         {
-            if (string.IsNullOrEmpty(query))
+            if(string.IsNullOrEmpty(query))
                 yield break;
 
             // Create a list of query parsers, one for each language, based on the language analyzer
@@ -110,16 +115,16 @@ namespace CS2.Core.Searching
             // If no language was specified in the query or if there is no analyzer suitable for that language
             // then use all the analyzers to search the query
             // A KeywordAnalyzer is always used for the language field.
-            if (string.IsNullOrEmpty(language) || !analyzers.ContainsKey(language))
-                foreach (KeyValuePair<string, AbstractAnalyzer> analyzer in analyzers)
+            if(string.IsNullOrEmpty(language) || !analyzers.ContainsKey(language))
+                foreach(KeyValuePair<string, AbstractAnalyzer> analyzer in analyzers)
                 {
                     analyzerWrapper = new PerFieldAnalyzerWrapper(analyzer.Value);
                     analyzerWrapper.AddAnalyzer(FieldFactory.LanguageFieldName, new KeywordAnalyzer());
 
                     parsers.Add(new QueryParser(FieldFactory.SourceFieldName, analyzerWrapper));
                 }
-            // Otherwise use just the analyzer corresponding to the specified language
-            // A KeywordAnalyzer is always used for the language field.
+                // Otherwise use just the analyzer corresponding to the specified language
+                // A KeywordAnalyzer is always used for the language field.
             else
             {
                 analyzerWrapper = new PerFieldAnalyzerWrapper(analyzers[language]);
@@ -128,32 +133,35 @@ namespace CS2.Core.Searching
                 parsers.Add(new QueryParser(FieldFactory.SourceFieldName, analyzerWrapper));
             }
 
-            foreach (QueryParser parser in parsers)
+            lock(searcherLock)
             {
-                Query q = parser.Parse(query).Rewrite(searcher.GetIndexReader());
-
-                Hits hits = searcher.Search(q);
-
-                Highlighter highlighter = new Highlighter(formatter, encoder, new QueryScorer(q));
-                highlighter.SetTextFragmenter(fragmenter);
-
-                for (int i = 0; i < hits.Length(); i++)
+                foreach(QueryParser parser in parsers)
                 {
-                    Document doc = hits.Doc(i);
+                    Query q = parser.Parse(query).Rewrite(searcher.GetIndexReader());
 
-                    string path = doc.Get(FieldFactory.PathFieldName);
+                    Hits hits = searcher.Search(q);
 
-                    TokenStream tokenStream =
-                        parser.GetAnalyzer().TokenStream(FieldFactory.SourceFieldName, new StreamReader(path));
+                    Highlighter highlighter = new Highlighter(formatter, encoder, new QueryScorer(q));
+                    highlighter.SetTextFragmenter(fragmenter);
 
-                    string[] fragments = highlighter.GetBestFragments(tokenStream, new StreamReader(path).ReadToEnd(), 10);
+                    for(int i = 0; i < hits.Length(); i++)
+                    {
+                        Document doc = hits.Doc(i);
 
-                    if (fragments.Length == 0)
-                        using (StreamReader reader = new StreamReader(path))
-                            fragments = new string[] { reader.ReadToEnd().Substring(0, 100) };
+                        string path = doc.Get(FieldFactory.PathFieldName);
 
-                    foreach (string fragment in fragments)
-                        yield return new SearchResult(doc, fragment);
+                        TokenStream tokenStream =
+                            parser.GetAnalyzer().TokenStream(FieldFactory.SourceFieldName, new StreamReader(path));
+
+                        string[] fragments = highlighter.GetBestFragments(tokenStream, new StreamReader(path).ReadToEnd(), 10);
+
+                        if(fragments.Length == 0)
+                            using(StreamReader reader = new StreamReader(path))
+                                fragments = new string[] { reader.ReadToEnd().Substring(0, 100) };
+
+                        foreach(string fragment in fragments)
+                            yield return new SearchResult(doc, fragment);
+                    }
                 }
             }
         }
@@ -167,7 +175,7 @@ namespace CS2.Core.Searching
         /// <returns>The language name in lower case if the query contains one, null otherwise.</returns>
         private static string GetLanguageFromQuery(string query)
         {
-            if (!query.Contains(FieldFactory.LanguageFieldName))
+            if(!query.Contains(FieldFactory.LanguageFieldName))
                 return null;
 
             List<string> terms = new List<string>(query.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
@@ -179,7 +187,13 @@ namespace CS2.Core.Searching
 
         private void InstantiateSearcher()
         {
-            searcher = new IndexSearcher(indexingService.IndexDirectory);
+            lock(searcherLock)
+            {
+                if(searcher != null)
+                    searcher.Close();
+
+                searcher = new IndexSearcher(indexingService.IndexDirectory);
+            }
         }
     }
 }

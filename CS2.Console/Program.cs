@@ -40,7 +40,7 @@ namespace CS2.Console
 
                         System.Console.WriteLine("{0} matches found.", new List<SearchResult>(searchResults).Count);
 
-                        foreach (SearchResult searchResult in searchResults)
+                        foreach(SearchResult searchResult in searchResults)
                         {
                             System.Console.WriteLine(searchResult.FilePath);
                             System.Console.WriteLine(searchResult.Snippet);

@@ -61,7 +61,6 @@
     <Reference Include="System.Web.Extensions" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Default.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -90,6 +89,7 @@
     <None Include="Configuration\Facilities.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Content Include="Default.aspx" />
     <Content Include="FileHandler.ashx" />
     <Content Include="Configuration\Properties.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

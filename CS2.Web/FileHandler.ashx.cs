@@ -1,5 +1,4 @@
 using System.Web;
-using System.Web.Services;
 
 namespace CS2.Web
 {
@@ -11,7 +10,7 @@ namespace CS2.Web
         {
             context.Response.ContentType = "text/plain";
 
-            context.Response.TransmitFile(context.Request.QueryString["f"]);
+            context.Response.WriteFile(context.Request.QueryString["f"]);
         }
 
         public bool IsReusable

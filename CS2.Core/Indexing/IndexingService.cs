@@ -21,6 +21,7 @@ namespace CS2.Core.Indexing
         private readonly object updatingLock = new object();
         private int addedFilesSinceLastUpdate;
         private int deletedFilesSinceLastUpdate;
+        private int documentCount;
         private string[] exclusions;
         private IndexReader indexReader;
         private IndexWriter indexWriter;
@@ -51,6 +52,19 @@ namespace CS2.Core.Indexing
 
         #region IIndexingService Members
 
+        /// <summary>
+        /// Gets the number of documents indexed.
+        /// </summary>
+        /// <value>The document count.</value>
+        public int DocumentCount
+        {
+            get { return documentCount; }
+        }
+
+        /// <summary>
+        /// Gets the parsing services.
+        /// </summary>
+        /// <value>The parsing services.</value>
         public IParsingService[] ParsingServices
         {
             get { return parsingServices; }
@@ -92,6 +106,10 @@ namespace CS2.Core.Indexing
             get { return indexDirectory; }
         }
 
+        /// <summary>
+        /// Gets or sets the exclusions.
+        /// </summary>
+        /// <value>The exclusions.</value>
         public string[] Exclusions
         {
             get { return exclusions; }
@@ -138,66 +156,61 @@ namespace CS2.Core.Indexing
         /// </summary>
         public void UpdateIndex()
         {
-            try
+            // If another indexing operation is being executed then abort
+            lock(updatingLock)
             {
-                lock (updatingLock)
-                {
-                    if (isUpdating)
-                        return;
+                if(isUpdating)
+                    return;
 
-                    isUpdating = true;
-                }
-
-                ISynchronizedStringSet filesUndergoingIndexing = filesWaitingToBeIndexed.CloneAndClear();
-
-                int addedFiles = 0;
-                int deletedFiles = 0;
-
-                try
-                {
-                    // Create new IndexReader to update the index
-                    indexReader = IndexReader.Open(indexDirectory);
-
-                    RemoveOldEntries(filesUndergoingIndexing, ref deletedFiles);
-                }
-                finally
-                {
-                    // Close the IndexReader
-                    indexReader.Close();
-                    indexReader = null;
-                }
-
-                if (filesUndergoingIndexing.Count > 0)
-                {
-                    // Create a new IndexWriter to add new documents to the index
-                    try
-                    {
-                        indexWriter = new IndexWriter(indexDirectory, new StandardAnalyzer(), false);
-
-                        foreach (string fileName in filesUndergoingIndexing)
-                            if (Index(new FileInfo(fileName)))
-                                addedFiles++;
-                    }
-                    finally
-                    {
-                        // Close the IndexWriter
-                        indexWriter.Optimize();
-                        indexWriter.Close();
-                        indexWriter = null;
-                    }
-                }
-
-                addedFilesSinceLastUpdate = addedFiles;
-                deletedFilesSinceLastUpdate = deletedFiles;
-
-                // Fire IndexingCompleted event
-                OnIndexingCompleted();
+                isUpdating = true;
             }
-            finally
+
+            // Get the list of files which need to be parsed and then indexed
+            // The source list is cleared
+            ISynchronizedStringSet filesUndergoingIndexing = filesWaitingToBeIndexed.CloneAndClear();
+
+            // Auditing
+            int addedFiles = 0;
+            int deletedFiles = 0;
+            int tempCount;
+
+            // Create new IndexReader to update the index
+            indexReader = IndexReader.Open(indexDirectory);
+
+            // Get the list of documents in the index while removing deleted or updated documents
+            tempCount = RemoveOldEntries(filesUndergoingIndexing, ref deletedFiles);
+
+            // Close the IndexReader
+            indexReader.Close();
+            indexReader = null;
+
+            // If there are files waiting to be parsed and indexed then write them to the index
+            if(filesUndergoingIndexing.Count > 0)
             {
-                lock(updatingLock)
-                    isUpdating = false;
+                // Create a new IndexWriter to add new documents to the index
+                indexWriter = new IndexWriter(indexDirectory, new StandardAnalyzer(), false);
+
+                foreach(string fileName in filesUndergoingIndexing)
+                    if(Index(new FileInfo(fileName)))
+                        addedFiles++;
+
+                // Close the IndexWriter
+                indexWriter.Optimize();
+                indexWriter.Close();
+                indexWriter = null;
             }
+
+            // Update statistics
+            addedFilesSinceLastUpdate = addedFiles;
+            deletedFilesSinceLastUpdate = deletedFiles;
+            documentCount = tempCount + addedFiles - deletedFiles;
+
+            // Fire IndexingCompleted event
+            OnIndexingCompleted();
+
+            // Signal as finished updating
+            lock(updatingLock)
+                isUpdating = false;
         }
 
         /// <summary>
@@ -255,14 +268,18 @@ namespace CS2.Core.Indexing
         private void OnIndexingCompleted()
         {
             if(IndexingCompleted != null)
-                IndexingCompleted(this, new IndexingCompletedEventArgs(addedFilesSinceLastUpdate, deletedFilesSinceLastUpdate));
+                IndexingCompleted(this,
+                                  new IndexingCompletedEventArgs(addedFilesSinceLastUpdate, deletedFilesSinceLastUpdate,
+                                                                 documentCount));
         }
 
         /// <summary>
         /// Removes the deleted and modified documents from the index. Marks the modified files as to be reindexed.
         /// </summary>
-        private void RemoveOldEntries(ISynchronizedStringSet filesUndergoingIndexing, ref int deletedFiles)
+        private int RemoveOldEntries(ISynchronizedStringSet filesUndergoingIndexing, ref int deletedFiles)
         {
+            int tempCount = 0;
+
             // Create a term enumerator to iterate through all the terms of the ID field
             // This is done to avoid searching, which is presumably less performant
             TermEnum idEnumerator = indexReader.Terms(new Term(FieldFactory.IdFieldName, ""));
@@ -270,6 +287,8 @@ namespace CS2.Core.Indexing
             // Iterate all the documents into the index
             while(idEnumerator.Term() != null && idEnumerator.Term().Field() == FieldFactory.IdFieldName)
             {
+                tempCount++;
+
                 string filePath = IdIdentifierUtilities.GetPathFromIdentifier(idEnumerator.Term().Text());
 
                 // If the file is already in the index remove it from the list of the files waiting to be indexed
@@ -294,6 +313,8 @@ namespace CS2.Core.Indexing
             }
 
             idEnumerator.Close();
+
+            return tempCount;
         }
 
         /// <summary>

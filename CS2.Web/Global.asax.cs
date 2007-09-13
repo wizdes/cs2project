@@ -20,34 +20,29 @@ namespace CS2.Web
             get { return indexingService; }
         }
 
-        public static ISearchService SearchService
-        {
-            get { return searchService; }
-        }
-
         public static IEnumerable<SearchResult> Search(string query, int maximumRows, int startRowIndex)
         {
             int count = Count(query);
 
             return
-                GetAndSaveResults(query).GetRange(Math.Min(startRowIndex, count),
-                                                  Math.Min(maximumRows, count - Math.Min(startRowIndex, count)));
+                GetAndCacheResults(query).GetRange(Math.Min(startRowIndex, count),
+                                                   Math.Min(maximumRows, count - Math.Min(startRowIndex, count)));
         }
 
         public static int Count(string query)
         {
-            return GetAndSaveResults(query).Count;
+            return GetAndCacheResults(query).Count;
         }
 
-        private static List<SearchResult> GetAndSaveResults(string query)
+        private static List<SearchResult> GetAndCacheResults(string query)
         {
-            if (HttpContext.Current.Items["results"] == null)
+            if(HttpContext.Current.Items["results"] == null)
             {
                 Stopwatch watch = new Stopwatch();
 
                 watch.Start();
 
-                HttpContext.Current.Items["results"] = new List<SearchResult>(SearchService.SearchWithQueryParser(query));
+                HttpContext.Current.Items["results"] = new List<SearchResult>(searchService.SearchWithQueryParser(query));
 
                 watch.Stop();
                 HttpContext.Current.Items["elapsed"] = watch.ElapsedMilliseconds;
@@ -55,6 +50,11 @@ namespace CS2.Web
                 return HttpContext.Current.Items["results"] as List<SearchResult>;
             }
             return HttpContext.Current.Items["results"] as List<SearchResult>;
+        }
+
+        protected void Application_BeginRequest(object sender, EventArgs e)
+        {
+
         }
 
         protected void Application_Start(object sender, EventArgs e)

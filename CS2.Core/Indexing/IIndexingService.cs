@@ -27,9 +27,23 @@ namespace CS2.Core.Indexing
         /// </summary>
         int AddedFilesSinceLastUpdate { get; }
 
+        /// <summary>
+        /// Gets or sets the exclusions.
+        /// </summary>
+        /// <value>The exclusions.</value>
         string[] Exclusions { get; set; }
 
+        /// <summary>
+        /// Gets the parsing services.
+        /// </summary>
+        /// <value>The parsing services.</value>
         IParsingService[] ParsingServices { get; }
+
+        /// <summary>
+        /// Gets the number of documents indexed.
+        /// </summary>
+        /// <value>The document count.</value>
+        int DocumentCount { get; }
 
         /// <summary>
         /// Occurs when indexing is completed.

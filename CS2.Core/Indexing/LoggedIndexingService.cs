@@ -21,6 +21,11 @@ namespace CS2.Core.Indexing
 
         #region IIndexingService Members
 
+        public int DocumentCount
+        {
+            get { return inner.DocumentCount; }
+        }
+
         public IParsingService[] ParsingServices
         {
             get { return inner.ParsingServices; }
@@ -105,7 +110,7 @@ namespace CS2.Core.Indexing
         private void inner_IndexingCompleted(object sender, IndexingCompletedEventArgs e)
         {
             Logger.InfoFormat("Update completed. Files added: {0}, files deleted: {1}", AddedFilesSinceLastUpdate,
-                                   DeletedFilesSinceLastUpdate);
+                              DeletedFilesSinceLastUpdate);
         }
     }
 }
