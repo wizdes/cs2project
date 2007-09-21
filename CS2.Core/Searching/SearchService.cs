@@ -7,7 +7,6 @@ using CS2.Core.Parsing;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Highlight;
-using Lucene.Net.Index;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 
@@ -64,39 +63,6 @@ namespace CS2.Core.Searching
         {
             get { return encoder; }
             set { encoder = value; }
-        }
-
-        public IEnumerable<Document> Search(string query)
-        {
-            Query q = new TermQuery(new Term(FieldFactory.SourceFieldName, query));
-
-            Hits hits = searcher.Search(q);
-
-            for(int i = 0; i < hits.Length(); i++)
-                yield return hits.Doc(i);
-        }
-
-        public IEnumerable<SearchResult> SearchWithHighlighting(string query)
-        {
-            IEnumerable<Document> docs = Search(query);
-
-            Highlighter highlighter =
-                new Highlighter(formatter, encoder, new QueryScorer(new TermQuery(new Term(FieldFactory.SourceFieldName, query))));
-            highlighter.SetTextFragmenter(fragmenter);
-
-            foreach(Document doc in docs)
-            {
-                string path = doc.Get(FieldFactory.PathFieldName);
-
-                TokenStream tokenStream =
-                    analyzers[doc.Get(FieldFactory.LanguageFieldName)].TokenStream(FieldFactory.SourceFieldName,
-                                                                                   new StreamReader(path));
-
-                string[] fragments = highlighter.GetBestFragments(tokenStream, new StreamReader(path).ReadToEnd(), 10);
-
-                foreach(string fragment in fragments)
-                    yield return new SearchResult(doc, fragment);
-            }
         }
 
         public IEnumerable<SearchResult> SearchWithQueryParser(string query)

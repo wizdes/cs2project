@@ -13,8 +13,16 @@ namespace CS2.Core.Parsing
         /// <value>The analyzer.</value>
         AbstractAnalyzer Analyzer { get; }
 
+        /// <summary>
+        /// Gets the name of the language the parsing service is able to parse.
+        /// </summary>
+        /// <value>The name of the language.</value>
         string LanguageName { get; }
 
+        /// <summary>
+        /// Gets the extensions of the files the parser is supposed to be able to parse.
+        /// </summary>
+        /// <value>The file extensions.</value>
         ICollection<string> FileExtensions { get; }
 
         /// <summary>
