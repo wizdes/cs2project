@@ -86,9 +86,9 @@
     <Content Include="Configuration\Directories.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="Configuration\Facilities.config">
+    <Content Include="Configuration\Facilities.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
     <Content Include="Default.aspx" />
     <Content Include="FileHandler.ashx" />
     <Content Include="Configuration\Properties.config">
