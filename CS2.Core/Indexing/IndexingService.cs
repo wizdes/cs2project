@@ -22,7 +22,7 @@ namespace CS2.Core.Indexing
         private int addedFilesSinceLastUpdate;
         private int deletedFilesSinceLastUpdate;
         private int documentCount;
-        private string[] exclusions;
+        private string[] exclusions = new string[0];
         private IndexReader indexReader;
         private IndexWriter indexWriter;
         private bool isUpdating = false;
@@ -156,7 +156,6 @@ namespace CS2.Core.Indexing
         /// </summary>
         public void UpdateIndex()
         {
-            // If another indexing operation is being executed then abort
             lock(updatingLock)
             {
                 if(isUpdating)
@@ -165,36 +164,28 @@ namespace CS2.Core.Indexing
                 isUpdating = true;
             }
 
-            // Get the list of files which need to be parsed and then indexed
-            // The source list is cleared
             ISynchronizedStringSet filesUndergoingIndexing = filesWaitingToBeIndexed.CloneAndClear();
 
-            // Auditing
             int addedFiles = 0;
             int deletedFiles = 0;
             int tempCount;
 
-            // Create new IndexReader to update the index
             indexReader = IndexReader.Open(indexDirectory);
 
             // Get the list of documents in the index while removing deleted or updated documents
             tempCount = RemoveOldEntries(filesUndergoingIndexing, ref deletedFiles);
 
-            // Close the IndexReader
             indexReader.Close();
             indexReader = null;
 
-            // If there are files waiting to be parsed and indexed then write them to the index
             if(filesUndergoingIndexing.Count > 0)
             {
-                // Create a new IndexWriter to add new documents to the index
                 indexWriter = new IndexWriter(indexDirectory, new StandardAnalyzer(), false);
 
                 foreach(string fileName in filesUndergoingIndexing)
                     if(Index(new FileInfo(fileName)))
                         addedFiles++;
 
-                // Close the IndexWriter
                 indexWriter.Optimize();
                 indexWriter.Close();
                 indexWriter = null;
@@ -297,10 +288,9 @@ namespace CS2.Core.Indexing
                 bool fileExists = File.Exists(filePath);
 
                 // If file doesn't exist or it is out of date
-                if(!fileExists ||
-                   IdIdentifierUtilities.GetIdentifierFromFile(new FileInfo(filePath)) != idEnumerator.Term().Text())
+                if(!fileExists || IdIdentifierUtilities.GetIdentifierFromFile(new FileInfo(filePath)) != idEnumerator.Term().Text())
                 {
-                    // The delete document from the index
+                    // Then delete document from the index
                     indexReader.DeleteDocuments(idEnumerator.Term());
                     deletedFiles++;
 

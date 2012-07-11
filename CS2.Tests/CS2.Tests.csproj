@@ -115,6 +115,10 @@
       <Project>{14E25989-745F-4FCF-BB25-145FDA0CC4DF}</Project>
       <Name>CS2.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CS2.CSharp\CS2.CSharp.csproj">
+      <Project>{7C952222-5E69-4F20-AE08-C185F8051D74}</Project>
+      <Name>CS2.CSharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

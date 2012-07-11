@@ -1,8 +1,12 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
+using CS2.CSharp.Parsing;
+using CS2.Core;
 using CS2.Core.Indexing;
 using Lucene.Net.Index;
+using Lucene.Net.Store;
 using NUnit.Framework;
 
 namespace CS2.Tests
@@ -11,13 +15,13 @@ namespace CS2.Tests
     public class IndexingServiceTests : BaseTest
     {
         private IIndexingService service;
-        private const string docsDir = @"C:\Development\castleproject\monorail\Castle.MonoRail.Views.Brail";
+        private const string docsDir = @"..\..";
         private const string dummyFile = @"..\..\DummyClassForParseTesting.cs";
 
         [SetUp]
         public void Setup()
         {
-            service = container.Resolve<IIndexingService>();
+            service = new LoggedIndexingService(new IndexingService(new RAMDirectory(), new[]{new CSharpParsingService()}, new LoggedSynchronizedStringSet(new SynchronizedStringSet())));
         }
 
         [Test]
@@ -42,18 +46,21 @@ namespace CS2.Tests
             service.RequestIndexing(new FileInfo(dummyFile));
             service.RequestIndexing(new DirectoryInfo(docsDir));
 
+            Thread.Sleep(1000);
+
             Assert.IsTrue(service.IsWaitingForFilesToBeIndexed);
         }
 
         [Test]
         public void CanIndexFiles()
         {
+            service.RequestIndexing(new FileInfo(dummyFile));
             service.UpdateIndex();
 
             PrintFileOperations();
 
             Assert.Greater(service.AddedFilesSinceLastUpdate, 0);
-            Assert.AreEqual(service.DeletedFilesSinceLastUpdate, 0);
+            Assert.AreEqual(0, service.DeletedFilesSinceLastUpdate);
 
             Assert.IsFalse(service.IsWaitingForFilesToBeIndexed);
         }
@@ -65,22 +72,25 @@ namespace CS2.Tests
 
             PrintFileOperations();
 
-            Assert.AreEqual(service.AddedFilesSinceLastUpdate, 0);
-            Assert.AreEqual(service.DeletedFilesSinceLastUpdate, 0);
+            Assert.AreEqual(0, service.AddedFilesSinceLastUpdate);
+            Assert.AreEqual(0, service.DeletedFilesSinceLastUpdate);
         }
 
         [Test]
         public void ShouldntIndexAgainTheSameFiles()
         {
             service.RequestIndexing(new FileInfo(dummyFile));
-            service.RequestIndexing(new DirectoryInfo(docsDir));
+
+            service.UpdateIndex();
+
+            service.RequestIndexing(new FileInfo(dummyFile));
 
             service.UpdateIndex();
 
             PrintFileOperations();
 
-            Assert.AreEqual(service.AddedFilesSinceLastUpdate, 0);
-            Assert.AreEqual(service.DeletedFilesSinceLastUpdate, 0);
+            Assert.AreEqual(0, service.AddedFilesSinceLastUpdate);
+            Assert.AreEqual(0, service.DeletedFilesSinceLastUpdate);
         }
 
         [Test]
@@ -98,13 +108,16 @@ namespace CS2.Tests
         [Test]
         public void ShouldReindexIfFileHasBeenModified()
         {
+            service.RequestIndexing(new FileInfo(dummyFile));
+            service.UpdateIndex();
+
             File.SetLastWriteTime(dummyFile, DateTime.Now);
             service.UpdateIndex();
 
             PrintFileOperations();
 
-            Assert.AreEqual(service.AddedFilesSinceLastUpdate, 1);
-            Assert.AreEqual(service.DeletedFilesSinceLastUpdate, 1);
+            Assert.AreEqual(1, service.AddedFilesSinceLastUpdate);
+            Assert.AreEqual(1, service.DeletedFilesSinceLastUpdate);
         }
 
         private void PrintFileOperations()
