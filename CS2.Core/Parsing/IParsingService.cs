@@ -23,7 +23,7 @@ namespace CS2.Core.Parsing
         /// Gets the extensions of the files the parser is supposed to be able to parse.
         /// </summary>
         /// <value>The file extensions.</value>
-        ICollection<string> FileExtensions { get; }
+        ICollection<string> SupportedFileExtensions { get; }
 
         /// <summary>
         /// Tries to parse the specified file into the supplied document.

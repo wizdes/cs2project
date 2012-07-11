@@ -26,9 +26,9 @@ namespace CS2.Core.Indexing
             get { return inner.DocumentCount; }
         }
 
-        public IParsingService[] ParsingServices
+        public IParsingService[] Parsers
         {
-            get { return inner.ParsingServices; }
+            get { return inner.Parsers; }
         }
 
         public int DeletedFilesSinceLastUpdate

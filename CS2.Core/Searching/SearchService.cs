@@ -38,7 +38,7 @@ namespace CS2.Core.Searching
                 };
 
             // Create a list of all the analyzers, one for each language
-            foreach(IParsingService service in indexingService.ParsingServices)
+            foreach(IParsingService service in indexingService.Parsers)
                 analyzers.Add(service.LanguageName, service.Analyzer);
 
             // Instantiate the searcher for the fist time

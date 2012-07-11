@@ -37,7 +37,7 @@ namespace CS2.Core.Indexing
         /// Gets the parsing services.
         /// </summary>
         /// <value>The parsing services.</value>
-        IParsingService[] ParsingServices { get; }
+        IParsingService[] Parsers { get; }
 
         /// <summary>
         /// Gets the number of documents indexed.

@@ -95,9 +95,9 @@ namespace CS2.Core.Indexing
             get { return inner.AddedFilesSinceLastUpdate; }
         }
 
-        public IParsingService[] ParsingServices
+        public IParsingService[] Parsers
         {
-            get { return inner.ParsingServices; }
+            get { return inner.Parsers; }
         }
 
         public event EventHandler<IndexingCompletedEventArgs> IndexingCompleted

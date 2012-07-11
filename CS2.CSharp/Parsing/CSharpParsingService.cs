@@ -36,17 +36,15 @@ namespace CS2.CSharp.Parsing
 
             try
             {
-                Thread parser = new Thread(Parse);
+                var parser = new Thread(Parse);
                 parser.Start(new object[] { file, document });
 
-                if(parser.Join(2000))
+                if(parser.Join(1000))
                     // Too few fields found, this is probably not a C# file
-                    return document.GetFieldsCount() > 1 ? true : false;
-                else
-                {
-                    parser.Abort();
-                    return false;
-                }
+                    return document.GetFieldsCount() > 1;
+                
+                parser.Abort();
+                return false;
             }
             catch
             {
@@ -55,9 +53,9 @@ namespace CS2.CSharp.Parsing
             }
         }
 
-        public ICollection<string> FileExtensions
+        public ICollection<string> SupportedFileExtensions
         {
-            get { return new string[] { ".cs" }; }
+            get { return new[] { ".cs" }; }
         }
 
         public string LanguageName
@@ -112,8 +110,6 @@ namespace CS2.CSharp.Parsing
             {
                 if(tokens != null)
                     tokens.Clear();
-
-                Thread.Sleep(2000);
             }
         }
     }

@@ -17,7 +17,7 @@ namespace CS2.Core.Indexing
         private readonly ISynchronizedStringSet filesWaitingToBeIndexed;
         private readonly Directory indexDirectory;
 
-        private readonly IParsingService[] parsingServices;
+        private readonly IParsingService[] parsers;
         private readonly object updatingLock = new object();
         private int addedFilesSinceLastUpdate;
         private int deletedFilesSinceLastUpdate;
@@ -33,13 +33,13 @@ namespace CS2.Core.Indexing
         /// Initializes a new instance of the <see cref="IndexingService"/> class.
         /// </summary>
         /// <param name="indexDirectory">The index directory.</param>
-        /// <param name="parsingServices">The parsing services.</param>
+        /// <param name="parsers">The parsing services.</param>
         /// <param name="fileQueue">The files waiting to be indexed.</param>
-        public IndexingService(Directory indexDirectory, IParsingService[] parsingServices, ISynchronizedStringSet fileQueue)
+        public IndexingService(Directory indexDirectory, IParsingService[] parsers, ISynchronizedStringSet fileQueue)
         {
             filesWaitingToBeIndexed = fileQueue;
             this.indexDirectory = indexDirectory;
-            this.parsingServices = parsingServices;
+            this.parsers = parsers;
 
             // If the index directory doesn't contain an index then create it
             if(!IndexReader.IndexExists(indexDirectory))
@@ -65,9 +65,9 @@ namespace CS2.Core.Indexing
         /// Gets the parsing services.
         /// </summary>
         /// <value>The parsing services.</value>
-        public IParsingService[] ParsingServices
+        public IParsingService[] Parsers
         {
-            get { return parsingServices; }
+            get { return parsers; }
         }
 
         /// <summary>
@@ -139,14 +139,12 @@ namespace CS2.Core.Indexing
                 return;
 
             ThreadPool.QueueUserWorkItem(delegate
-                {
-                    foreach(IParsingService parsingService in parsingServices)
-                        foreach(string extension in parsingService.FileExtensions)
-                            foreach(
-                                FileInfo file in directory.GetFiles(string.Format("*{0}", extension), SearchOption.AllDirectories)
-                                )
-                                RequestIndexing(file);
-                });
+            {
+                foreach(IParsingService parser in parsers)
+                    foreach(string extension in parser.SupportedFileExtensions)
+                        foreach(FileInfo file in directory.GetFiles(string.Format("*{0}", extension), SearchOption.AllDirectories))
+                            RequestIndexing(file);
+            });
         }
 
         /// <summary>
@@ -316,9 +314,7 @@ namespace CS2.Core.Indexing
             Document document;
 
             // Find a parser that suits the filez
-            foreach(IParsingService parsingService in
-                Array.FindAll(parsingServices,
-                              delegate(IParsingService service) { return service.FileExtensions.Contains(file.Extension); }))
+            foreach(IParsingService parsingService in Array.FindAll(parsers, service => service.SupportedFileExtensions.Contains(file.Extension)))
                 if(parsingService.TryParse(file, out document))
                 {
                     document.Add(FieldFactory.CreateIdField(IdIdentifierUtilities.GetIdentifierFromFile(file)));

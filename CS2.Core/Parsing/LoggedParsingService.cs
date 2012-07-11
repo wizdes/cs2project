@@ -33,9 +33,9 @@ namespace CS2.Core.Parsing
 
         #region IParsingService Members
 
-        public ICollection<string> FileExtensions
+        public ICollection<string> SupportedFileExtensions
         {
-            get { return inner.FileExtensions; }
+            get { return inner.SupportedFileExtensions; }
         }
 
         public string LanguageName
