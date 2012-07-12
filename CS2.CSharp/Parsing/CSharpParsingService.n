@@ -1,0 +1,112 @@
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using CS2.Core.Analysis;
+using CS2.Core.Parsing;
+using CS2.CSharp.Analysis;
+using DDW;
+using DDW.Collections;
+using Lucene.Net.Documents;
+
+namespace CS2.CSharp.Parsing
+{
+    public class CSharpParsingService : IParsingService
+    {
+        analyzer : AbstractAnalyzer;
+        parsingVisitor : CSharpParsingVisitor;
+
+        public this()
+        {
+            parsingVisitor =  CSharpParsingVisitor();
+            analyzer = CSharpAnalyzer();
+        }
+
+        #region IParsingService Members
+
+        /// <summary>
+        /// Tries to parse the specified file into the supplied document.
+        /// </summary>
+        /// <param name="file">The file.</param>
+        /// <param name="document">The document.</param>
+        /// <returns>True is the parsing is successful, false otherwise.</returns>
+        public TryParse(file : FileInfo, document : out Document) : bool
+        {
+            document = Document();
+
+            try
+            {
+                def parser = Thread(Parse);
+                parser.Start(array [file : object, document : object]);
+
+                if(parser.Join(2000)) {
+                    // Too few fields found, this is probably not a C# file
+                    document.GetFieldsCount() > 1;              
+                }
+                else {
+                    parser.Abort();
+                    false;
+                }
+            }
+            catch
+            {
+                _ => { document = null; false; }
+            }
+        }
+
+        public SupportedFileExtensions : ICollection[string]
+        {
+            get { array[".cs"]; }
+        }
+
+        public LanguageName : string
+        {
+            get { "c#"; }
+        }
+
+        /// <summary>
+        /// Gets or sets the analyzer used to index the documents supported by this parser.
+        /// </summary>
+        /// <value>The analyzer.</value>
+        public Analyzer : AbstractAnalyzer
+        {
+            get { analyzer; }
+        }
+
+        #endregion
+
+        private Parse(data : object) : void
+        {
+            mutable lexer : Lexer;
+
+            def bag = data :> array[object];
+
+            when(bag == null)();
+
+            def file = bag[0] :> FileInfo;
+            def document = bag[1] :> Document;
+
+            when(file == null || document == null)();
+
+            mutable tokens : TokenCollection;
+
+            try
+            {
+                using(fileStream = FileStream(file.FullName, FileMode.Open, FileAccess.Read))
+                using(reader = StreamReader(fileStream, true)) {
+                    lexer = Lexer(reader);
+                    tokens = lexer.Lex();
+                }
+
+                def parser = Parser(file.FullName);
+
+                def compilationUnitNode = parser.Parse(tokens, lexer.StringLiterals);
+
+                _ = compilationUnitNode.AcceptVisitor(parsingVisitor, document);
+            }
+            catch
+            {
+                | _ => { when(tokens != null) tokens.Clear(); }
+            }
+        }
+    }
+}

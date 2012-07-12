@@ -1,0 +1,81 @@
+using System.IO;
+using Lucene.Net.Documents;
+
+namespace CS2.Core
+{
+    public static class FieldFactory
+    {
+        public static ClassFieldName = "class";
+        public static CommentFieldName = "comment";
+        public static FileNameFieldName = "fileName";
+        public static IdFieldName = "id";
+        public static InterfaceFieldName = "interface";
+        public static LanguageFieldName = "language";
+        public static MethodFieldName = "method";
+        public static ModifiedFieldName = "modified";
+        public static NamespaceFieldName = "namespace";
+        public static PathFieldName = "path";
+        public static PropertyFieldName = "property";
+        public static SourceFieldName = "source";
+
+        public static CreateCommentField(identifier : string) : Field
+        {
+           Field(CommentFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
+        }
+
+        public static CreateIdField(identifier : string) : Field
+        {
+           Field(IdFieldName, identifier, Field.Store.NO, Field.Index.UN_TOKENIZED);
+        }
+
+        public static CreateLanguageField(identifier : string) : Field
+        {
+           Field(LanguageFieldName, identifier, Field.Store.YES, Field.Index.UN_TOKENIZED);
+        }
+
+        public static CreateFileNameField(identifier : string) : Field
+        {
+           Field(FileNameFieldName, identifier, Field.Store.NO, Field.Index.UN_TOKENIZED);
+        }
+
+        public static CreateModifiedField(identifier : string) : Field
+        {
+           Field(ModifiedFieldName, identifier, Field.Store.YES, Field.Index.UN_TOKENIZED);
+        }
+
+        public static CreatePathField(path : string) : Field
+        {
+           Field(PathFieldName, path, Field.Store.YES, Field.Index.NO);
+        }
+
+        public static CreateSourceField(source : TextReader) : Field
+        {
+           Field(SourceFieldName, source);
+        }
+
+        public static CreateMethodField(identifier : string) : Field
+        {
+           Field(MethodFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
+        }
+
+        public static CreateNamespaceField(identifier : string) : Field
+        {
+           Field(NamespaceFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
+        }
+
+        public static CreatePropertyField(identifier : string) : Field
+        {
+           Field(PropertyFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
+        }
+
+        public static CreateClassField(identifier : string) : Field
+        {
+           Field(ClassFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
+        }
+
+        public static CreateInterfaceField(identifier : string) : Field
+        {
+           Field(InterfaceFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
+        }
+    }
+}

@@ -1,0 +1,102 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading;
+using Castle.Core.Logging;
+using CS2.Core.Logging;
+
+namespace CS2.Core
+{
+    public class LoggedSynchronizedStringSet : ISynchronizedStringSet, ILoggingService
+    {
+        mutable inner : ISynchronizedStringSet;
+        mutable logger : ILogger = NullLogger.Instance;
+
+        public this(inner : ISynchronizedStringSet)
+        {
+            this.inner = inner;
+        }
+
+        #region ILoggingService Members
+
+        public Logger : ILogger 
+        {
+            get { logger; }
+            set { logger = value; }
+        }
+
+        #endregion
+
+        #region ISynchronizedStringSet Members
+
+        ///<summary>
+        ///Returns an enumerator that iterates through a collection.
+        ///</summary>
+        ///
+        ///<returns>
+        ///An <see cref="T:System.Collections.IEnumerator"></see> object that can be used to iterate through the collection.
+        ///</returns>
+        ///<filterpriority>2</filterpriority>
+        IEnumerable_GetEnumerator() : IEnumerator
+        {
+            inner.GetEnumerator();
+        }
+
+        ///<summary>
+        ///Returns an enumerator that iterates through the collection.
+        ///</summary>
+        ///
+        ///<returns>
+        ///A <see cref="T:System.Collections.Generic.IEnumerator`1"></see> that can be used to iterate through the collection.
+        ///</returns>
+        ///<filterpriority>1</filterpriority>
+        public GetEnumerator() : IEnumerator[string]
+        {
+            inner.GetEnumerator();
+        }
+
+        public Add(item : string) : bool
+        {
+            Thread.Sleep(0);
+
+            try
+            {
+                inner.Add(item);
+            }
+            finally
+            {
+                Logger.InfoFormat("Adding {0} to collection. Total items: {1}", item, Count);
+            }
+        }
+
+        public Clear() : void
+        {
+            Logger.InfoFormat("Clearing collection");
+            inner.Clear();
+        }
+
+        public CloneAndClear() : ISynchronizedStringSet
+        {
+            Logger.InfoFormat("Cloning and clearing the collection. Total items: {0}", Count);
+            inner.CloneAndClear();
+        }
+
+        public Remove(item : string) : bool
+        {
+            try
+            {
+                inner.Remove(item);
+            }
+            finally
+            {
+                Logger.InfoFormat("Removing {0} from the collection. Total items: {1}", item, Count);
+            }
+        }
+
+        public Count : int
+        {
+            get { inner.Count; }
+        }
+
+        #endregion
+    }
+}

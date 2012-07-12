@@ -1,0 +1,34 @@
+using System;
+using System.IO;
+using CS2.Core;
+using NUnit.Framework;
+
+namespace CS2.Tests
+{
+    [TestFixture]
+    public class IdIdentifierTests
+    {
+        private static filePath = @"..\..\DummyClassForParseTesting.cs";
+
+        [Test]
+        public ShouldBeEqualIDs() : void
+        {
+            def id1 = IdIdentifierUtilities.GetIdentifierFromFile(FileInfo(filePath));
+            def id2 = IdIdentifierUtilities.GetIdentifierFromFile(FileInfo(filePath));
+
+            Assert.AreEqual(id1, id2);
+        }
+
+        [Test]
+        public ShouldBeDifferentIDs() : void
+        {
+            def id1 = IdIdentifierUtilities.GetIdentifierFromFile(FileInfo(filePath));
+
+            File.SetLastWriteTime(filePath, DateTime.Now);
+
+            def id2 = IdIdentifierUtilities.GetIdentifierFromFile(FileInfo(filePath));
+
+            Assert.AreNotEqual(id1, id2);
+        }
+    }
+}

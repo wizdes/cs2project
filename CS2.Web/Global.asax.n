@@ -1,0 +1,69 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Web;
+using Castle.Windsor;
+using Castle.Windsor.Configuration.Interpreters;
+using CS2.Core.Indexing;
+using CS2.Core.Searching;
+
+namespace CS2.Web
+{
+    public class Global : HttpApplication
+    {
+        private static container = WindsorContainer(XmlInterpreter());
+        private static mutable indexingService : IIndexingService;
+        private static mutable searchService : ISearchService;
+
+        public static IndexingService : IIndexingService
+        {
+            get { indexingService; }
+        }
+
+        public static Search(query : string, maximumRows : int, startRowIndex : int) : IEnumerable[SearchResult] 
+        {
+            def count = Count(query);
+
+            GetAndCacheResults(query).GetRange(Math.Min(startRowIndex, count),
+                                                   Math.Min(maximumRows, count - Math.Min(startRowIndex, count)));
+        }
+
+        public static Count(query : string) : int
+        {
+            GetAndCacheResults(query).Count;
+        }
+
+        private static GetAndCacheResults(query : string) : List[SearchResult]
+        {
+            if(HttpContext.Current.Items["results"] == null)
+            {
+                def watch = Stopwatch();
+
+                watch.Start();
+
+                HttpContext.Current.Items["results"] = List.[SearchResult](searchService.SearchWithQueryParser(query));
+
+                watch.Stop();
+                HttpContext.Current.Items["elapsed"] = watch.ElapsedMilliseconds;
+
+                HttpContext.Current.Items["results"] :> List[SearchResult];
+            }
+            else
+                HttpContext.Current.Items["results"] :> List[SearchResult];
+        }
+
+        protected Application_Start(sender : object, e : EventArgs) : void
+        {
+            indexingService = container.Resolve.[IIndexingService]();
+            searchService = container.Resolve.[ISearchService]();
+        }
+
+        protected Application_End(sender : object, e : EventArgs) : void
+        {
+            container.Release(indexingService);
+            container.Release(searchService);
+
+            container.Dispose();
+        }
+    }
+}

@@ -1,0 +1,14 @@
+using System.Collections.Generic;
+
+namespace CS2.Core
+{
+    public interface ISynchronizedStringSet : IEnumerable[string]
+    {
+        Count : int { get; }
+
+        Add(item : string) : bool;
+        Clear() : void;
+        CloneAndClear() : ISynchronizedStringSet;
+        Remove(item : string) : bool;
+    }
+}

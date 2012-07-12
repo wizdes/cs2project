@@ -1,0 +1,27 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Web;
+
+namespace CS2.Web
+{
+    /// <summary>
+    /// Summary description for $codebehindclassname$
+    /// </summary>
+    public class FileHandler : IHttpHandler 
+    {
+        public ProcessRequest(context : HttpContext) : void
+        {
+            context.Response.ContentType = "text/plain";
+
+            context.Response.WriteFile(context.Request.QueryString["f"]);
+        }
+     
+        public IsReusable : bool
+        {
+            get 
+            {
+                false;
+            }
+        }
+    }
+}

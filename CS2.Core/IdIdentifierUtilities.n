@@ -1,0 +1,21 @@
+using System.IO;
+
+namespace CS2.Core
+{
+    public static class IdIdentifierUtilities
+    {
+        public static GetPathFromIdentifier(identifier : string) : string
+        {
+            def url = identifier.Replace('\u0000', Path.DirectorySeparatorChar); // replace nulls with slashes
+            url.Substring(0, (url.LastIndexOf(Path.DirectorySeparatorChar)) - (0)); // remove date from end
+        }
+
+        public static GetIdentifierFromFile(file : FileInfo) : string
+        {
+            when(!file.Exists)
+                throw FileNotFoundException("File not found", file.FullName);
+
+            file.FullName.Replace(Path.DirectorySeparatorChar, '\u0000') + "\u0000" + file.LastWriteTime.Ticks;
+        }
+    }
+}

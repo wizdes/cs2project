@@ -1,0 +1,39 @@
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using CS2.Core;
+using CS2.Core.Analysis;
+using Lucene.Net.Analysis;
+
+namespace CS2.CSharp.Analysis
+{
+    public class CSharpAnalyzer : AbstractAnalyzer
+    {
+        protected override StopWords : ICollection[string] 
+        {
+            get
+            {
+                Collection.[string](
+                        array[
+                                "byte", "bool", "char", "double", "decimal", "float", "int", "long", "object", "sbyte", "string",
+                                "short", "ushort", "ulong", "uint", "abstract", "const", "extern", "alias", "explicit", "implicit",
+                                "internal", "new", "out", "override", "private", "public", "protected", "ref", "readonly", "static",
+                                "sealed", "volatile", "virtual", "class", "delegate", "enum", "interface", "struct", "as", "base",
+                                "break", "catch", "continue", "case", "do", "default", "else", "for", "foreach", "finally", "fixed",
+                                "goto", "if", "in", "is", "lock", "return", "stackalloc", "switch", "sizeof", "throw", "try",
+                                "typeof", "this", "void", "while", "checked", "event", "namespace", "operator", "params", "unsafe",
+                                "unchecked", "using", "where", "partial", "yield", "true", "false", "null"
+                                //, "assembly", "property", "method", "field", "param", "type"                 
+                            ]);
+            }
+        }
+
+        public override TokenStream(fieldName : string, reader : TextReader) : TokenStream
+        {
+            if(fieldName.Equals(FieldFactory.CommentFieldName))
+                PorterStemFilter(StopFilter(LowerCaseTokenizer(reader), StopAnalyzer.ENGLISH_STOP_WORDS));
+            else
+                StopFilter(LowerCaseTokenizer(reader), List.[string](StopWords).ToArray());
+        }
+    }
+}

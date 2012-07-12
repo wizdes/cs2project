@@ -1,0 +1,116 @@
+using System;
+using System.IO;
+using Castle.Core.Logging;
+using CS2.Core.Logging;
+using CS2.Core.Parsing;
+using Directory=Lucene.Net.Store.Directory;
+
+namespace CS2.Core.Indexing
+{
+    public class LoggedIndexingService : IIndexingService, ILoggingService
+    {
+        inner : IIndexingService;
+        mutable logger : ILogger = NullLogger.Instance;
+
+        public this(inner : IIndexingService)
+        {
+            Logger.InfoFormat("IndexingService instantiated");
+            this.inner = inner;
+            inner.IndexingCompleted += inner_IndexingCompleted;
+        }
+
+        #region IIndexingService Members
+
+        public DocumentCount : int
+        {
+            get { inner.DocumentCount; }
+        }
+
+        public Parsers : array[IParsingService]
+        {
+            get { inner.Parsers; }
+        }
+
+        public DeletedFilesSinceLastUpdate : int
+        {
+            get { inner.DeletedFilesSinceLastUpdate; }
+        }
+
+        public AddedFilesSinceLastUpdate : int
+        {
+            get { inner.AddedFilesSinceLastUpdate; }
+        }
+
+        /// <summary>
+        /// The directory where the index is located.
+        /// </summary>
+        public IndexDirectory : Directory
+        {
+            get { inner.IndexDirectory; }
+        }
+
+        /// <summary>
+        /// Returns true if there are files waiting to be indexed in batch.
+        /// </summary>
+        /// <value></value>
+        public IsWaitingForFilesToBeIndexed : bool
+        {
+            get { inner.IsWaitingForFilesToBeIndexed; }
+        }
+
+        /// <summary>
+        /// Requests the indexing of the specified file.
+        /// </summary>
+        /// <param name="file">The file.</param>
+        public RequestIndexing(file : FileInfo) : void
+        {
+            Logger.InfoFormat("Requested indexing file {0}", file.FullName);
+            inner.RequestIndexing(file);
+        }
+
+        public RequestIndexing(directory : DirectoryInfo) : void
+        {
+            Logger.InfoFormat("Requested indexing directory {0}", directory.FullName);
+            inner.RequestIndexing(directory);
+        }
+
+        /// <summary>
+        /// Triggers update operations on the index, removing no longer existing documents, updating changed documents and adding new documents which have been explicitly required to be indexed.
+        /// </summary>
+        public UpdateIndex() : void
+        {
+            Logger.InfoFormat("Call to UpdateIndex()");
+            inner.UpdateIndex();
+        }
+
+        public event IndexingCompleted : EventHandler[IndexingCompletedEventArgs]
+        {
+            add { inner.IndexingCompleted += value; }
+            remove { inner.IndexingCompleted -= value; }
+        }
+
+        public Exclusions : array[string]
+        {
+            get { inner.Exclusions; }
+            set { inner.Exclusions = value; }
+        }
+
+        #endregion
+
+        #region ILoggingService Members
+
+        public Logger : ILogger
+        {
+            get { logger; }
+            set { logger = value; }
+        }
+
+        #endregion
+
+        private inner_IndexingCompleted(_ : object, e : IndexingCompletedEventArgs) : void
+        {
+            Logger.InfoFormat("Update completed. Files added: {0}, files deleted: {1}", AddedFilesSinceLastUpdate,
+                              DeletedFilesSinceLastUpdate);
+        }
+    }
+}

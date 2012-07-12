@@ -1,0 +1,70 @@
+using System;
+using System.IO;
+using CS2.Core.Parsing;
+using Directory=Lucene.Net.Store.Directory;
+
+namespace CS2.Core.Indexing
+{
+    public interface IIndexingService
+    {
+        /// <summary>
+        /// The directory where the index is located.
+        /// </summary>
+        IndexDirectory : Directory { get; }
+
+        /// <summary>
+        /// Returns true if there are files waiting to be indexed in batch.
+        /// </summary>
+        IsWaitingForFilesToBeIndexed : bool { get; }
+
+        /// <summary>
+        /// Returns the number of files deleted from the index since last update.
+        /// </summary>
+        DeletedFilesSinceLastUpdate : int { get; }
+
+        /// <summary>
+        /// Returns the number of files added to the index since last update.
+        /// </summary>
+        AddedFilesSinceLastUpdate : int { get; }
+
+        /// <summary>
+        /// Gets or sets the exclusions.
+        /// </summary>
+        /// <value>The exclusions.</value>
+        Exclusions : array[string] { get; set; }
+
+        /// <summary>
+        /// Gets the parsing services.
+        /// </summary>
+        /// <value>The parsing services.</value>
+        Parsers : array[IParsingService] { get; }
+
+        /// <summary>
+        /// Gets the number of documents indexed.
+        /// </summary>
+        /// <value>The document count.</value>
+        DocumentCount : int { get; }
+
+        /// <summary>
+        /// Occurs when indexing is completed.
+        /// </summary>
+        event IndexingCompleted : EventHandler[IndexingCompletedEventArgs];
+
+        /// <summary>
+        /// Requests the indexing of the specified file.
+        /// </summary>
+        /// <param name="file">The file.</param>
+        RequestIndexing(file : FileInfo) : void;
+
+        /// <summary>
+        /// Requests the indexing of all the files contained in the specified directory and all its subdirectories.
+        /// </summary>
+        /// <param name="directory">The directory.</param>
+        RequestIndexing(directory : DirectoryInfo) : void;
+
+        /// <summary>
+        /// Triggers update operations on the index, removing no longer existing documents, updating changed documents and adding new documents which have been explicitly required to be indexed.
+        /// </summary>
+        UpdateIndex() : void;
+    }
+}

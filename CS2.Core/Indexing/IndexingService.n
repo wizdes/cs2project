@@ -1,0 +1,326 @@
+using System;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Threading;
+using CS2.Core.Parsing;
+using Lucene.Net.Analysis.Standard;
+using Lucene.Net.Documents;
+using Lucene.Net.Index;
+using Directory=Lucene.Net.Store.Directory;
+using System.Linq;
+
+namespace CS2.Core.Indexing
+{
+    public class IndexingService : IIndexingService
+    {
+        #region Fields
+
+        mutable filesWaitingToBeIndexed : ISynchronizedStringSet;
+        mutable indexDirectory : Directory;
+
+        mutable parsers : array[IParsingService];
+        updatingLock = object();
+        mutable addedFilesSinceLastUpdate : int;
+        mutable deletedFilesSinceLastUpdate : int;
+        mutable documentCount : int;
+        mutable exclusions : array[string] = array[];
+        mutable indexReader : IndexReader;
+        mutable indexWriter : IndexWriter;
+        mutable isUpdating = false;
+
+        #endregion
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IndexingService"/> class.
+        /// </summary>
+        /// <param name="indexDirectory">The index directory.</param>
+        /// <param name="parsers">The parsing services.</param>
+        /// <param name="fileQueue">The files waiting to be indexed.</param>
+        public this(indexDirectory : Directory, parsers : array[IParsingService], fileQueue : ISynchronizedStringSet)
+        {
+            filesWaitingToBeIndexed = fileQueue;
+            this.indexDirectory = indexDirectory;
+            this.parsers = parsers;
+
+            // If the index directory doesn't contain an index then create it
+            when(!IndexReader.IndexExists(indexDirectory))
+            {
+                def writer = IndexWriter(indexDirectory, StandardAnalyzer(), true);
+                writer.Optimize();
+                writer.Close();
+            }
+        }
+
+        #region IIndexingService Members
+
+        /// <summary>
+        /// Gets the number of documents indexed.
+        /// </summary>
+        /// <value>The document count.</value>
+        public DocumentCount : int
+        {
+            get { documentCount; }
+        }
+
+        /// <summary>
+        /// Gets the parsing services.
+        /// </summary>
+        /// <value>The parsing services.</value>
+        public Parsers : array[IParsingService]
+        {
+            get { parsers; }
+        }
+
+        /// <summary>
+        /// Returns the number of files deleted from the index since last update.
+        /// </summary>
+        /// <value></value>
+        public DeletedFilesSinceLastUpdate : int
+        {
+            get { deletedFilesSinceLastUpdate; }
+        }
+
+        /// <summary>
+        /// Returns the number of files added to the index since last update.
+        /// </summary>
+        /// <value></value>
+        public AddedFilesSinceLastUpdate : int
+        {
+            get { addedFilesSinceLastUpdate; }
+        }
+
+        /// <summary>
+        /// Returns true if there are files waiting to be indexed in batch.
+        /// </summary>
+        /// <value></value>
+        public IsWaitingForFilesToBeIndexed : bool
+        {
+            get { filesWaitingToBeIndexed.Count != 0; }
+        }
+
+        /// <summary>
+        /// The directory where the index is located.
+        /// </summary>
+        /// <value></value>
+        public IndexDirectory : Directory
+        {
+            get { indexDirectory; }
+        }
+
+        /// <summary>
+        /// Gets or sets the exclusions.
+        /// </summary>
+        /// <value>The exclusions.</value>
+        public Exclusions : array[string]
+        {
+            get { exclusions; }
+            set { exclusions = value; }
+        }
+
+        /// <summary>
+        /// Requests the indexing of the specified file.
+        /// </summary>
+        /// <param name="file">The file.</param>
+        public RequestIndexing(file : FileInfo) : void
+        {
+            when(IsValidFileSystemEntryToBeIndexed(file))
+            // Add the file to be indexed to the queue, if it doesn't contain the file yet
+                filesWaitingToBeIndexed.Add(file.FullName);
+        }
+
+        /// <summary>
+        /// Requests the indexing of all the files contained in the specified directory and all its subdirectories.
+        /// </summary>
+        /// <param name="directory">The directory.</param>
+        public RequestIndexing(directory : DirectoryInfo) : void
+        {
+            when(IsValidFileSystemEntryToBeIndexed(directory))
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    foreach(parser in parsers)
+                        foreach(extension in parser.SupportedFileExtensions)
+                            foreach(file in directory.GetFiles(string.Format("*{0}", extension), SearchOption.AllDirectories))
+                                RequestIndexing(file);
+                });
+        }
+
+        /// <summary>
+        /// Triggers update operations on the index and on the files repository,
+        /// removing no longer existing files references both from repository and index,
+        /// updating changed documents and adding new documents which have been explicitly required to be indexed.
+        /// </summary>
+        public UpdateIndex() : void
+        {
+            lock(updatingLock)
+            {
+                when(isUpdating)();
+
+                isUpdating = true;
+            }
+
+            def filesUndergoingIndexing = filesWaitingToBeIndexed.CloneAndClear();
+
+            mutable addedFiles = 0;
+            mutable deletedFiles = 0;
+            mutable tempCount;
+
+            indexReader = IndexReader.Open(indexDirectory);
+
+            // Get the list of documents in the index while removing deleted or updated documents
+            tempCount = RemoveOldEntries(filesUndergoingIndexing, ref deletedFiles);
+
+            indexReader.Close();
+            indexReader = null;
+
+            when(filesUndergoingIndexing.Count > 0)
+            {
+                indexWriter = IndexWriter(indexDirectory, StandardAnalyzer(), false);
+
+                foreach(fileName in filesUndergoingIndexing)
+                    when(Index(FileInfo(fileName)))
+                        addedFiles++;
+
+                indexWriter.Optimize();
+                indexWriter.Close();
+                indexWriter = null;
+            }
+
+            // Update statistics
+            addedFilesSinceLastUpdate = addedFiles;
+            deletedFilesSinceLastUpdate = deletedFiles;
+            documentCount = tempCount + addedFiles - deletedFiles;
+
+            // Fire IndexingCompleted event
+            OnIndexingCompleted();
+
+            // Signal as finished updating
+            lock(updatingLock)
+                isUpdating = false;
+        }
+
+        /// <summary>
+        /// Occurs when indexing is completed.
+        /// </summary>
+        public event IndexingCompleted : EventHandler[IndexingCompletedEventArgs];
+
+        #endregion
+
+        /// <summary>
+        /// Determines whether the specified entry is a valid file system entry to be indexed.
+        /// </summary>
+        /// <param name="entry">The entry.</param>
+        /// <returns>
+        /// 	<c>true</c> if [is valid file system entry to be indexed] [the specified entry]; otherwise, <c>false</c>.
+        /// </returns>
+        private IsValidFileSystemEntryToBeIndexed(entry : FileSystemInfo) : bool
+        {
+            // The file or directory doesn't exist
+            if(!entry.Exists)
+                false;
+            else
+            // The file or directory is hidden
+            if(entry.Attributes == FileAttributes.Hidden)
+                false;
+            else
+            // The entry matches one of the exclusions
+            if(MatchesAnyExclusion(entry, exclusions))
+                false;
+            else true;
+        }
+
+        /// <summary>
+        /// Returns true if the supplied <see cref="System.IO.FileSystemInfo"/> 
+        /// matches any of the patterns in the <paramref name="exclusions"/>, false otherwise.
+        /// </summary>
+        /// <param name="entry">The entry in the file system.</param>
+        /// <param name="exclusions">The array of exclusions.</param>
+        /// <returns></returns>
+        private static MatchesAnyExclusion(entry : FileSystemInfo, exclusions : array[string]) : bool
+        {
+            mutable r : Regex;
+
+            !Array.TrueForAll(exclusions, exclusion =>
+            {
+                r = Regex(Regex.Escape(exclusion));
+                !r.IsMatch(entry.FullName);
+            });
+        }
+
+        /// <summary>
+        /// Called to fire the <see cref="IndexingCompleted" /> event.
+        /// </summary>
+        private OnIndexingCompleted() : void
+        {
+            when(IndexingCompleted != null)
+                IndexingCompleted(this, IndexingCompletedEventArgs(addedFilesSinceLastUpdate, deletedFilesSinceLastUpdate, documentCount));
+        }
+
+        /// <summary>
+        /// Removes the deleted and modified documents from the index. Marks the modified files as to be reindexed.
+        /// </summary>
+        private RemoveOldEntries(filesUndergoingIndexing : ISynchronizedStringSet, deletedFiles : ref int) : int
+        {
+            mutable tempCount = 0;
+
+            // Create a term enumerator to iterate through all the terms of the ID field
+            // This is done to avoid searching, which is presumably less performant
+            def idEnumerator = indexReader.Terms(Term(FieldFactory.IdFieldName, ""));
+
+            // Iterate all the documents into the index
+            while(idEnumerator.Term() != null && idEnumerator.Term().Field() == FieldFactory.IdFieldName)
+            {
+                tempCount++;
+
+                def filePath = IdIdentifierUtilities.GetPathFromIdentifier(idEnumerator.Term().Text());
+
+                // If the file is already in the index remove it from the list of the files waiting to be indexed
+                filesUndergoingIndexing.Remove(filePath);
+
+                def fileExists = File.Exists(filePath);
+
+                // If file doesn't exist or it is out of date
+                when(!fileExists || IdIdentifierUtilities.GetIdentifierFromFile(FileInfo(filePath)) != idEnumerator.Term().Text())
+                {
+                    // Then delete document from the index
+                    indexReader.DeleteDocuments(idEnumerator.Term());
+                    deletedFiles++;
+
+                    // If file was deleted since out of date then re-index it
+                    when(fileExists)
+                        filesUndergoingIndexing.Add(filePath);
+                }
+
+                idEnumerator.Next();
+            }
+
+            idEnumerator.Close();
+
+            tempCount;
+        }
+
+        /// <summary>
+        /// Indexes the specified file.
+        /// </summary>
+        /// <param name="file">The file.</param>
+        private Index(file : FileInfo) : bool
+        {
+            mutable document : Document;
+
+            // Find a parser that suits the filez
+            match(parsers.Where(p => p.SupportedFileExtensions.Contains(file.Extension)).FirstOrDefault(p => p.TryParse(file, out document))) {
+                | p is IParsingService =>  document.Add(FieldFactory.CreateIdField(IdIdentifierUtilities.GetIdentifierFromFile(file)));
+                                           document.Add(FieldFactory.CreatePathField(file.FullName));
+                                           document.Add(FieldFactory.CreateFileNameField(file.Name));
+                                           document.Add(FieldFactory.CreateSourceField(StreamReader(file.FullName, true)));
+                                           document.Add(FieldFactory.CreateLanguageField(p.LanguageName));
+
+                                           // Add the document to the index with the appropriate analyzer
+                                           indexWriter.AddDocument(document, p.Analyzer);
+
+                                           // If a parser has been able to parse the file stop iterating through parsers and return
+                                           true; 
+                | _ => false;
+            }
+        }
+    }
+}

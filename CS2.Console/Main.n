@@ -1,0 +1,60 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using Castle.Windsor;
+using Castle.Windsor.Configuration.Interpreters;
+using CS2.Core.Indexing;
+using CS2.Core.Searching;
+
+namespace CS2.Console
+{
+    module Program
+    {
+        Main() : void
+        {
+            def container = WindsorContainer(XmlInterpreter());
+
+            def indexingService = container.Resolve.[IIndexingService]();
+            def searchService = container.Resolve.[ISearchService]();
+
+            indexingService.RequestIndexing(DirectoryInfo(Environment.CurrentDirectory).Parent.Parent);
+            indexingService.IndexingCompleted += (_, args) => System.Console.WriteLine("Completed indexing. Total files: {0}", args.DocumentCount);
+
+            mutable input;
+
+            do
+            {
+                System.Console.WriteLine("Type file/directory to index or search query or press enter to exit:\n");
+
+                input = System.Console.ReadLine();
+                
+                when(input != string.Empty)
+                {
+                    // Index file
+                    if(File.Exists(input))
+                        indexingService.RequestIndexing(FileInfo(input));
+                    // Index directory
+                    else if(Directory.Exists(input))
+                        indexingService.RequestIndexing(DirectoryInfo(input));
+                    // Search
+                    else
+                    {
+                        def searchResults = searchService.SearchWithQueryParser(input);
+
+                        System.Console.WriteLine("{0} matches found.", List.[SearchResult](searchResults).Count);
+
+                        foreach(searchResult in searchResults)
+                        {
+                            System.Console.WriteLine(searchResult.FilePath);
+                            System.Console.WriteLine(searchResult.Snippet);
+                        }
+                    }
+
+                    System.Console.WriteLine();
+                }
+            } while(input != string.Empty);
+
+            System.Console.WriteLine("Exiting...");
+        }
+    }
+}

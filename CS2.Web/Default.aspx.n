@@ -1,0 +1,60 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using CS2.Core.Searching;
+
+namespace CS2.Web
+{
+    public partial class Default : Page
+    {
+        protected Page_Load(sender : object, e : EventArgs) : void
+        {
+            when(!IsPostBack)
+                GridView1.Visible = false;
+        }
+
+        protected ButtonRequestIndexing_Click(sender : object, e : EventArgs) : void
+        {
+            if(File.Exists(TextBoxPath.Text))
+                Global.IndexingService.RequestIndexing(FileInfo(TextBoxPath.Text));
+            else when(Directory.Exists(TextBoxPath.Text))
+                Global.IndexingService.RequestIndexing(DirectoryInfo(TextBoxPath.Text));
+
+            GridView1.Visible = false;
+
+            if (File.Exists(TextBoxPath.Text) || Directory.Exists(TextBoxPath.Text))
+                LiteralIndexingResult.Text = string.Format("<p>Successfully requested indexing for {0}.</p>", TextBoxPath.Text);
+            else
+                LiteralIndexingResult.Text = "<p>No suitable directory of file for indexing.</p>";
+        }
+
+        protected Page_PreRenderComplete(_ : object, _ : EventArgs) : void
+        {
+            when(GridView1.Visible)
+            {
+                def count = (Context.Items["results"] :> List[SearchResult]).Count;
+                def elapsed = Context.Items["elapsed"] :> long;
+
+                if(count > 0) {
+                    ResultsLiteral.Text =
+                        string.Format("Results <b>{0}</b> - <b>{1}</b> of <b>{2}</b>. (<b>{3}</b> milliseconds)",
+                                      GridView1.PageIndex * GridView1.PageSize + 1,
+                                      GridView1.PageIndex * GridView1.PageSize + GridView1.Rows.Count, count, elapsed);
+                }
+                else {
+                    ResultsLiteral.Text = string.Format("No results found (<b>{0}</b> milliseconds)", elapsed);
+                }
+            }
+        }
+
+        protected GridView1_RowDataBound(_ : object, e : GridViewRowEventArgs) : void
+        {
+            when(e.Row.RowType == DataControlRowType.Pager)
+            {
+                e.Row.Cells[0].Controls.AddAt(0, LiteralControl("Page through results"));
+            }
+        }
+    }
+}

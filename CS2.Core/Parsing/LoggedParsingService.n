@@ -1,0 +1,70 @@
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using Castle.Core.Logging;
+using CS2.Core.Analysis;
+using CS2.Core.Logging;
+using Lucene.Net.Documents;
+
+namespace CS2.Core.Parsing
+{
+    public class LoggedParsingService : IParsingService, ILoggingService
+    {
+        inner : IParsingService;
+        mutable watch = Stopwatch();
+        mutable logger : ILogger = NullLogger.Instance;
+
+        public this(inner : IParsingService)
+        {
+            this.inner = inner;
+            watch.Start();
+            watch.Reset();
+        }
+
+        #region ILoggingService Members
+
+        public Logger : ILogger
+        {
+            get { logger; }
+            set { logger = value; }
+        }
+
+        #endregion
+
+        #region IParsingService Members
+
+        public SupportedFileExtensions : ICollection[string]
+        {
+            get { inner.SupportedFileExtensions; }
+        }
+
+        public LanguageName : string
+        {
+            get { inner.LanguageName; }
+        }
+
+        public Analyzer : AbstractAnalyzer
+        {
+            get { inner.Analyzer; }
+        }
+
+        public TryParse(file : FileInfo, document : out Document ) : bool
+        {
+            watch.Start();
+
+            def couldParse = inner.TryParse(file, out document);
+            def elapsed = watch.ElapsedMilliseconds;
+
+            watch.Reset();
+
+            if(couldParse)
+                Logger.InfoFormat("Done parsing file {0} in {1} milliseconds", file.FullName, elapsed);
+            else
+                Logger.ErrorFormat("Error parsing file {0} in {1} milliseconds", file.FullName, elapsed);
+
+            couldParse;
+        }
+
+        #endregion
+    }
+}

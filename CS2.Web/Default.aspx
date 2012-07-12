@@ -1,6 +1,6 @@
 <%@ Import Namespace="CS2.Core.Searching" %>
 
-<%@ Page Language="C#" AutoEventWireup="true" Codebehind="Default.aspx.cs" Inherits="CS2.Web.Default" %>
+<%@ Page Language="NEMERLE" AutoEventWireup="true" Codebehind="Default.aspx.n" Inherits="CS2.Web.Default" %>
 
 <%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="cc1" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -89,14 +89,14 @@
                     <asp:TemplateField>
                         <ItemTemplate>
                             <div class="h">
-                                <a href="<%# ResolveClientUrl("FileHandler.ashx") + "?f=" + ((SearchResult) Container.DataItem).FilePath%>">
-                                    <%#((SearchResult) Container.DataItem).FilePath%>
+                                <a href="<%# ResolveClientUrl("FileHandler.ashx") + "?f=" + (Container.DataItem :> SearchResult).FilePath%>">
+                                    <%#(Container.DataItem :> SearchResult).FilePath%>
                                 </a>
                             </div>
-                            <pre class="j"><%#((SearchResult) Container.DataItem).Snippet%></pre>
+                            <pre class="j"><%#(Container.DataItem :> SearchResult).Snippet%></pre>
                             <div class="f">
                                 <span class="a">Language:
-                                    <%#((SearchResult) Container.DataItem).Language%>
+                                    <%#(Container.DataItem :> SearchResult).Language%>
                                 </span>
                             </div>
                         </ItemTemplate>

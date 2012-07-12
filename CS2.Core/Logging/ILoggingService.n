@@ -1,0 +1,9 @@
+using Castle.Core.Logging;
+
+namespace CS2.Core.Logging
+{
+    public interface ILoggingService
+    {
+        Logger : ILogger { get; set; }
+    }
+}

@@ -1,0 +1,117 @@
+using System;
+using System.IO;
+using System.Threading;
+using CS2.Core.Parsing;
+using Directory=Lucene.Net.Store.Directory;
+
+namespace CS2.Core.Indexing
+{
+    public class TimedIndexingService : IIndexingService, IDisposable
+    {
+        inner : IIndexingService;
+        timer : Timer;
+
+        public this(inner : IIndexingService, updateInterval : TimeSpan)
+        {
+            this.inner = inner;
+            timer = Timer(_ => { UpdateIndex(); }, null, TimeSpan.Zero, updateInterval);
+        }
+
+        #region IDisposable Members
+
+        ///<summary>
+        ///Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        ///</summary>
+        ///<filterpriority>2</filterpriority>
+        public Dispose() : void
+        {
+            Dispose(true);
+        }
+
+        #endregion
+
+        #region IIndexingService Members
+
+        public DocumentCount : int
+        {
+            get { inner.DocumentCount; }
+        }
+
+        public Exclusions : array[string]
+        {
+            get { inner.Exclusions; }
+            set { inner.Exclusions = value; }
+        }
+
+        /// <summary>
+        /// Requests the indexing of the specified file.
+        /// </summary>
+        /// <param name="file">The file.</param>
+        public RequestIndexing(file : FileInfo) : void
+        {
+            inner.RequestIndexing(file);
+        }
+
+        /// <summary>
+        /// Requests the indexing of all the files contained in the specified directory and all its subdirectories.
+        /// </summary>
+        /// <param name="directory">The directory.</param>
+        public RequestIndexing(directory : DirectoryInfo) : void
+        {
+            inner.RequestIndexing(directory);
+        }
+
+        /// <summary>
+        /// Triggers update operations on the index, removing no longer existing documents, updating changed documents and adding new documents which have been explicitly required to be indexed.
+        /// </summary>
+        public UpdateIndex() : void
+        {
+            inner.UpdateIndex();
+        }
+
+        /// <summary>
+        /// The directory where the index is located.
+        /// </summary>
+        public IndexDirectory : Directory
+        {
+            get { inner.IndexDirectory; }
+        }
+
+        /// <summary>
+        /// Returns true if there are files waiting to be indexed in batch.
+        /// </summary>
+        public IsWaitingForFilesToBeIndexed : bool
+        {
+            get { inner.IsWaitingForFilesToBeIndexed; }
+        }
+
+        public DeletedFilesSinceLastUpdate : int
+        {
+            get { inner.DeletedFilesSinceLastUpdate; }
+        }
+
+        public AddedFilesSinceLastUpdate : int
+        {
+            get { inner.AddedFilesSinceLastUpdate; }
+        }
+
+        public Parsers : array[IParsingService]
+        {
+            get { inner.Parsers; }
+        }
+
+        public event IndexingCompleted : EventHandler[IndexingCompletedEventArgs]
+        {
+            add { inner.IndexingCompleted += value; }
+            remove { inner.IndexingCompleted -= value; }
+        }
+
+        #endregion
+
+        protected virtual Dispose(_ : bool) : void
+        {
+            when(timer != null)
+                timer.Dispose();
+        }
+    }
+}
