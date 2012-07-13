@@ -17,6 +17,8 @@
     <NemerleBinPathRoot Condition=" '$(NemerleBinPathRoot)' == '' ">$(ProgramFiles)\Nemerle</NemerleBinPathRoot>
     <Nemerle Condition=" '$(Nemerle)' == '' ">$(NemerleBinPathRoot)\$(NemerleVersion)</Nemerle>
     <Name>CS2.Core</Name>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -46,20 +48,40 @@
       <AssemblyName>Castle.Facilities.Logging.dll</AssemblyName>
       <HintPath>..\Libraries\Castle.Facilities.Logging.dll</HintPath>
     </Reference>
+    <Reference Include="Castle.MicroKernel, Version=1.0.0.2, Culture=neutral, PublicKeyToken=407dd0808d44fbdc">
+      <Name>Castle.MicroKernel</Name>
+      <AssemblyName>Castle.MicroKernel.dll</AssemblyName>
+      <HintPath>..\Libraries\Castle.MicroKernel.dll</HintPath>
+    </Reference>
     <Reference Include="CMicroParser, Version=1.0.2729.41008, Culture=neutral, PublicKeyToken=null">
       <Name>CMicroParser</Name>
       <AssemblyName>CMicroParser.dll</AssemblyName>
       <HintPath>..\Libraries\CMicroParser.dll</HintPath>
     </Reference>
-    <Reference Include="Highlighter.Net, Version=2.0.0.1, Culture=neutral, PublicKeyToken=null">
-      <Name>Highlighter.Net</Name>
-      <AssemblyName>Highlighter.Net.dll</AssemblyName>
-      <HintPath>..\Libraries\Highlighter.Net.dll</HintPath>
+    <Reference Include="Contrib.Regex, Version=2.9.4.0, Culture=neutral, PublicKeyToken=85089178b9ac3181">
+      <Name>Contrib.Regex</Name>
+      <AssemblyName>Contrib.Regex.dll</AssemblyName>
+      <HintPath>..\packages\Lucene.Net.Contrib.2.9.4.1\lib\net40\Contrib.Regex.dll</HintPath>
     </Reference>
-    <Reference Include="Lucene.Net, Version=2.1.0.2, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73">
+      <Name>ICSharpCode.SharpZipLib</Name>
+      <AssemblyName>ICSharpCode.SharpZipLib.dll</AssemblyName>
+      <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Lucene.Net, Version=2.9.4.1, Culture=neutral, PublicKeyToken=85089178b9ac3181">
       <Name>Lucene.Net</Name>
       <AssemblyName>Lucene.Net.dll</AssemblyName>
-      <HintPath>..\Libraries\Lucene.Net.dll</HintPath>
+      <HintPath>..\packages\Lucene.Net.2.9.4.1\lib\net40\Lucene.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="Lucene.Net.Contrib.Core, Version=2.9.2.0, Culture=neutral, PublicKeyToken=85089178b9ac3181">
+      <Name>Lucene.Net.Contrib.Core</Name>
+      <AssemblyName>Lucene.Net.Contrib.Core.dll</AssemblyName>
+      <HintPath>..\packages\Lucene.Net.Contrib.2.9.4.1\lib\net40\Lucene.Net.Contrib.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Lucene.Net.Contrib.Highlighter, Version=2.3.2.1, Culture=neutral, PublicKeyToken=85089178b9ac3181">
+      <Name>Lucene.Net.Contrib.Highlighter</Name>
+      <AssemblyName>Lucene.Net.Contrib.Highlighter.dll</AssemblyName>
+      <HintPath>..\packages\Lucene.Net.Contrib.2.9.4.1\lib\net40\Lucene.Net.Contrib.Highlighter.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="PowerCollections, Version=1.0.2141.24679, Culture=neutral, PublicKeyToken=null">
@@ -147,7 +169,13 @@
       <SubType>Content</SubType>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="packages.config">
+      <SubType>Content</SubType>
+    </Content>
+  </ItemGroup>
   <Import Project="$(Nemerle)\Nemerle.MSBuild.targets" />
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!--
 		To modify your build process, add your task inside one of the targets below and uncomment it. 
 		Other similar extension points exist, see Microsoft.Common.targets.

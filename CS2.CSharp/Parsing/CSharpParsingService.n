@@ -40,7 +40,7 @@ namespace CS2.CSharp.Parsing
 
                 if(parser.Join(2000)) {
                     // Too few fields found, this is probably not a C# file
-                    document.GetFieldsCount() > 1;              
+                    document.GetFields().Count > 1;              
                 }
                 else {
                     parser.Abort();

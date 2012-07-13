@@ -18,12 +18,12 @@ namespace CS2.Tests
 
             Assert.IsTrue(parsingService.TryParse(FileInfo("..\\..\\DummyClassForParseTesting.cs"), out document));
 
-            foreach (field : Field in document.Fields())
+            foreach (field : Field in document.GetFields())
             {
                 Debug.WriteLine("{0} {1}", field.Name(), field.StringValue());
             }
 
-            Assert.Greater(document.GetFieldsCount(), 0);
+            Assert.Greater(document.GetFields().Count, 0);
         }
     }
 }

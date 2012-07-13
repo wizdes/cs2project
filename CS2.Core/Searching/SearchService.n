@@ -9,6 +9,7 @@ using Lucene.Net.Documents;
 using Lucene.Net.Highlight;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
+using Lucene.Net.Util;
 
 namespace CS2.Core.Searching
 {
@@ -80,7 +81,7 @@ namespace CS2.Core.Searching
                         analyzerWrapper = PerFieldAnalyzerWrapper(analyzer.Value);
                         analyzerWrapper.AddAnalyzer(FieldFactory.LanguageFieldName, KeywordAnalyzer());
 
-                        parsers.Add(QueryParser(FieldFactory.SourceFieldName, analyzerWrapper));
+                        parsers.Add(QueryParser(Version.LUCENE_29, FieldFactory.SourceFieldName, analyzerWrapper));
                     }
                         // Otherwise use just the analyzer corresponding to the specified language
                 // A KeywordAnalyzer is always used for the language field.
@@ -89,7 +90,7 @@ namespace CS2.Core.Searching
                     analyzerWrapper = PerFieldAnalyzerWrapper(analyzers[language]);
                     analyzerWrapper.AddAnalyzer(FieldFactory.LanguageFieldName, KeywordAnalyzer());
 
-                    parsers.Add(QueryParser(FieldFactory.SourceFieldName, analyzerWrapper));
+                    parsers.Add(QueryParser(Version.LUCENE_29, FieldFactory.SourceFieldName, analyzerWrapper));
                 }
 
                 lock(searcherLock)
@@ -98,16 +99,16 @@ namespace CS2.Core.Searching
                     {
                         def q = parser.Parse(query).Rewrite(searcher.GetIndexReader());
 
-                        def hits = searcher.Search(q);
+                        def hits = searcher.Search(q, 1000);
 
                         def highlighter = Highlighter(formatter, encoder, QueryScorer(q));
                         highlighter.SetTextFragmenter(fragmenter);
 
-                        for(mutable i = 0; i < hits.Length(); i++)
+                        for(mutable i = 0; i < hits.ScoreDocs.Length; i++)
                         {
-                            def doc = hits.Doc(i);
-
-                            def path = doc.Get(FieldFactory.PathFieldName);
+                            def scoreDoc = hits.ScoreDocs[i];
+                            
+                            def path = searcher.Doc(scoreDoc.doc).Get(FieldFactory.PathFieldName);
 
                             def tokenStream = parser.GetAnalyzer().TokenStream(FieldFactory.SourceFieldName, StreamReader(path));
 
@@ -118,7 +119,7 @@ namespace CS2.Core.Searching
                                     fragments = array[reader.ReadToEnd().Substring(0, 100)];
 
                             foreach(fragment in fragments)
-                                yield SearchResult(doc, fragment);
+                                yield SearchResult(searcher.Doc(scoreDoc.doc), fragment);
                         }
                     }
                 }
@@ -148,7 +149,7 @@ namespace CS2.Core.Searching
                 when(searcher != null)
                     searcher.Close();
 
-                searcher = IndexSearcher(indexingService.IndexDirectory);
+                searcher = IndexSearcher(indexingService.IndexDirectory, true);
             }
         }
     }

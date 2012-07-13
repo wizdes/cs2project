@@ -20,27 +20,27 @@ namespace CS2.Core
 
         public static CreateCommentField(identifier : string) : Field
         {
-           Field(CommentFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
+           Field(CommentFieldName, identifier, Field.Store.NO, Field.Index.ANALYZED);
         }
 
         public static CreateIdField(identifier : string) : Field
         {
-           Field(IdFieldName, identifier, Field.Store.NO, Field.Index.UN_TOKENIZED);
+           Field(IdFieldName, identifier, Field.Store.NO, Field.Index.NOT_ANALYZED);
         }
 
         public static CreateLanguageField(identifier : string) : Field
         {
-           Field(LanguageFieldName, identifier, Field.Store.YES, Field.Index.UN_TOKENIZED);
+           Field(LanguageFieldName, identifier, Field.Store.YES, Field.Index.NOT_ANALYZED);
         }
 
         public static CreateFileNameField(identifier : string) : Field
         {
-           Field(FileNameFieldName, identifier, Field.Store.NO, Field.Index.UN_TOKENIZED);
+           Field(FileNameFieldName, identifier, Field.Store.NO, Field.Index.NOT_ANALYZED);
         }
 
         public static CreateModifiedField(identifier : string) : Field
         {
-           Field(ModifiedFieldName, identifier, Field.Store.YES, Field.Index.UN_TOKENIZED);
+           Field(ModifiedFieldName, identifier, Field.Store.YES, Field.Index.NOT_ANALYZED);
         }
 
         public static CreatePathField(path : string) : Field
@@ -55,27 +55,27 @@ namespace CS2.Core
 
         public static CreateMethodField(identifier : string) : Field
         {
-           Field(MethodFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
+           Field(MethodFieldName, identifier, Field.Store.NO, Field.Index.ANALYZED);
         }
 
         public static CreateNamespaceField(identifier : string) : Field
         {
-           Field(NamespaceFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
+           Field(NamespaceFieldName, identifier, Field.Store.NO, Field.Index.ANALYZED);
         }
 
         public static CreatePropertyField(identifier : string) : Field
         {
-           Field(PropertyFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
+           Field(PropertyFieldName, identifier, Field.Store.NO, Field.Index.ANALYZED);
         }
 
         public static CreateClassField(identifier : string) : Field
         {
-           Field(ClassFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
+           Field(ClassFieldName, identifier, Field.Store.NO, Field.Index.ANALYZED);
         }
 
         public static CreateInterfaceField(identifier : string) : Field
         {
-           Field(InterfaceFieldName, identifier, Field.Store.NO, Field.Index.TOKENIZED);
+           Field(InterfaceFieldName, identifier, Field.Store.NO, Field.Index.ANALYZED);
         }
     }
 }

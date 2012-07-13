@@ -6,6 +6,7 @@ using CS2.Core.Parsing;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
+using Lucene.Net.Util;
 using Directory=Lucene.Net.Store.Directory;
 using System.Linq;
 
@@ -45,7 +46,7 @@ namespace CS2.Core.Indexing
             // If the index directory doesn't contain an index then create it
             when(!IndexReader.IndexExists(indexDirectory))
             {
-                def writer = IndexWriter(indexDirectory, StandardAnalyzer(), true);
+                def writer = IndexWriter(indexDirectory, StandardAnalyzer(Version.LUCENE_29), true, IndexWriter.MaxFieldLength.UNLIMITED);
                 writer.Optimize();
                 writer.Close();
             }
@@ -164,7 +165,7 @@ namespace CS2.Core.Indexing
             mutable deletedFiles = 0;
             mutable tempCount;
 
-            indexReader = IndexReader.Open(indexDirectory);
+            indexReader = IndexReader.Open(indexDirectory, false);
 
             // Get the list of documents in the index while removing deleted or updated documents
             tempCount = RemoveOldEntries(filesUndergoingIndexing, ref deletedFiles);
@@ -174,7 +175,7 @@ namespace CS2.Core.Indexing
 
             when(filesUndergoingIndexing.Count > 0)
             {
-                indexWriter = IndexWriter(indexDirectory, StandardAnalyzer(), false);
+                indexWriter = IndexWriter(indexDirectory, StandardAnalyzer(Version.LUCENE_29), false, IndexWriter.MaxFieldLength.UNLIMITED);
 
                 foreach(fileName in filesUndergoingIndexing)
                     when(Index(FileInfo(fileName)))
@@ -311,13 +312,13 @@ namespace CS2.Core.Indexing
                 | p is IParsingService =>  document.Add(FieldFactory.CreateIdField(IdIdentifierUtilities.GetIdentifierFromFile(file)));
                                            document.Add(FieldFactory.CreatePathField(file.FullName));
                                            document.Add(FieldFactory.CreateFileNameField(file.Name));
-                                           document.Add(FieldFactory.CreateSourceField(StreamReader(file.FullName, true)));
                                            document.Add(FieldFactory.CreateLanguageField(p.LanguageName));
+                                           
+                                           using(def reader = StreamReader(file.FullName, true)) {
+                                                document.Add(FieldFactory.CreateSourceField(reader));
+                                                indexWriter.AddDocument(document, p.Analyzer);
+                                           }
 
-                                           // Add the document to the index with the appropriate analyzer
-                                           indexWriter.AddDocument(document, p.Analyzer);
-
-                                           // If a parser has been able to parse the file stop iterating through parsers and return
                                            true; 
                 | _ => false;
             }

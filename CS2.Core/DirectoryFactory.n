@@ -15,7 +15,7 @@ namespace CS2.Core
         /// <returns></returns>
         public static GetDirectory(path : string, overwrite : bool) : Directory
         {
-            FSDirectory.GetDirectory(path, overwrite || !System.IO.Directory.Exists(path));
+            FSDirectory.Open(System.IO.DirectoryInfo(path));
         }
     }
 }
