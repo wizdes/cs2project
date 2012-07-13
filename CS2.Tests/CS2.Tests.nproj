@@ -38,16 +38,6 @@
     <DocumentationFile>$(OutputPath)\$(MSBuildProjectName).xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Castle.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc">
-      <Name>Castle.Core</Name>
-      <AssemblyName>Castle.Core.dll</AssemblyName>
-      <HintPath>..\Libraries\Castle.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Castle.DynamicProxy2, Version=2.0.0.1, Culture=neutral, PublicKeyToken=407dd0808d44fbdc">
-      <Name>Castle.DynamicProxy2</Name>
-      <AssemblyName>Castle.DynamicProxy2.dll</AssemblyName>
-      <HintPath>..\Libraries\Castle.DynamicProxy2.dll</HintPath>
-    </Reference>
     <Reference Include="Castle.Facilities.Logging, Version=1.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc">
       <Name>Castle.Facilities.Logging</Name>
       <AssemblyName>Castle.Facilities.Logging.dll</AssemblyName>
@@ -79,15 +69,15 @@
       <HintPath>..\packages\Lucene.Net.2.9.4.1\lib\net40\Lucene.Net.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="nunit.framework, Version=2.4.1.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77">
+    <Reference Include="nunit.framework, Version=2.6.0.12051, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77">
       <Name>nunit.framework</Name>
       <AssemblyName>nunit.framework.dll</AssemblyName>
-      <HintPath>..\Libraries\nunit.framework.dll</HintPath>
+      <HintPath>..\packages\NUnit.2.6.0.12054\lib\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="Rhino.Mocks, Version=3.1.0.648, Culture=neutral, PublicKeyToken=0b3305902db7183f">
+    <Reference Include="Rhino.Mocks, Version=3.6.0.0, Culture=neutral, PublicKeyToken=0b3305902db7183f">
       <Name>Rhino.Mocks</Name>
       <AssemblyName>Rhino.Mocks.dll</AssemblyName>
-      <HintPath>..\Libraries\Rhino.Mocks.dll</HintPath>
+      <HintPath>..\packages\RhinoMocks.3.6.1\lib\net\Rhino.Mocks.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">

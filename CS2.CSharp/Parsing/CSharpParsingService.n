@@ -21,14 +21,6 @@ namespace CS2.CSharp.Parsing
             analyzer = CSharpAnalyzer();
         }
 
-        #region IParsingService Members
-
-        /// <summary>
-        /// Tries to parse the specified file into the supplied document.
-        /// </summary>
-        /// <param name="file">The file.</param>
-        /// <param name="document">The document.</param>
-        /// <returns>True is the parsing is successful, false otherwise.</returns>
         public TryParse(file : FileInfo, document : out Document) : bool
         {
             document = Document();
@@ -47,8 +39,7 @@ namespace CS2.CSharp.Parsing
                     false;
                 }
             }
-            catch
-            {
+            catch {
                 _ => { document = null; false; }
             }
         }
@@ -63,34 +54,24 @@ namespace CS2.CSharp.Parsing
             get { "c#"; }
         }
 
-        /// <summary>
-        /// Gets or sets the analyzer used to index the documents supported by this parser.
-        /// </summary>
-        /// <value>The analyzer.</value>
         public Analyzer : AbstractAnalyzer
         {
             get { analyzer; }
         }
 
-        #endregion
-
         private Parse(data : object) : void
         {
-            mutable lexer : Lexer;
-
             def bag = data :> array[object];
-
-            when(bag == null)();
 
             def file = bag[0] :> FileInfo;
             def document = bag[1] :> Document;
-
-            when(file == null || document == null)();
 
             mutable tokens : TokenCollection;
 
             try
             {
+                mutable lexer;
+                
                 using(fileStream = FileStream(file.FullName, FileMode.Open, FileAccess.Read))
                 using(reader = StreamReader(fileStream, true)) {
                     lexer = Lexer(reader);

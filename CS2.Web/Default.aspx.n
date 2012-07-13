@@ -9,13 +9,13 @@ namespace CS2.Web
 {
     public partial class Default : Page
     {
-        protected Page_Load(sender : object, e : EventArgs) : void
+        protected Page_Load(_ : object, _ : EventArgs) : void
         {
             when(!IsPostBack)
                 GridView1.Visible = false;
         }
 
-        protected ButtonRequestIndexing_Click(sender : object, e : EventArgs) : void
+        protected ButtonRequestIndexing_Click(_ : object, _ : EventArgs) : void
         {
             if(File.Exists(TextBoxPath.Text))
                 Global.IndexingService.RequestIndexing(FileInfo(TextBoxPath.Text));

@@ -19,8 +19,6 @@ namespace CS2.Core.Indexing
             inner.IndexingCompleted += inner_IndexingCompleted;
         }
 
-        #region IIndexingService Members
-
         public DocumentCount : int
         {
             get { inner.DocumentCount; }
@@ -95,22 +93,15 @@ namespace CS2.Core.Indexing
             set { inner.Exclusions = value; }
         }
 
-        #endregion
-
-        #region ILoggingService Members
-
         public Logger : ILogger
         {
             get { logger; }
             set { logger = value; }
         }
 
-        #endregion
-
-        private inner_IndexingCompleted(_ : object, e : IndexingCompletedEventArgs) : void
+        private inner_IndexingCompleted(_ : object, _ : IndexingCompletedEventArgs) : void
         {
-            Logger.InfoFormat("Update completed. Files added: {0}, files deleted: {1}", AddedFilesSinceLastUpdate,
-                              DeletedFilesSinceLastUpdate);
+            Logger.InfoFormat("Update completed. Files added: {0}, files deleted: {1}", AddedFilesSinceLastUpdate, DeletedFilesSinceLastUpdate);
         }
     }
 }

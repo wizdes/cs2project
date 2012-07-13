@@ -34,7 +34,7 @@ namespace CS2.CSharp.Analysis
                 PorterStemFilter(StopFilter(false, LowerCaseTokenizer(reader), StopAnalyzer.ENGLISH_STOP_WORDS_SET));
             else {
                 def set = Lucene.Net.Analysis.CharArraySet(StopWords.Count, false);
-                set.AddAll(List.[string](StopWords).ToArray());
+                _ = set.AddAll(List.[string](StopWords).ToArray());
                 StopFilter(false, LowerCaseTokenizer(reader), CharArraySet.UnmodifiableSet(set));
             }
         }

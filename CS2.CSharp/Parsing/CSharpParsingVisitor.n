@@ -6,20 +6,20 @@ namespace CS2.CSharp.Parsing
 {
     public class CSharpParsingVisitor : AbstractVisitor
     {
-        private static GetDocument(data : object) : Document
+        private static Document(data : object) : Document
         {
             data :> Document;
         }
 
         //public override object VisitCommentStatement(CommentStatement commentStatement, data : object)
         //{
-        //    GetDocument(data).Add(FieldFactory.CreateCommentField(commentStatement.Comment));
+        //    Document(data).Add(FieldFactory.CreateCommentField(commentStatement.Comment));
         //    return base.VisitCommentStatement(commentStatement, data);
         //}
 
         public override VisitMethodDeclaration(methodDeclaration : MethodNode, data : object) : object
         {
-            GetDocument(data).Add(FieldFactory.CreateMethodField(methodDeclaration.Names[0].GenericIdentifier));
+            Document(data).Add(FieldFactory.CreateMethodField(methodDeclaration.Names[0].GenericIdentifier));
             base.VisitMethodDeclaration(methodDeclaration, data);
         }
 
@@ -27,25 +27,25 @@ namespace CS2.CSharp.Parsing
         {
             def name = if(namespaceDeclaration.Name != null) namespaceDeclaration.Name.GenericIdentifier else "Global";
 
-            GetDocument(data).Add(FieldFactory.CreateNamespaceField(name));
+            Document(data).Add(FieldFactory.CreateNamespaceField(name));
             base.VisitNamespaceDeclaration(namespaceDeclaration, data);
         }
 
         public override VisitPropertyDeclaration(propertyDeclaration : PropertyNode, data : object) : object
         {
-            GetDocument(data).Add(FieldFactory.CreatePropertyField(propertyDeclaration.Names[0].QualifiedIdentifier));
+            Document(data).Add(FieldFactory.CreatePropertyField(propertyDeclaration.Names[0].QualifiedIdentifier));
             base.VisitPropertyDeclaration(propertyDeclaration, data);
         }
 
         public override VisitClassDeclaration(classDeclaration : ClassNode, data : object) : object
         {
-            GetDocument(data).Add(FieldFactory.CreateClassField(classDeclaration.Name.Identifier));
+            Document(data).Add(FieldFactory.CreateClassField(classDeclaration.Name.Identifier));
             base.VisitClassDeclaration(classDeclaration, data);
         }
 
         public override VisitInterfaceDeclaration(interfaceDeclaration : InterfaceNode, data : object) : object
         {
-            GetDocument(data).Add(FieldFactory.CreateInterfaceField(interfaceDeclaration.Name.Identifier));
+            Document(data).Add(FieldFactory.CreateInterfaceField(interfaceDeclaration.Name.Identifier));
             base.VisitInterfaceDeclaration(interfaceDeclaration, data);
         }
     }

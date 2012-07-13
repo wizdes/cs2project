@@ -14,8 +14,6 @@ namespace CS2.Core.Indexing
 {
     public class IndexingService : IIndexingService
     {
-        #region Fields
-
         mutable filesWaitingToBeIndexed : ISynchronizedStringSet;
         mutable indexDirectory : Directory;
 
@@ -25,11 +23,7 @@ namespace CS2.Core.Indexing
         mutable deletedFilesSinceLastUpdate : int;
         mutable documentCount : int;
         mutable exclusions : array[string] = array[];
-        mutable indexReader : IndexReader;
-        mutable indexWriter : IndexWriter;
         mutable isUpdating = false;
-
-        #endregion
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IndexingService"/> class.
@@ -43,7 +37,6 @@ namespace CS2.Core.Indexing
             this.indexDirectory = indexDirectory;
             this.parsers = parsers;
 
-            // If the index directory doesn't contain an index then create it
             when(!IndexReader.IndexExists(indexDirectory))
             {
                 def writer = IndexWriter(indexDirectory, StandardAnalyzer(Version.LUCENE_29), true, IndexWriter.MaxFieldLength.UNLIMITED);
@@ -51,8 +44,6 @@ namespace CS2.Core.Indexing
                 writer.Close();
             }
         }
-
-        #region IIndexingService Members
 
         /// <summary>
         /// Gets the number of documents indexed.
@@ -125,8 +116,7 @@ namespace CS2.Core.Indexing
         public RequestIndexing(file : FileInfo) : void
         {
             when(IsValidFileSystemEntryToBeIndexed(file))
-            // Add the file to be indexed to the queue, if it doesn't contain the file yet
-                filesWaitingToBeIndexed.Add(file.FullName);
+                _ = filesWaitingToBeIndexed.Add(file.FullName);
         }
 
         /// <summary>
@@ -136,7 +126,7 @@ namespace CS2.Core.Indexing
         public RequestIndexing(directory : DirectoryInfo) : void
         {
             when(IsValidFileSystemEntryToBeIndexed(directory))
-                ThreadPool.QueueUserWorkItem(_ =>
+                _ = ThreadPool.QueueUserWorkItem(_ =>
                 {
                     foreach(parser in parsers)
                         foreach(extension in parser.SupportedFileExtensions)
@@ -152,59 +142,45 @@ namespace CS2.Core.Indexing
         /// </summary>
         public UpdateIndex() : void
         {
-            lock(updatingLock)
-            {
-                when(isUpdating)();
-
-                isUpdating = true;
-            }
-
+            when(Monitor.TryEnter(updatingLock))
+                try {
+                    DoUpdateIndex();
+                }
+                finally {
+                    Monitor.Exit(updatingLock);
+                }
+        }
+        
+        private DoUpdateIndex() : void {
             def filesUndergoingIndexing = filesWaitingToBeIndexed.CloneAndClear();
 
             mutable addedFiles = 0;
-            mutable deletedFiles = 0;
-            mutable tempCount;
-
-            indexReader = IndexReader.Open(indexDirectory, false);
-
-            // Get the list of documents in the index while removing deleted or updated documents
-            tempCount = RemoveOldEntries(filesUndergoingIndexing, ref deletedFiles);
-
-            indexReader.Close();
-            indexReader = null;
+            
+            def (originalDocumentCount, deletedFiles) = RemoveOldEntries(filesUndergoingIndexing);
 
             when(filesUndergoingIndexing.Count > 0)
             {
-                indexWriter = IndexWriter(indexDirectory, StandardAnalyzer(Version.LUCENE_29), false, IndexWriter.MaxFieldLength.UNLIMITED);
+                def indexWriter = IndexWriter(indexDirectory, StandardAnalyzer(Version.LUCENE_29), false, IndexWriter.MaxFieldLength.UNLIMITED);
 
                 foreach(fileName in filesUndergoingIndexing)
-                    when(Index(FileInfo(fileName)))
+                    when(Index(FileInfo(fileName), indexWriter))
                         addedFiles++;
 
                 indexWriter.Optimize();
                 indexWriter.Close();
-                indexWriter = null;
             }
 
-            // Update statistics
             addedFilesSinceLastUpdate = addedFiles;
             deletedFilesSinceLastUpdate = deletedFiles;
-            documentCount = tempCount + addedFiles - deletedFiles;
+            documentCount = originalDocumentCount + addedFiles - deletedFiles;
 
-            // Fire IndexingCompleted event
             OnIndexingCompleted();
-
-            // Signal as finished updating
-            lock(updatingLock)
-                isUpdating = false;
         }
 
         /// <summary>
         /// Occurs when indexing is completed.
         /// </summary>
         public event IndexingCompleted : EventHandler[IndexingCompletedEventArgs];
-
-        #endregion
 
         /// <summary>
         /// Determines whether the specified entry is a valid file system entry to be indexed.
@@ -215,17 +191,9 @@ namespace CS2.Core.Indexing
         /// </returns>
         private IsValidFileSystemEntryToBeIndexed(entry : FileSystemInfo) : bool
         {
-            // The file or directory doesn't exist
-            if(!entry.Exists)
-                false;
-            else
-            // The file or directory is hidden
-            if(entry.Attributes == FileAttributes.Hidden)
-                false;
-            else
-            // The entry matches one of the exclusions
-            if(MatchesAnyExclusion(entry, exclusions))
-                false;
+            if(!entry.Exists) false;
+            else if(entry.Attributes & FileAttributes.Hidden == FileAttributes.Hidden) false;
+            else if(MatchesAnyExclusion(entry, exclusions)) false;
             else true;
         }
 
@@ -238,13 +206,7 @@ namespace CS2.Core.Indexing
         /// <returns></returns>
         private static MatchesAnyExclusion(entry : FileSystemInfo, exclusions : array[string]) : bool
         {
-            mutable r : Regex;
-
-            !Array.TrueForAll(exclusions, exclusion =>
-            {
-                r = Regex(Regex.Escape(exclusion));
-                !r.IsMatch(entry.FullName);
-            });
+            exclusions.Any(e => Regex(Regex.Escape(e)).IsMatch(entry.FullName));
         }
 
         /// <summary>
@@ -259,55 +221,47 @@ namespace CS2.Core.Indexing
         /// <summary>
         /// Removes the deleted and modified documents from the index. Marks the modified files as to be reindexed.
         /// </summary>
-        private RemoveOldEntries(filesUndergoingIndexing : ISynchronizedStringSet, deletedFiles : ref int) : int
+        private RemoveOldEntries(filesUndergoingIndexing : ISynchronizedStringSet) : int * int
         {
-            mutable tempCount = 0;
+            mutable originalDocumentCount = 0, deletedFiles = 0;
+            
+            def indexReader = IndexReader.Open(indexDirectory, false);
 
             // Create a term enumerator to iterate through all the terms of the ID field
             // This is done to avoid searching, which is presumably less performant
             def idEnumerator = indexReader.Terms(Term(FieldFactory.IdFieldName, ""));
 
-            // Iterate all the documents into the index
             while(idEnumerator.Term() != null && idEnumerator.Term().Field() == FieldFactory.IdFieldName)
             {
-                tempCount++;
+                originalDocumentCount++;
 
                 def filePath = IdIdentifierUtilities.GetPathFromIdentifier(idEnumerator.Term().Text());
 
-                // If the file is already in the index remove it from the list of the files waiting to be indexed
-                filesUndergoingIndexing.Remove(filePath);
+                _ = filesUndergoingIndexing.Remove(filePath);
 
                 def fileExists = File.Exists(filePath);
 
-                // If file doesn't exist or it is out of date
                 when(!fileExists || IdIdentifierUtilities.GetIdentifierFromFile(FileInfo(filePath)) != idEnumerator.Term().Text())
                 {
-                    // Then delete document from the index
-                    indexReader.DeleteDocuments(idEnumerator.Term());
-                    deletedFiles++;
+                    deletedFiles += indexReader.DeleteDocuments(idEnumerator.Term());
 
-                    // If file was deleted since out of date then re-index it
                     when(fileExists)
-                        filesUndergoingIndexing.Add(filePath);
+                        _ = filesUndergoingIndexing.Add(filePath);
                 }
 
-                idEnumerator.Next();
+                _ = idEnumerator.Next();
             }
 
             idEnumerator.Close();
+            indexReader.Close();
 
-            tempCount;
+            (originalDocumentCount, deletedFiles);
         }
 
-        /// <summary>
-        /// Indexes the specified file.
-        /// </summary>
-        /// <param name="file">The file.</param>
-        private Index(file : FileInfo) : bool
+        private Index(file : FileInfo, indexWriter : IndexWriter) : bool
         {
-            mutable document : Document;
+            mutable document;
 
-            // Find a parser that suits the filez
             match(parsers.Where(p => p.SupportedFileExtensions.Contains(file.Extension)).FirstOrDefault(p => p.TryParse(file, out document))) {
                 | p is IParsingService =>  document.Add(FieldFactory.CreateIdField(IdIdentifierUtilities.GetIdentifierFromFile(file)));
                                            document.Add(FieldFactory.CreatePathField(file.FullName));

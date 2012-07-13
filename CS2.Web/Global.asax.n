@@ -52,13 +52,13 @@ namespace CS2.Web
                 HttpContext.Current.Items["results"] :> List[SearchResult];
         }
 
-        protected Application_Start(sender : object, e : EventArgs) : void
+        protected Application_Start(_ : object, _ : EventArgs) : void
         {
             indexingService = container.Resolve.[IIndexingService]();
             searchService = container.Resolve.[ISearchService]();
         }
 
-        protected Application_End(sender : object, e : EventArgs) : void
+        protected Application_End(_ : object, _ : EventArgs) : void
         {
             container.Release(indexingService);
             container.Release(searchService);

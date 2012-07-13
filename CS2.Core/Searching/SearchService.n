@@ -32,17 +32,15 @@ namespace CS2.Core.Searching
             this.indexingService = indexingService;
 
             // Refresh searcher each time the indexer has finished indexing
-            this.indexingService.IndexingCompleted += (sender, e) =>
-                {
-                    when(e.AddedFiles > 0 || e.DeletedFiles > 0)
-                        InstantiateSearcher();
-                };
+            this.indexingService.IndexingCompleted += (_, e) =>
+            {
+                when(e.AddedFiles > 0 || e.DeletedFiles > 0)
+                    InstantiateSearcher();
+            };
 
-            // Create a list of all the analyzers, one for each language
             foreach(service in indexingService.Parsers)
                 analyzers.Add(service.LanguageName, service.Analyzer);
 
-            // Instantiate the searcher for the fist time
             InstantiateSearcher();
         }
 
@@ -83,8 +81,6 @@ namespace CS2.Core.Searching
 
                         parsers.Add(QueryParser(Version.LUCENE_29, FieldFactory.SourceFieldName, analyzerWrapper));
                     }
-                        // Otherwise use just the analyzer corresponding to the specified language
-                // A KeywordAnalyzer is always used for the language field.
                 else
                 {
                     analyzerWrapper = PerFieldAnalyzerWrapper(analyzers[language]);

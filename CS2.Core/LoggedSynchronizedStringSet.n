@@ -16,39 +16,12 @@ namespace CS2.Core
             this.inner = inner;
         }
 
-        #region ILoggingService Members
-
         public Logger : ILogger 
         {
             get { logger; }
             set { logger = value; }
         }
 
-        #endregion
-
-        #region ISynchronizedStringSet Members
-
-        ///<summary>
-        ///Returns an enumerator that iterates through a collection.
-        ///</summary>
-        ///
-        ///<returns>
-        ///An <see cref="T:System.Collections.IEnumerator"></see> object that can be used to iterate through the collection.
-        ///</returns>
-        ///<filterpriority>2</filterpriority>
-        IEnumerable_GetEnumerator() : IEnumerator
-        {
-            inner.GetEnumerator();
-        }
-
-        ///<summary>
-        ///Returns an enumerator that iterates through the collection.
-        ///</summary>
-        ///
-        ///<returns>
-        ///A <see cref="T:System.Collections.Generic.IEnumerator`1"></see> that can be used to iterate through the collection.
-        ///</returns>
-        ///<filterpriority>1</filterpriority>
         public GetEnumerator() : IEnumerator[string]
         {
             inner.GetEnumerator();
@@ -56,16 +29,8 @@ namespace CS2.Core
 
         public Add(item : string) : bool
         {
-            Thread.Sleep(0);
-
-            try
-            {
-                inner.Add(item);
-            }
-            finally
-            {
-                Logger.InfoFormat("Adding {0} to collection. Total items: {1}", item, Count);
-            }
+            Logger.InfoFormat("Adding {0} to collection. Total items: {1}", item, Count);
+            inner.Add(item);
         }
 
         public Clear() : void
@@ -82,21 +47,13 @@ namespace CS2.Core
 
         public Remove(item : string) : bool
         {
-            try
-            {
-                inner.Remove(item);
-            }
-            finally
-            {
-                Logger.InfoFormat("Removing {0} from the collection. Total items: {1}", item, Count);
-            }
+            Logger.InfoFormat("Removing {0} from the collection. Total items: {1}", item, Count);
+            inner.Remove(item);
         }
 
         public Count : int
         {
             get { inner.Count; }
         }
-
-        #endregion
     }
 }
