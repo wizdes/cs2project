@@ -21,7 +21,7 @@ namespace CS2.Tests
         [SetUp]
         public Setup() : void
         {
-            service = LoggedIndexingService(IndexingService(RAMDirectory(), array[CSharpParsingService()], LoggedSynchronizedStringSet(SynchronizedStringSet())));
+            service = LoggedIndexingService(IndexingService(RAMDirectory(), array[CSharpParsingService()]));
         }
 
         [Test]

@@ -25,7 +25,7 @@ namespace CS2.Core
 
         public static CreateIdField(identifier : string) : Field
         {
-           Field(IdFieldName, identifier, Field.Store.NO, Field.Index.NOT_ANALYZED);
+           Field(IdFieldName, identifier, Field.Store.YES, Field.Index.NOT_ANALYZED);
         }
 
         public static CreateLanguageField(identifier : string) : Field

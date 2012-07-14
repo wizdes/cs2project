@@ -9,33 +9,28 @@ using Lucene.Net.Index;
 using Lucene.Net.Util;
 using Directory=Lucene.Net.Store.Directory;
 using System.Linq;
+using Nemerle.Utility;
 
 namespace CS2.Core.Indexing
 {
     public class IndexingService : IIndexingService
     {
-        mutable filesWaitingToBeIndexed : ISynchronizedStringSet;
-        mutable indexDirectory : Directory;
-
-        mutable parsers : array[IParsingService];
         updatingLock = object();
-        mutable addedFilesSinceLastUpdate : int;
-        mutable deletedFilesSinceLastUpdate : int;
-        mutable documentCount : int;
-        mutable exclusions : array[string] = array[];
-        mutable isUpdating = false;
+        filesWaitingToBeIndexed : ISynchronizedStringSet;
+        
+        [Accessor] parsers : array[IParsingService];
+        [Accessor] mutable indexDirectory : Directory;
+        [Accessor] mutable addedFilesSinceLastUpdate : int;
+        [Accessor] mutable deletedFilesSinceLastUpdate : int;
+        [Accessor] mutable documentCount : int;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="IndexingService"/> class.
-        /// </summary>
-        /// <param name="indexDirectory">The index directory.</param>
-        /// <param name="parsers">The parsing services.</param>
-        /// <param name="fileQueue">The files waiting to be indexed.</param>
-        public this(indexDirectory : Directory, parsers : array[IParsingService], fileQueue : ISynchronizedStringSet)
+        mutable exclusions : array[Regex] = array[];
+
+        public this(indexDirectory : Directory, parsers : array[IParsingService])
         {
-            filesWaitingToBeIndexed = fileQueue;
             this.indexDirectory = indexDirectory;
             this.parsers = parsers;
+            filesWaitingToBeIndexed = SynchronizedStringSet();
 
             when(!IndexReader.IndexExists(indexDirectory))
             {
@@ -45,110 +40,41 @@ namespace CS2.Core.Indexing
             }
         }
 
-        /// <summary>
-        /// Gets the number of documents indexed.
-        /// </summary>
-        /// <value>The document count.</value>
-        public DocumentCount : int
-        {
-            get { documentCount; }
-        }
-
-        /// <summary>
-        /// Gets the parsing services.
-        /// </summary>
-        /// <value>The parsing services.</value>
-        public Parsers : array[IParsingService]
-        {
-            get { parsers; }
-        }
-
-        /// <summary>
-        /// Returns the number of files deleted from the index since last update.
-        /// </summary>
-        /// <value></value>
-        public DeletedFilesSinceLastUpdate : int
-        {
-            get { deletedFilesSinceLastUpdate; }
-        }
-
-        /// <summary>
-        /// Returns the number of files added to the index since last update.
-        /// </summary>
-        /// <value></value>
-        public AddedFilesSinceLastUpdate : int
-        {
-            get { addedFilesSinceLastUpdate; }
-        }
-
-        /// <summary>
-        /// Returns true if there are files waiting to be indexed in batch.
-        /// </summary>
-        /// <value></value>
         public IsWaitingForFilesToBeIndexed : bool
         {
-            get { filesWaitingToBeIndexed.Count != 0; }
+            get { filesWaitingToBeIndexed.Any() }
         }
 
-        /// <summary>
-        /// The directory where the index is located.
-        /// </summary>
-        /// <value></value>
-        public IndexDirectory : Directory
-        {
-            get { indexDirectory; }
-        }
-
-        /// <summary>
-        /// Gets or sets the exclusions.
-        /// </summary>
-        /// <value>The exclusions.</value>
         public Exclusions : array[string]
         {
-            get { exclusions; }
-            set { exclusions = value; }
+            set { exclusions = value.Select(v => Regex(v |> Regex.Escape)).ToArray() }
         }
 
-        /// <summary>
-        /// Requests the indexing of the specified file.
-        /// </summary>
-        /// <param name="file">The file.</param>
         public RequestIndexing(file : FileInfo) : void
         {
             when(IsValidFileSystemEntryToBeIndexed(file))
                 _ = filesWaitingToBeIndexed.Add(file.FullName);
         }
 
-        /// <summary>
-        /// Requests the indexing of all the files contained in the specified directory and all its subdirectories.
-        /// </summary>
-        /// <param name="directory">The directory.</param>
         public RequestIndexing(directory : DirectoryInfo) : void
         {
             when(IsValidFileSystemEntryToBeIndexed(directory))
-                _ = ThreadPool.QueueUserWorkItem(_ =>
-                {
-                    foreach(parser in parsers)
-                        foreach(extension in parser.SupportedFileExtensions)
-                            foreach(file in directory.GetFiles(string.Format("*{0}", extension), SearchOption.AllDirectories))
-                                RequestIndexing(file);
-                });
+                _ = ThreadPool.QueueUserWorkItem(DoIndexDirectory, directory)
+        }
+        
+        private DoIndexDirectory(directory : object) : void {
+            foreach(parser in parsers)
+            foreach(extension in parser.SupportedFileExtensions)
+            foreach(file in (directory :> DirectoryInfo).EnumerateFiles(string.Format("*{0}", extension), SearchOption.AllDirectories))
+                RequestIndexing(file);
         }
 
-        /// <summary>
-        /// Triggers update operations on the index and on the files repository,
-        /// removing no longer existing files references both from repository and index,
-        /// updating changed documents and adding new documents which have been explicitly required to be indexed.
-        /// </summary>
-        public UpdateIndex() : void
-        {
+        public UpdateIndex() : void {
             when(Monitor.TryEnter(updatingLock))
-                try {
-                    DoUpdateIndex();
-                }
-                finally {
-                    Monitor.Exit(updatingLock);
-                }
+            try
+                DoUpdateIndex();
+            finally
+                Monitor.Exit(updatingLock);
         }
         
         private DoUpdateIndex() : void {
@@ -177,82 +103,53 @@ namespace CS2.Core.Indexing
             OnIndexingCompleted();
         }
 
-        /// <summary>
-        /// Occurs when indexing is completed.
-        /// </summary>
-        public event IndexingCompleted : EventHandler[IndexingCompletedEventArgs];
+        public event IndexingCompleted : Action[IndexingCompletedEventArgs];
 
-        /// <summary>
-        /// Determines whether the specified entry is a valid file system entry to be indexed.
-        /// </summary>
-        /// <param name="entry">The entry.</param>
-        /// <returns>
-        /// 	<c>true</c> if [is valid file system entry to be indexed] [the specified entry]; otherwise, <c>false</c>.
-        /// </returns>
         private IsValidFileSystemEntryToBeIndexed(entry : FileSystemInfo) : bool
         {
             if(!entry.Exists) false;
             else if(entry.Attributes & FileAttributes.Hidden == FileAttributes.Hidden) false;
-            else if(MatchesAnyExclusion(entry, exclusions)) false;
+            else if(MatchesAnyExclusion(entry)) false;
             else true;
         }
 
-        /// <summary>
-        /// Returns true if the supplied <see cref="System.IO.FileSystemInfo"/> 
-        /// matches any of the patterns in the <paramref name="exclusions"/>, false otherwise.
-        /// </summary>
-        /// <param name="entry">The entry in the file system.</param>
-        /// <param name="exclusions">The array of exclusions.</param>
-        /// <returns></returns>
-        private static MatchesAnyExclusion(entry : FileSystemInfo, exclusions : array[string]) : bool
+        private MatchesAnyExclusion(entry : FileSystemInfo) : bool
         {
-            exclusions.Any(e => Regex(Regex.Escape(e)).IsMatch(entry.FullName));
+            exclusions.Any <| _.IsMatch(entry.FullName);
         }
 
-        /// <summary>
-        /// Called to fire the <see cref="IndexingCompleted" /> event.
-        /// </summary>
         private OnIndexingCompleted() : void
         {
             when(IndexingCompleted != null)
-                IndexingCompleted(this, IndexingCompletedEventArgs(addedFilesSinceLastUpdate, deletedFilesSinceLastUpdate, documentCount));
+                IndexingCompleted(IndexingCompletedEventArgs(addedFilesSinceLastUpdate, deletedFilesSinceLastUpdate, documentCount));
         }
 
-        /// <summary>
-        /// Removes the deleted and modified documents from the index. Marks the modified files as to be reindexed.
-        /// </summary>
         private RemoveOldEntries(filesUndergoingIndexing : ISynchronizedStringSet) : int * int
         {
-            mutable originalDocumentCount = 0, deletedFiles = 0;
+            mutable deletedFiles;
             
             def indexReader = IndexReader.Open(indexDirectory, false);
-
-            // Create a term enumerator to iterate through all the terms of the ID field
-            // This is done to avoid searching, which is presumably less performant
-            def idEnumerator = indexReader.Terms(Term(FieldFactory.IdFieldName, ""));
-
-            while(idEnumerator.Term() != null && idEnumerator.Term().Field() == FieldFactory.IdFieldName)
-            {
-                originalDocumentCount++;
-
-                def filePath = IdIdentifierUtilities.GetPathFromIdentifier(idEnumerator.Term().Text());
+            def originalDocumentCount = indexReader.MaxDoc() - 1;
+            
+            for(mutable i = 0; i < indexReader.MaxDoc(); i++) {
+                def doc = indexReader.Document(i);
+                def id = doc.GetField(FieldFactory.IdFieldName).StringValue();
+                def filePath = IdIdentifierUtilities.GetPathFromIdentifier(id);
 
                 _ = filesUndergoingIndexing.Remove(filePath);
 
                 def fileExists = File.Exists(filePath);
 
-                when(!fileExists || IdIdentifierUtilities.GetIdentifierFromFile(FileInfo(filePath)) != idEnumerator.Term().Text())
+                when(!fileExists || IdIdentifierUtilities.GetIdentifierFromFile(FileInfo(filePath)) != id)
                 {
-                    deletedFiles += indexReader.DeleteDocuments(idEnumerator.Term());
+                    indexReader.DeleteDocument(i);
+                    deletedFiles++;
 
                     when(fileExists)
                         _ = filesUndergoingIndexing.Add(filePath);
                 }
-
-                _ = idEnumerator.Next();
             }
 
-            idEnumerator.Close();
             indexReader.Close();
 
             (originalDocumentCount, deletedFiles);
@@ -262,13 +159,13 @@ namespace CS2.Core.Indexing
         {
             mutable document;
 
-            match(parsers.Where(p => p.SupportedFileExtensions.Contains(file.Extension)).FirstOrDefault(p => p.TryParse(file, out document))) {
+            match(parsers.Where(p => p.SupportedFileExtensions.Contains <| file.Extension).FirstOrDefault(p => p.TryParse(file, out document))) {
                 | p is IParsingService =>  document.Add(FieldFactory.CreateIdField(IdIdentifierUtilities.GetIdentifierFromFile(file)));
                                            document.Add(FieldFactory.CreatePathField(file.FullName));
                                            document.Add(FieldFactory.CreateFileNameField(file.Name));
                                            document.Add(FieldFactory.CreateLanguageField(p.LanguageName));
                                            
-                                           using(def reader = StreamReader(file.FullName, true)) {
+                                           using(def reader = StreamReader(file.FullName)) {
                                                 document.Add(FieldFactory.CreateSourceField(reader));
                                                 indexWriter.AddDocument(document, p.Analyzer);
                                            }

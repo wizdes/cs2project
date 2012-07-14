@@ -4,7 +4,7 @@ using Lucene.Net.Documents;
 
 namespace CS2.CSharp.Parsing
 {
-    public class CSharpParsingVisitor : AbstractVisitor
+    internal class CSharpParsingVisitor : AbstractVisitor
     {
         private static Document(data : object) : Document
         {

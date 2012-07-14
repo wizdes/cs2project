@@ -31,7 +31,7 @@ namespace CS2.Core.Indexing
         /// Gets or sets the exclusions.
         /// </summary>
         /// <value>The exclusions.</value>
-        Exclusions : array[string] { get; set; }
+        Exclusions : array[string] { set; }
 
         /// <summary>
         /// Gets the parsing services.
@@ -48,7 +48,7 @@ namespace CS2.Core.Indexing
         /// <summary>
         /// Occurs when indexing is completed.
         /// </summary>
-        event IndexingCompleted : EventHandler[IndexingCompletedEventArgs];
+        event IndexingCompleted : Action[IndexingCompletedEventArgs];
 
         /// <summary>
         /// Requests the indexing of the specified file.

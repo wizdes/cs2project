@@ -7,12 +7,13 @@ using CS2.CSharp.Analysis;
 using DDW;
 using DDW.Collections;
 using Lucene.Net.Documents;
+using Nemerle.Utility;
 
 namespace CS2.CSharp.Parsing
 {
     public class CSharpParsingService : IParsingService
     {
-        analyzer : AbstractAnalyzer;
+        [Accessor] analyzer : AbstractAnalyzer;
         parsingVisitor : CSharpParsingVisitor;
 
         public this()
@@ -20,64 +21,45 @@ namespace CS2.CSharp.Parsing
             parsingVisitor =  CSharpParsingVisitor();
             analyzer = CSharpAnalyzer();
         }
-
-        public TryParse(file : FileInfo, document : out Document) : bool
+        
+        public SupportedFileExtensions : IEnumerable[string]
         {
-            document = Document();
-
-            try
-            {
-                def parser = Thread(Parse);
-                parser.Start(array [file : object, document : object]);
-
-                if(parser.Join(2000)) {
-                    // Too few fields found, this is probably not a C# file
-                    document.GetFields().Count > 1;              
-                }
-                else {
-                    parser.Abort();
-                    false;
-                }
-            }
-            catch {
-                _ => { document = null; false; }
-            }
-        }
-
-        public SupportedFileExtensions : ICollection[string]
-        {
-            get { array[".cs"]; }
+            get { array[".cs"] }
         }
 
         public LanguageName : string
         {
-            get { "c#"; }
+            get { "c#" }
         }
 
-        public Analyzer : AbstractAnalyzer
+        public TryParse(file : FileInfo, document : out Document) : bool
         {
-            get { analyzer; }
+            try
+            {
+                document = Document();
+                def parser = Thread(Parse);
+                parser.Start((file, document));
+
+                if(parser.Join(2000))
+                    document.GetFields().Count > 1             
+                else {
+                    parser.Abort();
+                    false
+                }
+            }
+            catch {
+                _ => { document = null; false }
+            }
         }
 
         private Parse(data : object) : void
         {
-            def bag = data :> array[object];
-
-            def file = bag[0] :> FileInfo;
-            def document = bag[1] :> Document;
-
-            mutable tokens : TokenCollection;
+            def (file, document) = data :> FileInfo * Document;
 
             try
             {
-                mutable lexer;
+                def (lexer, tokens) = LexAndTokenize(file);
                 
-                using(fileStream = FileStream(file.FullName, FileMode.Open, FileAccess.Read))
-                using(reader = StreamReader(fileStream, true)) {
-                    lexer = Lexer(reader);
-                    tokens = lexer.Lex();
-                }
-
                 def parser = Parser(file.FullName);
 
                 def compilationUnitNode = parser.Parse(tokens, lexer.StringLiterals);
@@ -86,7 +68,17 @@ namespace CS2.CSharp.Parsing
             }
             catch
             {
-                | _ => { when(tokens != null) tokens.Clear(); }
+                | _ => ()
+            }
+        }
+        
+        private LexAndTokenize(file : FileInfo) : Lexer * TokenCollection 
+        {
+            using(stream = File.Open(file.FullName, FileMode.Open, FileAccess.Read))
+            using(reader = StreamReader(stream)) 
+            {
+                def lexer = Lexer(reader);
+                (lexer, lexer.Lex())
             }
         }
     }

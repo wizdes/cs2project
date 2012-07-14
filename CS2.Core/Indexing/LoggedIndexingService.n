@@ -81,7 +81,7 @@ namespace CS2.Core.Indexing
             inner.UpdateIndex();
         }
 
-        public event IndexingCompleted : EventHandler[IndexingCompletedEventArgs]
+        public event IndexingCompleted : Action[IndexingCompletedEventArgs]
         {
             add { inner.IndexingCompleted += value; }
             remove { inner.IndexingCompleted -= value; }
@@ -89,7 +89,6 @@ namespace CS2.Core.Indexing
 
         public Exclusions : array[string]
         {
-            get { inner.Exclusions; }
             set { inner.Exclusions = value; }
         }
 
@@ -99,7 +98,7 @@ namespace CS2.Core.Indexing
             set { logger = value; }
         }
 
-        private inner_IndexingCompleted(_ : object, _ : IndexingCompletedEventArgs) : void
+        private inner_IndexingCompleted(_ : IndexingCompletedEventArgs) : void
         {
             Logger.InfoFormat("Update completed. Files added: {0}, files deleted: {1}", AddedFilesSinceLastUpdate, DeletedFilesSinceLastUpdate);
         }

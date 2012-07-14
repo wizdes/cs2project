@@ -18,7 +18,7 @@ namespace CS2.Console
             def searchService = container.Resolve.[ISearchService]();
 
             indexingService.RequestIndexing(DirectoryInfo(Environment.CurrentDirectory).Parent.Parent);
-            indexingService.IndexingCompleted += (_, args) => System.Console.WriteLine("Completed indexing. Total files: {0}", args.DocumentCount);
+            indexingService.IndexingCompleted += args => System.Console.WriteLine("Completed indexing. Total files: {0}", args.DocumentCount);
 
             mutable input;
 
@@ -30,13 +30,10 @@ namespace CS2.Console
                 
                 when(input != string.Empty)
                 {
-                    // Index file
                     if(File.Exists(input))
                         indexingService.RequestIndexing(FileInfo(input));
-                    // Index directory
                     else if(Directory.Exists(input))
                         indexingService.RequestIndexing(DirectoryInfo(input));
-                    // Search
                     else
                     {
                         def searchResults = searchService.SearchWithQueryParser(input);

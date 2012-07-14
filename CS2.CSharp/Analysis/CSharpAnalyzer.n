@@ -7,7 +7,7 @@ using Lucene.Net.Analysis;
 
 namespace CS2.CSharp.Analysis
 {
-    public class CSharpAnalyzer : AbstractAnalyzer
+    internal class CSharpAnalyzer : AbstractAnalyzer
     {
         protected override StopWords : ICollection[string] 
         {

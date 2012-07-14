@@ -12,7 +12,7 @@ namespace CS2.Tests
         [Test]
         public CanResolve() : void
         {
-            def searcher = mocks.CreateMock.[Searcher]();
+            def searcher = mocks.StrictMock.[Searcher]();
 
             def parameters = ListDictionary();
             parameters.Add("searcher", searcher);

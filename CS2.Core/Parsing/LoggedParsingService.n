@@ -17,11 +17,7 @@ namespace CS2.Core.Parsing
         public this(inner : IParsingService)
         {
             this.inner = inner;
-            watch.Start();
-            watch.Reset();
         }
-
-        #region ILoggingService Members
 
         public Logger : ILogger
         {
@@ -29,11 +25,7 @@ namespace CS2.Core.Parsing
             set { logger = value; }
         }
 
-        #endregion
-
-        #region IParsingService Members
-
-        public SupportedFileExtensions : ICollection[string]
+        public SupportedFileExtensions : IEnumerable[string]
         {
             get { inner.SupportedFileExtensions; }
         }
@@ -48,7 +40,7 @@ namespace CS2.Core.Parsing
             get { inner.Analyzer; }
         }
 
-        public TryParse(file : FileInfo, document : out Document ) : bool
+        public TryParse(file : FileInfo, document : out Document) : bool
         {
             watch.Start();
 
@@ -64,7 +56,5 @@ namespace CS2.Core.Parsing
 
             couldParse;
         }
-
-        #endregion
     }
 }
