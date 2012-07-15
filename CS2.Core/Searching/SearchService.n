@@ -12,6 +12,7 @@ using Lucene.Net.Search;
 using Lucene.Net.Util;
 using System.Linq;
 using Nemerle.Utility;
+using Nemerle.Collections;
 
 namespace CS2.Core.Searching
 {
@@ -19,10 +20,10 @@ namespace CS2.Core.Searching
     {
         searcherLock = object();
         indexingService : IIndexingService;
-        
+
         mutable analyzersByLanguage : Dictionary[string, AbstractAnalyzer];
         mutable searcher : IndexSearcher;
-        
+
         [Accessor(flags = Setter)] mutable encoder : Encoder = DefaultEncoder();
         [Accessor(flags = Setter)] mutable formatter : Formatter = SimpleHTMLFormatter();
         [Accessor(flags = Setter)] mutable fragmenter : Fragmenter = SimpleFragmenter(50);
@@ -30,11 +31,11 @@ namespace CS2.Core.Searching
         public this(indexingService : IIndexingService)
         {
             this.indexingService = indexingService;
-         
+
             analyzersByLanguage = indexingService.Parsers.ToDictionary(p => p.LanguageName, p => p.Analyzer);
-            
+
             CreateSearcher();
-            
+
             this.indexingService.IndexingCompleted += e =>
             {
                 when(e.AddedFiles > 0 || e.DeletedFiles > 0)
@@ -45,10 +46,10 @@ namespace CS2.Core.Searching
         public SearchWithQueryParser(query : string) : IEnumerable[SearchResult]
         {
             if(!string.IsNullOrEmpty(query))
-                DoSearch(query, GetQueryParsers(query))
+                DoSearch(query, GetQueryParsers(query).NToList())
             else Enumerable.Empty.[SearchResult]()
         }
-        
+
         private GetQueryParsers(query: string) : IEnumerable[QueryParser] {
             mutable analyzerWrapper, language, analyzer;
 
@@ -59,61 +60,67 @@ namespace CS2.Core.Searching
                 yield QueryParser(Version.LUCENE_29, FieldFactory.SourceFieldName, analyzerWrapper)
             }
             else foreach(analyzer in analyzersByLanguage.Values) {
-                analyzerWrapper = PerFieldAnalyzerWrapper(analyzer);
-                analyzerWrapper.AddAnalyzer(FieldFactory.LanguageFieldName, KeywordAnalyzer());
+                     analyzerWrapper = PerFieldAnalyzerWrapper(analyzer);
+                     analyzerWrapper.AddAnalyzer(FieldFactory.LanguageFieldName, KeywordAnalyzer());
 
-                yield QueryParser(Version.LUCENE_29, FieldFactory.SourceFieldName, analyzerWrapper)
-            }
+                     yield QueryParser(Version.LUCENE_29, FieldFactory.SourceFieldName, analyzerWrapper)
+                 }
         }
-        
-        private DoSearch(query: string, parsers : IEnumerable[QueryParser]) : IEnumerable[SearchResult]{
-            lock(searcherLock) {
-                def results = List.[SearchResult]();
-            foreach(parser in parsers)
-            {
-                def luceneQuery = parser.Parse(query).Rewrite(searcher.GetIndexReader());
 
-                def docs = searcher.Search(luceneQuery, 1000).ScoreDocs;
+        private DoSearch(query: string, parsers : IEnumerable[QueryParser]) : IEnumerable[SearchResult]{
+            def useParser(parser : QueryParser) {
+                def luceneQuery = parser.Parse(query).Rewrite(searcher.GetIndexReader());
+                def docs = searcher.Search(luceneQuery, 1000).ScoreDocs.NToList();
 
                 def highlighter = Highlighter(formatter, encoder, QueryScorer(luceneQuery));
                 highlighter.SetTextFragmenter(fragmenter);
 
-                for(mutable i = 0; i < docs.Length; i++)
-                {
-                    def doc = searcher.Doc(docs[i].doc);
-                            
-                    def path = doc.Get(FieldFactory.PathFieldName);
-                    
-                    mutable contents;
-                    
-                    using(def reader = StreamReader(path))
-                        contents = reader.ReadToEnd();
+                def iterDocs(docs) {
+                    | [] => []
+                    | h::t =>   
+                        def doc = searcher.Doc(h.doc);
+                        def path = doc.Get(FieldFactory.PathFieldName);
 
-                    def tokenStream = parser.GetAnalyzer().TokenStream(FieldFactory.SourceFieldName, StringReader(contents));
-              
-                    mutable fragments = highlighter.GetBestFragments(tokenStream, contents, 10);
+                        mutable contents;
 
-                    when(fragments.Length == 0)
-                        using(def reader = StreamReader(path)) {
-                            fragments = array[contents.Substring(0, Math.Min(100, contents.Length))];
-                        }
+                        using(def reader = StreamReader(path))
+                            contents = reader.ReadToEnd();
 
-                    foreach(fragment in fragments)
-                        results.Add(SearchResult(doc, fragment));
-                }
-            }
-            
-            results;
-            }
+                        def tokenStream = parser.GetAnalyzer().TokenStream(FieldFactory.SourceFieldName, StringReader(contents));
+
+                        mutable fragments = highlighter.GetBestFragments(tokenStream, contents, 10).NToList();
+
+                        when(fragments.Length == 0)
+                            using(def reader = StreamReader(path))
+                                fragments = [contents.Substring(0, Math.Min(100, contents.Length))];
+
+                        def iterFragments(fragments) {
+                            | [] => []
+                            | h::t => SearchResult(doc, h) :: iterFragments(t)
+                        };
+
+                        iterFragments(fragments).Append(iterDocs(t))
+                };
+
+                iterDocs(docs)
+            };
+
+            def iterParsers(parsers) {
+                | [] => []
+                | h::t => useParser(h).Append(iterParsers(t))
+            };
+
+            lock(searcherLock)      
+                iterParsers(parsers)
         }
 
         private static TryGetLanguageFromQuery(query : string, language : out string) : bool
         {
             def languagePair = query.Split(array[' '], StringSplitOptions.RemoveEmptyEntries)
-                 .Select(t => t.Split(':'))
-                 .Where(t => t.Length == 2)
-                 .FirstOrDefault(t => FieldFactory.LanguageFieldName.Equals(t[0], StringComparison.InvariantCultureIgnoreCase));
-                 
+                                      .Select(t => t.Split(':'))
+                                      .Where(t => t.Length == 2)
+                                      .FirstOrDefault(t => FieldFactory.LanguageFieldName.Equals(t[0], StringComparison.InvariantCultureIgnoreCase));
+
             match(languagePair) {
                 | p is array[string] => { language = p[1]; true; }
                 | _  => { language = null; false; }

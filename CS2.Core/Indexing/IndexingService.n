@@ -38,6 +38,9 @@ namespace CS2.Core.Indexing
                 writer.Optimize();
                 writer.Close();
             }
+            
+            using(indexReader = IndexReader.Open(indexDirectory, true))
+                documentCount = indexReader.MaxDoc();
         }
 
         public IsWaitingForFilesToBeIndexed : bool
@@ -71,10 +74,8 @@ namespace CS2.Core.Indexing
 
         public UpdateIndex() : void {
             when(Monitor.TryEnter(updatingLock))
-            try
-                DoUpdateIndex();
-            finally
-                Monitor.Exit(updatingLock);
+                try DoUpdateIndex();
+                finally Monitor.Exit(updatingLock);
         }
         
         private DoUpdateIndex() : void {
@@ -82,9 +83,9 @@ namespace CS2.Core.Indexing
 
             mutable addedFiles = 0;
             
-            def (originalDocumentCount, deletedFiles) = RemoveOldEntries(filesUndergoingIndexing);
+            RemoveOldEntries(filesUndergoingIndexing);
 
-            when(filesUndergoingIndexing.Count > 0)
+            when(filesUndergoingIndexing.Any())
             {
                 def indexWriter = IndexWriter(indexDirectory, StandardAnalyzer(Version.LUCENE_29), false, IndexWriter.MaxFieldLength.UNLIMITED);
 
@@ -92,13 +93,12 @@ namespace CS2.Core.Indexing
                     when(Index(FileInfo(fileName), indexWriter))
                         addedFiles++;
 
+                documentCount = indexWriter.MaxDoc();
                 indexWriter.Optimize();
                 indexWriter.Close();
             }
 
             addedFilesSinceLastUpdate = addedFiles;
-            deletedFilesSinceLastUpdate = deletedFiles;
-            documentCount = originalDocumentCount + addedFiles - deletedFiles;
 
             OnIndexingCompleted();
         }
@@ -124,41 +124,38 @@ namespace CS2.Core.Indexing
                 IndexingCompleted(IndexingCompletedEventArgs(addedFilesSinceLastUpdate, deletedFilesSinceLastUpdate, documentCount));
         }
 
-        private RemoveOldEntries(filesUndergoingIndexing : ISynchronizedStringSet) : int * int
-        {
-            mutable deletedFiles;
-            
-            def indexReader = IndexReader.Open(indexDirectory, false);
-            def originalDocumentCount = indexReader.MaxDoc() - 1;
-            
-            for(mutable i = 0; i < indexReader.MaxDoc(); i++) {
-                def doc = indexReader.Document(i);
-                def id = doc.GetField(FieldFactory.IdFieldName).StringValue();
-                def filePath = IdIdentifierUtilities.GetPathFromIdentifier(id);
+        private RemoveOldEntries(filesUndergoingIndexing : ISynchronizedStringSet) : void
+        {        
+            using(indexReader = IndexReader.Open(indexDirectory, false)) {
+                mutable deletedCount;
+                
+                for(mutable i = 0; i < indexReader.MaxDoc(); i++) {
+                    def doc = indexReader.Document(i);
+                    def id = doc.GetField(FieldFactory.IdFieldName).StringValue();
+                    def filePath = IdIdentifierUtilities.GetPathFromIdentifier(id);
 
-                _ = filesUndergoingIndexing.Remove(filePath);
+                    _ = filesUndergoingIndexing.Remove(filePath);
 
-                def fileExists = File.Exists(filePath);
+                    def fileExists = File.Exists(filePath);
 
-                when(!fileExists || IdIdentifierUtilities.GetIdentifierFromFile(FileInfo(filePath)) != id)
-                {
-                    indexReader.DeleteDocument(i);
-                    deletedFiles++;
+                    when(!fileExists || IdIdentifierUtilities.GetIdentifierFromFile(FileInfo(filePath)) != id)
+                    {
+                        indexReader.DeleteDocument(i);
+                        deletedCount++;
 
-                    when(fileExists)
-                        _ = filesUndergoingIndexing.Add(filePath);
+                        when(fileExists)
+                            _ = filesUndergoingIndexing.Add(filePath);
+                    }
                 }
+
+                deletedFilesSinceLastUpdate = deletedCount
             }
-
-            indexReader.Close();
-
-            (originalDocumentCount, deletedFiles);
         }
 
         private Index(file : FileInfo, indexWriter : IndexWriter) : bool
         {
             mutable document;
-
+            
             match(parsers.Where(p => p.SupportedFileExtensions.Contains <| file.Extension).FirstOrDefault(p => p.TryParse(file, out document))) {
                 | p is IParsingService =>  document.Add(FieldFactory.CreateIdField(IdIdentifierUtilities.GetIdentifierFromFile(file)));
                                            document.Add(FieldFactory.CreatePathField(file.FullName));
