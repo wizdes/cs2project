@@ -42,16 +42,19 @@
       <Name>Castle.Facilities.Logging</Name>
       <AssemblyName>Castle.Facilities.Logging.dll</AssemblyName>
       <HintPath>..\Libraries\Castle.Facilities.Logging.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Castle.MicroKernel, Version=1.0.0.2, Culture=neutral, PublicKeyToken=407dd0808d44fbdc">
       <Name>Castle.MicroKernel</Name>
       <AssemblyName>Castle.MicroKernel.dll</AssemblyName>
       <HintPath>..\Libraries\Castle.MicroKernel.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Castle.Windsor, Version=1.0.0.5, Culture=neutral, PublicKeyToken=407dd0808d44fbdc">
       <Name>Castle.Windsor</Name>
       <AssemblyName>Castle.Windsor.dll</AssemblyName>
       <HintPath>..\Libraries\Castle.Windsor.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="CMicroParser, Version=1.0.2729.41008, Culture=neutral, PublicKeyToken=null">
       <Name>CMicroParser</Name>

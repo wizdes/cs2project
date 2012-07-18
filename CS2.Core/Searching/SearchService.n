@@ -81,10 +81,8 @@ namespace CS2.Core.Searching
                         def doc = searcher.Doc(h.doc);
                         def path = doc.Get(FieldFactory.PathFieldName);
 
-                        mutable contents;
-
-                        using(def reader = StreamReader(path))
-                            contents = reader.ReadToEnd();
+                        def contents = using(def reader = StreamReader(path))
+                                        reader.ReadToEnd();
 
                         def tokenStream = parser.GetAnalyzer().TokenStream(FieldFactory.SourceFieldName, StringReader(contents));
 
@@ -116,14 +114,14 @@ namespace CS2.Core.Searching
 
         private static TryGetLanguageFromQuery(query : string, language : out string) : bool
         {
-            def languagePair = query.Split(array[' '], StringSplitOptions.RemoveEmptyEntries)
+            def languagePair = query.Split(null : array[char], StringSplitOptions.RemoveEmptyEntries)
                                       .Select(t => t.Split(':'))
                                       .Where(t => t.Length == 2)
                                       .FirstOrDefault(t => FieldFactory.LanguageFieldName.Equals(t[0], StringComparison.InvariantCultureIgnoreCase));
 
             match(languagePair) {
-                | p is array[string] => { language = p[1]; true; }
-                | _  => { language = null; false; }
+                | p when p != null => language = p[1]; true
+                | _  => language = null; false
             }
         }
 

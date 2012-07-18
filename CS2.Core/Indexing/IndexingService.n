@@ -16,7 +16,7 @@ namespace CS2.Core.Indexing
     public class IndexingService : IIndexingService
     {
         updatingLock = object();
-        filesWaitingToBeIndexed : ISynchronizedStringSet;
+        filesWaitingToBeIndexed : ISynchronizedStringSet = SynchronizedStringSet();
         
         [Accessor] parsers : array[IParsingService];
         [Accessor] mutable indexDirectory : Directory;
@@ -26,41 +26,39 @@ namespace CS2.Core.Indexing
 
         mutable exclusions : array[Regex] = array[];
 
-        public this(indexDirectory : Directory, parsers : array[IParsingService])
-        {
+        public this(indexDirectory : Directory, parsers : array[IParsingService]) {
             this.indexDirectory = indexDirectory;
             this.parsers = parsers;
-            filesWaitingToBeIndexed = SynchronizedStringSet();
-
-            when(!IndexReader.IndexExists(indexDirectory))
+    
+            TryCreateIndex();
+            
+            using(indexReader = IndexReader.Open(indexDirectory, true))
+                documentCount = indexReader.MaxDoc();
+        }
+        
+        private TryCreateIndex() : void {
+            unless(IndexReader.IndexExists(indexDirectory))
             {
                 def writer = IndexWriter(indexDirectory, StandardAnalyzer(Version.LUCENE_29), true, IndexWriter.MaxFieldLength.UNLIMITED);
                 writer.Optimize();
                 writer.Close();
             }
-            
-            using(indexReader = IndexReader.Open(indexDirectory, true))
-                documentCount = indexReader.MaxDoc();
         }
 
-        public IsWaitingForFilesToBeIndexed : bool
-        {
+        public IsWaitingForFilesToBeIndexed : bool {
             get { filesWaitingToBeIndexed.Any() }
         }
 
-        public Exclusions : array[string]
-        {
+        public Exclusions : array[string] {
             set { exclusions = value.Select(v => Regex(v |> Regex.Escape)).ToArray() }
         }
 
-        public RequestIndexing(file : FileInfo) : void
-        {
+        public RequestIndexing(file : FileInfo) : void {
             when(IsValidFileSystemEntryToBeIndexed(file))
                 _ = filesWaitingToBeIndexed.Add(file.FullName);
         }
 
-        public RequestIndexing(directory : DirectoryInfo) : void
-        {
+        public RequestIndexing(directory : DirectoryInfo) : void {
             when(IsValidFileSystemEntryToBeIndexed(directory))
                 _ = ThreadPool.QueueUserWorkItem(DoIndexDirectory, directory)
         }
@@ -105,27 +103,19 @@ namespace CS2.Core.Indexing
 
         public event IndexingCompleted : Action[IndexingCompletedEventArgs];
 
-        private IsValidFileSystemEntryToBeIndexed(entry : FileSystemInfo) : bool
-        {
+        private IsValidFileSystemEntryToBeIndexed(entry : FileSystemInfo) : bool {
             if(!entry.Exists) false;
             else if(entry.Attributes & FileAttributes.Hidden == FileAttributes.Hidden) false;
-            else if(MatchesAnyExclusion(entry)) false;
+            else if(exclusions.Any <| _.IsMatch(entry.FullName)) false;
             else true;
         }
 
-        private MatchesAnyExclusion(entry : FileSystemInfo) : bool
-        {
-            exclusions.Any <| _.IsMatch(entry.FullName);
-        }
-
-        private OnIndexingCompleted() : void
-        {
+        private OnIndexingCompleted() : void {
             when(IndexingCompleted != null)
                 IndexingCompleted(IndexingCompletedEventArgs(addedFilesSinceLastUpdate, deletedFilesSinceLastUpdate, documentCount));
         }
 
-        private RemoveOldEntries(filesUndergoingIndexing : ISynchronizedStringSet) : void
-        {        
+        private RemoveOldEntries(filesUndergoingIndexing : ISynchronizedStringSet) : void {        
             using(indexReader = IndexReader.Open(indexDirectory, false)) {
                 mutable deletedCount;
                 
@@ -138,8 +128,7 @@ namespace CS2.Core.Indexing
 
                     def fileExists = File.Exists(filePath);
 
-                    when(!fileExists || IdIdentifierUtilities.GetIdentifierFromFile(FileInfo(filePath)) != id)
-                    {
+                    when(!fileExists || IdIdentifierUtilities.GetIdentifierFromFile(FileInfo(filePath)) != id) {
                         indexReader.DeleteDocument(i);
                         deletedCount++;
 
@@ -152,22 +141,21 @@ namespace CS2.Core.Indexing
             }
         }
 
-        private Index(file : FileInfo, indexWriter : IndexWriter) : bool
-        {
+        private Index(file : FileInfo, indexWriter : IndexWriter) : bool {
             mutable document;
             
             match(parsers.Where(p => p.SupportedFileExtensions.Contains <| file.Extension).FirstOrDefault(p => p.TryParse(file, out document))) {
-                | p is IParsingService =>  document.Add(FieldFactory.CreateIdField(IdIdentifierUtilities.GetIdentifierFromFile(file)));
-                                           document.Add(FieldFactory.CreatePathField(file.FullName));
-                                           document.Add(FieldFactory.CreateFileNameField(file.Name));
-                                           document.Add(FieldFactory.CreateLanguageField(p.LanguageName));
+                | p when p != null =>   document.Add(FieldFactory.CreateIdField(IdIdentifierUtilities.GetIdentifierFromFile(file)));
+                                        document.Add(FieldFactory.CreatePathField(file.FullName));
+                                        document.Add(FieldFactory.CreateFileNameField(file.Name));
+                                        document.Add(FieldFactory.CreateLanguageField(p.LanguageName));
                                            
-                                           using(def reader = StreamReader(file.FullName)) {
-                                                document.Add(FieldFactory.CreateSourceField(reader));
-                                                indexWriter.AddDocument(document, p.Analyzer);
-                                           }
+                                        using(def reader = StreamReader(file.FullName)) {
+                                            document.Add(FieldFactory.CreateSourceField(reader));
+                                            indexWriter.AddDocument(document, p.Analyzer);
+                                        }
 
-                                           true; 
+                                        true; 
                 | _ => false;
             }
         }
