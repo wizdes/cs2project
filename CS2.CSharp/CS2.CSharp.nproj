@@ -43,6 +43,11 @@
       <AssemblyName>CMicroParser.dll</AssemblyName>
       <HintPath>..\Libraries\CMicroParser.dll</HintPath>
     </Reference>
+    <Reference Include="CSharpParser, Version=1.1.746.0, Culture=neutral, PublicKeyToken=null">
+      <Name>CSharpParser</Name>
+      <AssemblyName>CSharpParser.dll</AssemblyName>
+      <HintPath>C:\Program Files (x86)\Nemerle\net-4.0\CSharpParser.dll</HintPath>
+    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73">
       <Name>ICSharpCode.SharpZipLib</Name>
       <AssemblyName>ICSharpCode.SharpZipLib.dll</AssemblyName>
@@ -54,6 +59,11 @@
       <HintPath>..\packages\Lucene.Net.2.9.4.1\lib\net40\Lucene.Net.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
+    <Reference Include="Nemerle.Peg, Version=1.1.746.0, Culture=neutral, PublicKeyToken=null">
+      <Name>Nemerle.Peg</Name>
+      <AssemblyName>Nemerle.Peg.dll</AssemblyName>
+      <HintPath>C:\Program Files (x86)\Nemerle\net-4.0\Nemerle.Peg.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -75,6 +85,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Parsing\CSharpParsingVisitor.n">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Parsing\NemerleCSharpParsingService.n">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.n" />

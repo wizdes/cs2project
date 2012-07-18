@@ -1,0 +1,35 @@
+using System.Diagnostics;
+using System.IO;
+using CS2.CSharp.Parsing;
+using CS2.Core.Parsing;
+using Lucene.Net.Documents;
+using NUnit.Framework;
+using System.Collections.Generic;
+
+namespace CS2.Tests
+{
+    public class ParsingServicesTests : BaseTest
+    {
+        Parsers : IEnumerable[IParsingService] { 
+            get {
+                yield CSharpParsingService();
+                yield NemerleCSharpParsingService();
+            }
+        } 
+        
+        [TestCaseSource("Parsers")]
+        public CanParseFile(parser : IParsingService) : void
+        {
+            mutable document;
+
+            Assert.IsTrue(parser.TryParse(FileInfo("..\\..\\DummyClassForParseTesting.cs"), out document));
+
+            foreach (field :> Field in document.GetFields())
+            {
+                Debug.WriteLine("{0} {1}", field.Name(), field.StringValue());
+            }
+
+            Assert.Greater(document.GetFields().Count, 0);
+        }
+    }
+}

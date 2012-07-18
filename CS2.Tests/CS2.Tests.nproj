@@ -138,7 +138,7 @@
     <Compile Include="IndexingServiceTests.n">
       <SubType>Content</SubType>
     </Compile>
-    <Compile Include="ParsingServiceTests.n">
+    <Compile Include="ParsingServicesTests.n">
       <SubType>Content</SubType>
     </Compile>
     <Compile Include="RamDirectoryTests.n">

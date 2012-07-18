@@ -17,18 +17,18 @@ namespace CS2.CSharp.Parsing
         //    return base.VisitCommentStatement(commentStatement, data);
         //}
 
-        public override VisitMethodDeclaration(methodDeclaration : MethodNode, data : object) : object
-        {
-            Document(data).Add(FieldFactory.CreateMethodField(methodDeclaration.Names[0].GenericIdentifier));
-            base.VisitMethodDeclaration(methodDeclaration, data);
-        }
-
         public override VisitNamespaceDeclaration(namespaceDeclaration : NamespaceNode, data : object) : object
         {
             def name = if(namespaceDeclaration.Name != null) namespaceDeclaration.Name.GenericIdentifier else "Global";
 
             Document(data).Add(FieldFactory.CreateNamespaceField(name));
             base.VisitNamespaceDeclaration(namespaceDeclaration, data);
+        }
+        
+        public override VisitMethodDeclaration(methodDeclaration : MethodNode, data : object) : object
+        {
+            Document(data).Add(FieldFactory.CreateMethodField(methodDeclaration.Names[0].GenericIdentifier));
+            base.VisitMethodDeclaration(methodDeclaration, data);
         }
 
         public override VisitPropertyDeclaration(propertyDeclaration : PropertyNode, data : object) : object

@@ -3,7 +3,7 @@ namespace CS2.Tests
     /// <summary>
     /// This is a dummy class used to parser testing
     /// </summary>
-    internal class DummyClassForParseTesting
+    public class DummyClassForParseTesting
     {
         public void DoSomething()
         {}
@@ -14,10 +14,10 @@ namespace CS2.Tests
         // This is a comment
     }
 
-    interface TestInterface
+    public interface TestInterface
     { }
 
-    enum TestEnum
+    public enum TestEnum
     {
         FirstValue,
         SecondValue

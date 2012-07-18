@@ -1,0 +1,90 @@
+﻿using Nemerle;
+using Nemerle.Collections;
+using Nemerle.Text;
+using Nemerle.Utility;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using CS2.Core;
+using CS2.Core.Parsing;
+using CS2.CSharp.Analysis;
+using CS2.Core.Analysis;
+using Lucene.Net.Documents;
+using System.IO;
+using CSharpParser;
+using Nemerle.Peg;
+
+namespace CS2.CSharp.Parsing
+{
+    public class NemerleCSharpParsingService : IParsingService
+    {
+        [Accessor] analyzer : AbstractAnalyzer;
+        parser : Parser;
+
+        public this()
+        {
+            analyzer = CSharpAnalyzer();
+            parser = Parser();
+        }
+        
+        public SupportedFileExtensions : IEnumerable[string]
+        {
+            get { array[".cs"] }
+        }
+
+        public LanguageName : string
+        {
+            get { "c#" }
+        }
+        
+        public TryParse(file : FileInfo, document : out Document) : bool
+        {
+            document = Document();
+            
+            def addTypeMembers(members : list[TypeMember], document) : void {
+                match(members) {
+                    | m::ms => 
+                        match(m) {
+                            | Method(name, _, _, _, _, _) => document.Add(FieldFactory.CreateMethodField(name.ToString()))
+                            | Property(name, _, _, _) => document.Add(FieldFactory.CreatePropertyField(name.ToString())) 
+                            | _ => () }
+                        addTypeMembers(ms, document)
+                    | _ => ()
+                }
+            }
+            
+            def addNamespaceNodes(members : list[NamespaceNode], document) {
+                match(members){
+                    | m::ms =>
+                        match(m) {
+                            | Namespace(name, _, _, members) => document.Add(FieldFactory.CreateNamespaceField(name.ToString()));
+                                                                addNamespaceNodes(members, document);
+                            | TypeDeclaration(type) =>
+                                match(type) {
+                                    | Class(_, members) as c => document.Add(FieldFactory.CreateClassField(c.Name.Id));
+                                                                addTypeMembers(members, document)
+                                    | Interface(_, members) as i => document.Add(FieldFactory.CreateInterfaceField(i.Name.Id));
+                                                                    addTypeMembers(members, document)
+                                    | _ => ()
+                                }
+                            | _ => ()
+                        }
+                        addNamespaceNodes(ms, document)
+                    | _ => ()
+                }
+            }
+            
+            def source = SourceSnapshot(File.ReadAllText(file.FullName), 1, file.Name);
+            
+            match(PreParser().Parse(source)) {
+                | Some(pcu) => 
+                    match(parser.Parse(Preprocessor.Run(pcu, []).Source)) {
+                        | Some(unit) => addNamespaceNodes(unit.Members, document); true
+                        | None => false
+                    }
+                | None => false
+            }
+        }
+    }
+}
