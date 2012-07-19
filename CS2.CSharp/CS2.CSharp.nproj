@@ -38,11 +38,6 @@
     <DocumentationFile>$(OutputPath)\$(MSBuildProjectName).xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CMicroParser, Version=1.0.2729.41008, Culture=neutral, PublicKeyToken=null">
-      <Name>CMicroParser</Name>
-      <AssemblyName>CMicroParser.dll</AssemblyName>
-      <HintPath>..\Libraries\CMicroParser.dll</HintPath>
-    </Reference>
     <Reference Include="CSharpParser, Version=1.1.746.0, Culture=neutral, PublicKeyToken=null">
       <Name>CSharpParser</Name>
       <AssemblyName>CSharpParser.dll</AssemblyName>
@@ -79,12 +74,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analysis\CSharpAnalyzer.n">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Parsing\CSharpParsingService.n">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Parsing\CSharpParsingVisitor.n">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Parsing\NemerleCSharpParsingService.n">

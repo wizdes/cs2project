@@ -12,7 +12,6 @@ namespace CS2.Tests
     {
         Parsers : IEnumerable[IParsingService] { 
             get {
-                yield CSharpParsingService();
                 yield NemerleCSharpParsingService();
             }
         } 

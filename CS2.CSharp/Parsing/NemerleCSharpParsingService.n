@@ -42,13 +42,14 @@ namespace CS2.CSharp.Parsing
         {
             document = Document();
             
-            def addTypeMembers(members : list[TypeMember], document) : void {
+            def addTypeMembers(members : list[TypeMember], document) {
                 match(members) {
                     | m::ms => 
                         match(m) {
                             | Method(name, _, _, _, _, _) => document.Add(FieldFactory.CreateMethodField(name.ToString()))
                             | Property(name, _, _, _) => document.Add(FieldFactory.CreatePropertyField(name.ToString())) 
-                            | _ => () }
+                            | _ => () 
+                        }
                         addTypeMembers(ms, document)
                     | _ => ()
                 }
