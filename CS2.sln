@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{EDCC3B85-0BAD-11DB-BC1A-00112FDE8B61}") = "CS2.CSharp", "CS2.CSharp\CS2.CSharp.nproj", "{57C61489-A88F-4C8D-90A9-FFBEAEEDB1AD}"
 EndProject
 Project("{EDCC3B85-0BAD-11DB-BC1A-00112FDE8B61}") = "CS2.Console", "CS2.Console\CS2.Console.nproj", "{BA8BAE5A-EA9D-44FA-8EAC-E4249E84F88F}"
@@ -9,13 +9,13 @@ Project("{EDCC3B85-0BAD-11DB-BC1A-00112FDE8B61}") = "CS2.Core", "CS2.Core\CS2.Co
 EndProject
 Project("{EDCC3B85-0BAD-11DB-BC1A-00112FDE8B61}") = "CS2.Tests", "CS2.Tests\CS2.Tests.nproj", "{9D27E48C-EAC5-44C0-A62F-8939643E1EA2}"
 EndProject
-Project("{EDCC3B85-0BAD-11DB-BC1A-00112FDE8B61}") = "CS2.Web", "CS2.Web\CS2.Web.nproj", "{88538E7D-A980-4E61-A642-B098AB36D45D}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{6C4FD822-D9D8-4E54-AB20-8045FA75A2DF}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
+EndProject
+Project("{EDCC3B85-0BAD-11DB-BC1A-00112FDE8B61}") = "CS2.WebForms", "CS2.WebForms\CS2.WebForms.nproj", "{82308164-6893-47FC-A019-C96929BFB6D2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,10 +39,10 @@ Global
 		{9D27E48C-EAC5-44C0-A62F-8939643E1EA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D27E48C-EAC5-44C0-A62F-8939643E1EA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D27E48C-EAC5-44C0-A62F-8939643E1EA2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{88538E7D-A980-4E61-A642-B098AB36D45D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{88538E7D-A980-4E61-A642-B098AB36D45D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{88538E7D-A980-4E61-A642-B098AB36D45D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{88538E7D-A980-4E61-A642-B098AB36D45D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82308164-6893-47FC-A019-C96929BFB6D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82308164-6893-47FC-A019-C96929BFB6D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82308164-6893-47FC-A019-C96929BFB6D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82308164-6893-47FC-A019-C96929BFB6D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

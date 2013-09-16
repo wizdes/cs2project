@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web;
+using System.Web.Services;
 
-namespace CS2.Web
+namespace CS2.WebForms
 {
     /// <summary>
     /// Summary description for $codebehindclassname$
     /// </summary>
+    [WebService(Namespace = "http://tempuri.org/")]
+    [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     public class FileHandler : IHttpHandler 
     {
         public ProcessRequest(context : HttpContext) : void

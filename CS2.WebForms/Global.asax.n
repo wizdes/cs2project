@@ -7,7 +7,7 @@ using Castle.Windsor.Configuration.Interpreters;
 using CS2.Core.Indexing;
 using CS2.Core.Searching;
 
-namespace CS2.Web
+namespace CS2.WebForms
 {
     public class Global : HttpApplication
     {
