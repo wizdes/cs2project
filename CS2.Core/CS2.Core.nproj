@@ -53,11 +53,6 @@
       <AssemblyName>Castle.MicroKernel.dll</AssemblyName>
       <HintPath>..\Libraries\Castle.MicroKernel.dll</HintPath>
     </Reference>
-    <Reference Include="CMicroParser, Version=1.0.2729.41008, Culture=neutral, PublicKeyToken=null">
-      <Name>CMicroParser</Name>
-      <AssemblyName>CMicroParser.dll</AssemblyName>
-      <HintPath>..\Libraries\CMicroParser.dll</HintPath>
-    </Reference>
     <Reference Include="Contrib.Regex, Version=2.9.4.0, Culture=neutral, PublicKeyToken=85089178b9ac3181">
       <Name>Contrib.Regex</Name>
       <AssemblyName>Contrib.Regex.dll</AssemblyName>

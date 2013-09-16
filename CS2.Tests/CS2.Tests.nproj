@@ -56,11 +56,6 @@
       <HintPath>..\Libraries\Castle.Windsor.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="CMicroParser, Version=1.0.2729.41008, Culture=neutral, PublicKeyToken=null">
-      <Name>CMicroParser</Name>
-      <AssemblyName>CMicroParser.dll</AssemblyName>
-      <HintPath>..\Libraries\CMicroParser.dll</HintPath>
-    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73">
       <Name>ICSharpCode.SharpZipLib</Name>
       <AssemblyName>ICSharpCode.SharpZipLib.dll</AssemblyName>
